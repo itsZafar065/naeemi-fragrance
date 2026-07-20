@@ -60,49 +60,93 @@ export default function Home() {
   return (
     <div className="space-y-16 pb-12">
       {/* SECTION 1: HERO (Brand Banner) */}
-      <section className="relative overflow-hidden rounded-[32px] glass-panel border border-white/50 p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
-        <div className="space-y-6 max-w-xl text-left">
+      <section className="relative overflow-hidden rounded-[32px] glass-panel border border-white/50 p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 shadow-xl bg-gradient-to-br from-amber-50/40 via-white/20 to-rose-50/30">
+        
+        {/* Background glow flares */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* LEFT COLUMN: Premium Copy details */}
+        <div className="space-y-6 max-w-xl text-left w-full md:w-1/2 z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-800 text-xs font-semibold tracking-wider uppercase">
-            <Sparkles className="w-3.5 h-3.5 fill-amber-600/30 text-amber-600" />
-            Luxury Scent Vault
+            <Sparkles className="w-3.5 h-3.5 fill-amber-600/30 text-amber-600 animate-pulse" />
+            Luxury Fragrance Vault
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-serif text-stone-800 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight font-serif text-stone-850 leading-tight">
             Elevate Your <br />
             <span className="gold-gradient-text">Presence</span>
           </h1>
 
-          <div className="space-y-2">
-            <p className="text-lg md:text-xl font-medium italic text-amber-700/90 font-serif">
+          <div className="space-y-3">
+            <p className="text-lg md:text-2xl font-bold italic text-amber-700/90 font-serif border-l-2 border-amber-500/40 pl-3">
               "Naeemi Naam Hai Mohabbat Ka"
             </p>
-            <p className="text-sm md:text-base text-stone-600 leading-relaxed max-w-md">
+            <p className="text-xs md:text-sm text-stone-500 leading-relaxed font-medium">
               A curated collection of rich, long-lasting fragrances designed to evoke memories and inspire emotions. Discover our signature blends of royal Oud, fresh florals, and warm wood notes.
             </p>
           </div>
 
           <div className="pt-2 flex flex-wrap gap-4">
-            <Link href="/shop" className="px-6 py-3 rounded-2xl gold-btn font-semibold text-sm flex items-center gap-2">
+            <Link href="/shop" className="px-6 py-3.5 rounded-2xl gold-btn font-bold text-xs flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all">
               Explore Collection
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="#story"
-              className="px-6 py-3 rounded-2xl border border-stone-200 bg-white/40 backdrop-blur-md text-stone-700 font-semibold text-sm hover:bg-white/60 transition-colors"
+              className="px-6 py-3.5 rounded-2xl border border-stone-200 bg-white/40 backdrop-blur-md text-stone-700 font-bold text-xs hover:bg-white/60 transition-all"
             >
               Our Story
             </Link>
           </div>
-             {/* Hero Decorative Bottle Illustration */}
-        <div className="relative w-64 h-64 md:w-80 md:h-80 shrink-0 select-none flex items-center justify-center">
-          {/* Glass floating sphere background glow */}
-          <div className="absolute w-56 h-56 rounded-full bg-gradient-to-tr from-amber-200/40 via-amber-300/20 to-rose-200/40 blur-2xl animate-pulse" />
-          <img
-            src="/heroimg.webp"
-            alt="Naeemi Fragrance"
-            className="relative z-10 w-auto h-auto max-h-[300px] object-contain drop-shadow-[0_25px_50px_rgba(212,175,55,0.25)] hover:scale-105 transition-transform duration-500"
-          />
-        </div>       </div>
+        </div>
+
+        {/* RIGHT COLUMN: Cinematic 3D Perfume Podium */}
+        <div className="relative w-full md:w-1/2 flex items-center justify-center min-h-[380px] select-none z-10">
+          
+          {/* Subtle warm golden spotlight flare from top */}
+          <div className="absolute top-[-80px] w-64 h-96 bg-gradient-to-b from-amber-300/20 via-amber-200/5 to-transparent blur-2xl pointer-events-none" />
+
+          {/* Background circular halo light behind bottle */}
+          <div className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-amber-300/30 to-rose-200/20 blur-3xl animate-pulse pointer-events-none" />
+
+          {/* Floating fine gold light particles/orbits */}
+          <div className="absolute w-80 h-40 rounded-full border border-amber-500/10 rotate-[-12deg] scale-[1.1] animate-[spin_25s_linear_infinite] pointer-events-none" />
+          <div className="absolute w-72 h-36 rounded-full border border-amber-400/20 rotate-[8deg] scale-[0.9] animate-[spin_20s_linear_infinite_reverse] pointer-events-none" />
+
+          {/* 3D Pedestal Construct */}
+          <div className="relative mt-8 flex flex-col items-center justify-center">
+            
+            {/* Float container for perfume bottle */}
+            <div className="relative z-20 transition-all duration-700 hover:-translate-y-4 cursor-pointer select-none">
+              <img
+                src="/heroimg.webp"
+                alt="Naeemi Fragrance Premium Bottle"
+                className="w-auto h-auto max-h-[300px] object-contain drop-shadow-[0_25px_45px_rgba(212,175,55,0.4)]"
+              />
+              
+              {/* Specular bottle light reflection overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-white/10 to-white/0 rounded-full mix-blend-overlay pointer-events-none" />
+            </div>
+
+            {/* 3D Cylindrical Display Pedestal (Podium) */}
+            <div className="relative w-72 h-20 -mt-16 flex flex-col items-center justify-start pointer-events-none">
+              
+              {/* Podium Top Face (3D Ellipse with radial gold gradient and glass luster) */}
+              <div className="absolute top-0 z-10 w-64 h-14 rounded-full bg-gradient-to-b from-amber-50/90 to-amber-200/60 border border-amber-300/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),_0_4px_20px_rgba(180,130,40,0.15)] flex items-center justify-center">
+                {/* Golden specular inner reflection ring */}
+                <div className="w-[96%] h-[90%] rounded-full border border-white/60 bg-gradient-to-b from-white/30 to-amber-100/10" />
+              </div>
+
+              {/* Podium Cylindrical Front Face (Adds depth thickness) */}
+              <div className="absolute top-7 w-64 h-8 rounded-full bg-gradient-to-b from-amber-200/90 via-amber-300/80 to-amber-400/50 border-x border-b border-amber-400/30 shadow-[0_12px_24px_rgba(160,110,30,0.3)]" />
+
+              {/* Soft ground ambient occlusion shadow */}
+              <div className="absolute top-10 w-68 h-12 rounded-full bg-amber-950/20 blur-md" />
+            </div>
+            
+          </div>
+        </div>
       </section>
 
       {/* SECTION 2: ACCORD EXPLORER */}
