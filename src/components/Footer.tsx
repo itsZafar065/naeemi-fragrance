@@ -6,7 +6,7 @@ import { Phone, Mail, MapPin, Heart, ShieldAlert } from "lucide-react";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full glass-panel mt-16 border-t border-white/50 rounded-t-[36px] overflow-hidden">
+    <footer className="hidden md:block w-full glass-panel mt-16 border-t border-white/50 rounded-t-[36px] overflow-hidden">
       <div className="hidden md:grid max-w-7xl mx-auto px-6 py-12 grid-cols-1 md:grid-cols-12 gap-8 text-stone-700">
         {/* Column 1: Brand Info */}
         <div className="md:col-span-4 space-y-4">
