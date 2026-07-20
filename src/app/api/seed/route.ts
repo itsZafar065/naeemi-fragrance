@@ -15,7 +15,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Golden Amber", "Vanilla", "Musk"],
     stock: 18,
     rating: 4.9,
-    imageUrl: "/shams.webp",
+    imageUrl: "/shams.jpeg",
   },
   {
     name: "Oud Un Naeemi",
@@ -29,7 +29,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Sandalwood", "Ambergris", "Vanilla"],
     stock: 25,
     rating: 5.0,
-    imageUrl: "/oud.webp",
+    imageUrl: "/oud.jpeg",
   },
   {
     name: "Qaswa",
@@ -43,7 +43,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Smoky Vetiver", "Amber", "Cedarwood"],
     stock: 15,
     rating: 4.8,
-    imageUrl: "/qaswa.webp",
+    imageUrl: "/qaswa.jpeg",
   },
   {
     name: "Oud Albaloshi",
@@ -57,7 +57,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Oakmoss", "Ambergris", "White Musk"],
     stock: 12,
     rating: 4.9,
-    imageUrl: "/albaloshi.webp",
+    imageUrl: "/albaloshi.jpeg",
   },
   {
     name: "Gul e Najaf",
@@ -71,7 +71,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Clean White Musk", "Vanilla"],
     stock: 20,
     rating: 4.7,
-    imageUrl: "/najaf.webp",
+    imageUrl: "/najaf.jpeg",
   },
   {
     name: "Musk e Naeemi",
@@ -85,7 +85,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Madagascar Vanilla", "Amber"],
     stock: 30,
     rating: 4.8,
-    imageUrl: "/musk.webp",
+    imageUrl: "/musk.jpeg",
   },
   {
     name: "Gul e Quds",
@@ -99,7 +99,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Golden Amber", "Sandalwood"],
     stock: 9,
     rating: 4.9,
-    imageUrl: "/quds.webp",
+    imageUrl: "/quds.jpeg",
   },
   {
     name: "Zouq e Safar",
@@ -113,7 +113,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Cedarwood", "Vetiver Root", "Musk"],
     stock: 4,
     rating: 4.6,
-    imageUrl: "/safar.webp",
+    imageUrl: "/safar.jpeg",
   }
 ];
 
