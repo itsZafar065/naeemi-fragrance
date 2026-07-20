@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { sanitizeInput } from "@/lib/security";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
@@ -48,7 +49,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { customerName, customerPhone, customerAddress, items, totalAmount } = body;
+    const sanitizedBody = sanitizeInput(body);
+    const { customerName, customerPhone, customerAddress, items, totalAmount } = sanitizedBody;
 
     if (!customerName || !customerPhone || !customerAddress || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Missing required order parameters" }, { status: 400 });
@@ -110,7 +112,8 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { orderId, status } = body;
+    const sanitizedBody = sanitizeInput(body);
+    const { orderId, status } = sanitizedBody;
 
     if (!orderId || !status) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });

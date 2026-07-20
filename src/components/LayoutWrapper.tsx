@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
@@ -9,6 +10,17 @@ import { CartDrawer } from "./CartDrawer";
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
   const isAdmin = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => console.log("Service Worker registered successfully:", reg.scope))
+          .catch((err) => console.error("Service Worker registration failed:", err));
+      });
+    }
+  }, []);
 
   if (isAdmin) {
     return (

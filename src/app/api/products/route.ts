@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { sanitizeInput } from "@/lib/security";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
@@ -48,7 +49,8 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description, price, volume, type, category, topNotes, heartNotes, baseNotes, stock, imageUrl } = body;
+    const sanitizedBody = sanitizeInput(body);
+    const { name, description, price, volume, type, category, topNotes, heartNotes, baseNotes, stock, imageUrl } = sanitizedBody;
 
     if (!name || !price || !volume) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
@@ -102,7 +104,8 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, ...updates } = body;
+    const sanitizedBody = sanitizeInput(body);
+    const { id, ...updates } = sanitizedBody;
 
     if (!id) {
       return NextResponse.json({ error: "Missing product id" }, { status: 400 });

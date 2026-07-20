@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { 
+  sanitizeInput, 
+  rateLimit, 
+  checkBruteForce, 
+  registerFailedAttempt, 
+  resetFailedAttempts, 
+  validateEmail 
+} from "@/lib/security";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -7,25 +15,51 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    // 1. Rate Limiting Check by client IP
+    const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!rateLimit(clientIp, 10, 60000)) { // limit 10 requests per minute
+      return NextResponse.json({ error: "Too many login attempts. Please wait 1 minute." }, { status: 429 });
+    }
+
+    const body = await request.json();
+    const sanitizedBody = sanitizeInput(body);
+    const { email, password } = sanitizedBody;
 
     if (!email || !password) {
       return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
+    if (!validateEmail(cleanEmail)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    // 2. Brute Force Protection check
+    const bruteCheck = checkBruteForce(cleanEmail);
+    if (!bruteCheck.allowed) {
+      return NextResponse.json({ 
+        error: `Account temporarily locked due to failed logins. Please retry in ${bruteCheck.waitTimeMinutes} minutes.` 
+      }, { status: 423 });
+    }
+
     const db = await getDb();
-    const user = await db.collection("users").findOne({ email: email.toLowerCase().trim() });
+    const user = await db.collection("users").findOne({ email: cleanEmail });
 
     if (!user) {
-      // Mitigate timing attack by running mock compare
-      await bcrypt.compare(password, "$2a$10$abcdefghijklmnopqrstuv");
+      registerFailedAttempt(cleanEmail);
+      await bcrypt.compare(password, "$2a$10$abcdefghijklmnopqrstuv"); // timing mitigation
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
+      registerFailedAttempt(cleanEmail);
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
+
+    // Reset failed counter on success
+    resetFailedAttempts(cleanEmail);
 
     // Sign session JWT
     const token = jwt.sign(
