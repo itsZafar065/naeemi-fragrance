@@ -36,7 +36,7 @@ export const CartDrawer: React.FC = () => {
     setOrderId(tempOrderId);
 
     // Call AdminContext state mutation
-    placeOrder(name, phone, address, orderItems, cartTotal);
+    placeOrder(name, "", phone, address, orderItems, cartTotal, null);
 
     // Reset states
     setOrderSuccess(true);
