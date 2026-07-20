@@ -19,6 +19,12 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("Lahore");
 
+  // Payment states
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "EASYPAISA">("COD");
+  const [paymentSlipUrl, setPaymentSlipUrl] = useState<string | null>(null);
+  const [uploadingSlip, setUploadingSlip] = useState(false);
+  const { settings } = useAdmin();
+
   // Discount / Coupons
   const [couponCode, setCouponCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState(0); // in percent
@@ -55,9 +61,41 @@ export default function CheckoutPage() {
   const [checkoutError, setCheckoutError] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
+  const handleSlipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingSlip(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload receipt screenshot.");
+      }
+
+      const data = await res.json();
+      setPaymentSlipUrl(data.url);
+    } catch (err: any) {
+      alert("Slip upload failed. Please try again or select Cash on Delivery.");
+      console.error(err);
+    } finally {
+      setUploadingSlip(false);
+    }
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !address || cart.length === 0) return;
+    if (paymentMethod === "EASYPAISA" && !paymentSlipUrl && !uploadingSlip) {
+      alert("Please upload the transaction transfer screenshot to verify your payment.");
+      return;
+    }
 
     const orderItems = cart.map((item) => ({
       perfumeId: item.product.id,
@@ -69,7 +107,7 @@ export default function CheckoutPage() {
     setCheckoutLoading(true);
     setCheckoutError("");
 
-    const result = await placeOrder(name, phone, address, orderItems, finalTotal);
+    const result = await placeOrder(name, email, phone, address, orderItems, finalTotal, paymentSlipUrl);
     setCheckoutLoading(false);
 
     if (result.success) {
@@ -220,27 +258,94 @@ export default function CheckoutPage() {
               </div>
 
               {/* Payment Details */}
-              <div className="space-y-2.5 pt-2">
+              <div className="space-y-3 pt-2">
                 <label className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest block">Payment Method</label>
-                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-                    <div>
-                      <p className="text-xs font-bold text-stone-800">Cash on Delivery (COD)</p>
-                      <p className="text-[10px] text-stone-500">Pay inside Pakistan in cash upon delivery</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* COD Option */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod("COD");
+                      setPaymentSlipUrl(null);
+                    }}
+                    className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
+                      paymentMethod === "COD"
+                        ? "bg-amber-500/5 border-amber-500 shadow-xs"
+                        : "bg-white border-stone-200 hover:bg-stone-50/50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center w-full">
+                      <span className="text-xs font-bold text-stone-850">Cash on Delivery</span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${paymentMethod === "COD" ? "bg-amber-500" : "bg-stone-250"}`} />
+                    </div>
+                    <span className="text-[9px] text-stone-500 leading-normal">Pay cash upon delivery at your doorstep.</span>
+                  </button>
+
+                  {/* EasyPaisa Option */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("EASYPAISA")}
+                    className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
+                      paymentMethod === "EASYPAISA"
+                        ? "bg-amber-500/5 border-amber-500 shadow-xs"
+                        : "bg-white border-stone-200 hover:bg-stone-50/50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center w-full">
+                      <span className="text-xs font-bold text-stone-855">EasyPaisa Transfer</span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${paymentMethod === "EASYPAISA" ? "bg-amber-500" : "bg-stone-250"}`} />
+                    </div>
+                    <span className="text-[9px] text-stone-500 leading-normal">Pay beforehand using direct mobile transfer.</span>
+                  </button>
+                </div>
+
+                {paymentMethod === "EASYPAISA" && (
+                  <div className="p-4 rounded-2xl border border-amber-500/10 bg-amber-500/5 space-y-3.5 animate-fadeIn">
+                    <div className="text-xs space-y-1">
+                      <p className="font-bold text-amber-900">Transfer Instructions:</p>
+                      <p className="text-stone-700">
+                        Please send **Rs. {finalTotal.toLocaleString()}** to our official EasyPaisa Account:
+                      </p>
+                      <p className="font-extrabold text-sm text-stone-900 tracking-wider">
+                        📲 {settings?.easyPaisaAccount || "03092184760"}
+                      </p>
+                      <p className="text-[10px] text-stone-500 font-medium">
+                        After transferring, upload the payment confirmation screenshot or receipt slip below:
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-extrabold text-stone-500 uppercase tracking-widest block">Upload Transfer Receipt</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleSlipUpload}
+                        className="w-full text-xs text-stone-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:bg-amber-700 file:text-white file:cursor-pointer hover:file:bg-amber-800"
+                        required
+                      />
+                      {uploadingSlip && (
+                        <p className="text-[10px] font-bold text-amber-700 animate-pulse">Uploading screenshot to server...</p>
+                      )}
+                      {paymentSlipUrl && (
+                        <p className="text-[10px] font-bold text-emerald-700">✓ Receipt screenshot linked successfully!</p>
+                      )}
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-amber-800 bg-white border border-amber-200 px-2 py-0.5 rounded uppercase">COD Active</span>
-                </div>
+                )}
               </div>
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={checkoutLoading}
+                  disabled={checkoutLoading || uploadingSlip}
                   className="w-full py-4 rounded-2xl gold-btn font-extrabold text-xs shadow-md disabled:bg-stone-300"
                 >
-                  {checkoutLoading ? "Processing Scent Package..." : `Place Cash on Delivery Order (Rs. ${finalTotal.toLocaleString()})`}
+                  {checkoutLoading
+                    ? "Processing Scent Package..."
+                    : paymentMethod === "COD"
+                    ? `Place Cash on Delivery Order (Rs. ${finalTotal.toLocaleString()})`
+                    : `Confirm Paid Order (Rs. ${finalTotal.toLocaleString()})`}
                 </button>
               </div>
             </form>

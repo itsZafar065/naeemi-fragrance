@@ -28,10 +28,12 @@ export interface OrderItem {
 export interface Order {
   id: string;
   customerName: string;
+  customerEmail?: string;
   customerPhone: string;
   customerAddress: string;
   items: OrderItem[];
   totalAmount: number;
+  paymentSlipUrl?: string | null;
   status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
   date: string;
 }
@@ -85,12 +87,15 @@ interface AdminContextType {
   addProduct: (product: Omit<Perfume, "id" | "rating">) => Promise<{ success: boolean; error?: string }>;
   updateProduct: (id: string, updatedProduct: Partial<Perfume>) => Promise<{ success: boolean; error?: string }>;
   deleteProduct: (id: string) => Promise<{ success: boolean; error?: string }>;
-  placeOrder: (customerName: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number) => Promise<{ success: boolean; orderId?: string; error?: string }>;
+  placeOrder: (customerName: string, customerEmail: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number, paymentSlipUrl?: string | null) => Promise<{ success: boolean; orderId?: string; error?: string }>;
   updateOrderStatus: (orderId: string, status: Order["status"]) => Promise<{ success: boolean; error?: string }>;
   getSalesSummary: () => { totalSales: number; totalOrders: number; pendingOrders: number; lowStockCount: number };
   addCoupon: (coupon: Coupon) => Promise<{ success: boolean; error?: string }>;
   deleteCoupon: (code: string) => Promise<{ success: boolean; error?: string }>;
   updateSettings: (settings: Partial<StoreSettings>) => void;
+  staffUsers: AdminUser[];
+  addStaff: (user: any) => Promise<{ success: boolean; error?: string }>;
+  deleteStaff: (email: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const DEFAULT_SETTINGS: StoreSettings = {
@@ -116,6 +121,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([]);
+  const [staffUsers, setStaffUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   const settingsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -174,6 +180,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const data = await ordersRes.json();
         setOrders(data.orders || []);
         setSystemLogs(data.logs || []);
+      }
+      
+      const staffRes = await fetch("/api/admins");
+      if (staffRes.ok) {
+        const staffData = await staffRes.json();
+        setStaffUsers(staffData || []);
       }
     } catch (e) {
       console.error("Failed to fetch admin dashboard records:", e);
@@ -287,16 +299,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const placeOrder = async (
     customerName: string,
+    customerEmail: string,
     customerPhone: string,
     customerAddress: string,
     items: OrderItem[],
-    totalAmount: number
+    totalAmount: number,
+    paymentSlipUrl?: string | null
   ) => {
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerName, customerPhone, customerAddress, items, totalAmount }),
+        body: JSON.stringify({ 
+          customerName, 
+          customerEmail, 
+          customerPhone, 
+          customerAddress, 
+          items, 
+          totalAmount,
+          paymentSlipUrl: paymentSlipUrl || null
+        }),
       });
 
       if (!res.ok) {
@@ -420,6 +442,45 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, 1000);
   };
 
+  const addStaff = async (user: any): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch("/api/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, error: errorData.error || "Failed to create staff account." };
+      }
+
+      const data = await res.json();
+      setStaffUsers([...staffUsers, data.user]);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const deleteStaff = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch(`/api/admins?email=${email}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, error: errorData.error || "Failed to revoke staff credentials." };
+      }
+
+      setStaffUsers(staffUsers.filter((u) => u.email !== email));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -442,6 +503,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addCoupon,
         deleteCoupon,
         updateSettings,
+        staffUsers,
+        addStaff,
+        deleteStaff,
       }}
     >
       {children}

@@ -33,7 +33,8 @@ import {
   LogOut,
   ShieldCheck,
   ClipboardList,
-  ArrowLeft
+  ArrowLeft,
+  Download
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -54,7 +55,10 @@ export default function AdminDashboard() {
     getSalesSummary,
     addCoupon,
     deleteCoupon,
-    updateSettings
+    updateSettings,
+    staffUsers,
+    addStaff,
+    deleteStaff
   } = useAdmin();
 
   // Authentication credentials states
@@ -125,11 +129,17 @@ export default function AdminDashboard() {
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [tempStockValue, setTempStockValue] = useState<number>(0);
 
-  // Coupon state form
   const [newCouponCode, setNewCouponCode] = useState("");
   const [newCouponDiscount, setNewCouponDiscount] = useState(10);
   const [newCouponDesc, setNewCouponDesc] = useState("");
 
+  // Staff creation form states
+  const [newStaffEmail, setNewStaffEmail] = useState("");
+  const [newStaffPassword, setNewStaffPassword] = useState("");
+  const [newStaffName, setNewStaffName] = useState("");
+  const [newStaffRole, setNewStaffRole] = useState<"Admin" | "Manager">("Manager");
+  const [showStaffForm, setShowStaffForm] = useState(false);
+  const [orderSearchQuery, setOrderSearchQuery] = useState("");
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput || !passwordInput) return;
@@ -202,6 +212,60 @@ export default function AdminDashboard() {
     } else {
       alert(result.error || "Failed to create coupon voucher");
     }
+  };
+
+  const handleAddStaffSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStaffEmail || !newStaffPassword || !newStaffName) return;
+
+    const result = await addStaff({
+      email: newStaffEmail,
+      password: newStaffPassword,
+      name: newStaffName,
+      role: newStaffRole,
+    });
+
+    if (result.success) {
+      setNewStaffEmail("");
+      setNewStaffPassword("");
+      setNewStaffName("");
+      setNewStaffRole("Manager");
+      setShowStaffForm(false);
+      alert("Staff credentials registered successfully!");
+    } else {
+      alert(result.error || "Failed to create staff account");
+    }
+  };
+
+  const handleExportOrdersCSV = () => {
+    if (orders.length === 0) return;
+    
+    const headers = ["Order ID", "Date", "Customer Name", "Email", "Phone", "Address", "Items Summary", "Total Amount (Rs)", "Status", "Payment Slip"];
+    const rows = orders.map((ord) => {
+      const itemsSummary = ord.items.map((it) => `${it.name} (${it.quantity}x)`).join(" | ");
+      return [
+        ord.id,
+        ord.date,
+        `"${ord.customerName.replace(/"/g, '""')}"`,
+        ord.customerEmail || "N/A",
+        `"${ord.customerPhone}"`,
+        `"${ord.customerAddress.replace(/"/g, '""')}"`,
+        `"${itemsSummary.replace(/"/g, '""')}"`,
+        ord.totalAmount,
+        ord.status,
+        ord.paymentSlipUrl || "COD"
+      ];
+    });
+
+    const csvString = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `naeemi_orders_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleStartEditStock = (prod: Perfume) => {
@@ -605,60 +669,115 @@ export default function AdminDashboard() {
         )}
 
         {/* TAB 3: Orders log */}
-        {activeTab === "orders" && (
-          <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">Customer Placed Orders</h2>
-            
-            <div className="space-y-4">
-              {orders.length === 0 ? (
-                <p className="text-xs text-stone-500 py-6 text-center">No orders found.</p>
-              ) : (
-                orders.map((ord) => (
-                  <div key={ord.id} className="glass-panel p-5 rounded-3xl space-y-3">
-                    <div className="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
-                      <span className="font-extrabold text-xs text-stone-850">{ord.id} ({ord.date})</span>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-bold border px-2 py-0.5 rounded-full ${getStatusBadgeColor(ord.status)}`}>
-                          {ord.status}
-                        </span>
-                        <select
-                          value={ord.status}
-                          onChange={(e) => handleOrderStatusUpdate(ord.id, e.target.value as Order["status"])}
-                          className="bg-stone-50 border rounded-lg text-[10px] py-1 px-2 font-bold focus:outline-none"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Shipped">Shipped</option>
-                          <option value="Delivered">Delivered</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
+        {activeTab === "orders" && (() => {
+          const filteredOrders = orders.filter(
+            (ord) =>
+              ord.id.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
+              ord.customerName.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
+              ord.customerPhone.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
+              ord.customerAddress.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
+              (ord.customerEmail && ord.customerEmail.toLowerCase().includes(orderSearchQuery.toLowerCase()))
+          );
+
+          return (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex justify-between items-center flex-wrap gap-4">
+                <h2 className="text-xl font-black text-stone-850 tracking-tight">Customer Placed Orders</h2>
+                <button
+                  onClick={handleExportOrdersCSV}
+                  className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Export Orders CSV
+                </button>
+              </div>
+
+              {/* Live Search Order Input */}
+              <div className="relative max-w-md">
+                <input
+                  type="text"
+                  placeholder="Search orders by name, ID, phone, email, address..."
+                  value={orderSearchQuery}
+                  onChange={(e) => setOrderSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none shadow-xs"
+                />
+                <Search className="absolute left-3 top-3 w-4 h-4 text-stone-400" />
+              </div>
+              
+              <div className="space-y-4">
+                {filteredOrders.length === 0 ? (
+                  <p className="text-xs text-stone-500 py-6 text-center">No matching orders found.</p>
+                ) : (
+                  filteredOrders.map((ord) => (
+                    <div key={ord.id} className="glass-panel p-5 rounded-3xl space-y-3">
+                      <div className="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
+                        <span className="font-extrabold text-xs text-stone-850">{ord.id} ({ord.date})</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-bold border px-2 py-0.5 rounded-full ${getStatusBadgeColor(ord.status)}`}>
+                            {ord.status}
+                          </span>
+                          <select
+                            value={ord.status}
+                            onChange={(e) => handleOrderStatusUpdate(ord.id, e.target.value as Order["status"])}
+                            className="bg-stone-50 border rounded-lg text-[10px] py-1 px-2 font-bold focus:outline-none"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <p className="font-bold text-stone-700">Recipient: {ord.customerName}</p>
-                        <p className="text-stone-500">Contact: {ord.customerPhone}</p>
-                        <p className="text-stone-500 leading-relaxed font-medium">Address: {ord.customerAddress}</p>
-                      </div>
-                      <div>
-                        <span className="font-bold text-stone-400 text-[9px] uppercase tracking-wider block">Package Items</span>
-                        {ord.items.map((it, idx) => (
-                          <div key={idx} className="flex justify-between text-stone-600 font-medium">
-                            <span>{it.name} x{it.quantity}</span>
-                            <span>Rs. {(it.price * it.quantity).toLocaleString()}</span>
+                      <div className="text-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <p className="font-bold text-stone-705">Recipient: {ord.customerName}</p>
+                          {ord.customerEmail && <p className="text-stone-500">Email: {ord.customerEmail}</p>}
+                          <p className="text-stone-500">Contact: {ord.customerPhone}</p>
+                          <p className="text-stone-500 leading-relaxed font-medium">Address: {ord.customerAddress}</p>
+                          
+                          {/* EasyPaisa Transfer slip visual preview */}
+                          {ord.paymentSlipUrl && (
+                            <div className="pt-2.5">
+                              <span className="text-[9px] font-extrabold text-stone-400 uppercase tracking-widest block mb-1">EasyPaisa Slip Screenshot</span>
+                              <a
+                                href={ord.paymentSlipUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-block relative group"
+                              >
+                                <img
+                                  src={ord.paymentSlipUrl}
+                                  alt="Payment Receipt Slip"
+                                  className="w-16 h-16 object-cover rounded-xl border hover:opacity-80 transition-opacity"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[8px] text-white font-bold rounded-xl transition-opacity">
+                                  View Full
+                                </div>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <span className="font-bold text-stone-400 text-[9px] uppercase tracking-wider block">Package Items</span>
+                          {ord.items.map((it, idx) => (
+                            <div key={idx} className="flex justify-between text-stone-600 font-medium">
+                              <span>{it.name} x{it.quantity}</span>
+                              <span>Rs. {(it.price * it.quantity).toLocaleString()}</span>
+                            </div>
+                          ))}
+                          <div className="border-t pt-1 mt-1 flex justify-between font-black text-stone-850">
+                            <span>Total Paid</span>
+                            <span>Rs. {ord.totalAmount.toLocaleString()}</span>
                           </div>
-                        ))}
-                        <div className="border-t pt-1 mt-1 flex justify-between font-black text-stone-800">
-                          <span>Total Paid</span>
-                          <span>Rs. {ord.totalAmount.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 4: Customer registry */}
         {activeTab === "customers" && (
@@ -999,22 +1118,107 @@ export default function AdminDashboard() {
         {/* TAB 12: Admin Accounts */}
         {activeTab === "admins" && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">Authorized Admin Accounts</h2>
+            <div className="flex justify-between items-center gap-2">
+              <h2 className="text-xl font-black text-stone-800 tracking-tight">Authorized Admin Accounts</h2>
+              {(adminUser.role === "Owner" || adminUser.role === "Admin") && (
+                <button
+                  onClick={() => setShowStaffForm(!showStaffForm)}
+                  className="px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  {showStaffForm ? "Close Form" : "Add Staff User"}
+                </button>
+              )}
+            </div>
+
+            {showStaffForm && (
+              <form onSubmit={handleAddStaffSubmit} className="glass-panel p-5 rounded-3xl border border-amber-100 space-y-4 max-w-lg">
+                <h3 className="font-bold text-stone-850 text-xs border-b pb-2">Add New Staff Member</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Full Name</label>
+                    <input
+                      type="text" required placeholder="e.g. Ali Nawaz" value={newStaffName}
+                      onChange={(e) => setNewStaffName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Email Address</label>
+                    <input
+                      type="email" required placeholder="e.g. ali@naeemi.com" value={newStaffEmail}
+                      onChange={(e) => setNewStaffEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Access Password</label>
+                    <input
+                      type="password" required placeholder="Min 8 chars, A-Z, a-z, 0-9" value={newStaffPassword}
+                      onChange={(e) => setNewStaffPassword(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Access Role</label>
+                    <select
+                      value={newStaffRole} onChange={(e) => setNewStaffRole(e.target.value as any)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                    >
+                      <option value="Admin">Admin (Full catalogue/orders access)</option>
+                      <option value="Manager">Manager (View lists & update order status)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="pt-2 flex justify-end gap-3">
+                  <button
+                    type="button" onClick={() => setShowStaffForm(false)}
+                    className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-4 py-2 rounded-xl gold-btn text-white font-bold text-xs">
+                    Register Staff
+                  </button>
+                </div>
+              </form>
+            )}
+
             <div className="glass-panel p-5 rounded-3xl space-y-4">
-              <h4 className="font-bold text-stone-800 text-xs">Registered Staff Logins</h4>
+              <h4 className="font-bold text-stone-800 text-xs border-b pb-2">Registered Staff Logins</h4>
               <div className="divide-y text-xs">
-                <div className="py-2.5 flex justify-between items-center">
-                  <span>owner@naeemi.com</span>
-                  <span className="text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border">Owner access</span>
-                </div>
-                <div className="py-2.5 flex justify-between items-center">
-                  <span>admin@naeemi.com</span>
-                  <span className="text-[9px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded border">Admin access</span>
-                </div>
-                <div className="py-2.5 flex justify-between items-center">
-                  <span>manager@naeemi.com</span>
-                  <span className="text-[9px] font-bold text-stone-800 bg-stone-100 px-2 py-0.5 rounded border">Manager access</span>
-                </div>
+                {staffUsers.map((staff) => (
+                  <div key={staff.email} className="py-3 flex justify-between items-center">
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-stone-855">{staff.name}</span>
+                      <p className="text-[10px] text-stone-400">{staff.email}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
+                        staff.role === "Owner" 
+                          ? "bg-amber-50 text-amber-800 border-amber-200" 
+                          : staff.role === "Admin" 
+                          ? "bg-blue-50 text-blue-800 border-blue-200" 
+                          : "bg-stone-50 text-stone-700 border-stone-200"
+                      }`}>
+                        {staff.role} Access
+                      </span>
+                      {adminUser.role === "Owner" && staff.email !== adminUser.email && (
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Are you sure you want to revoke access for ${staff.name}?`)) {
+                              const res = await deleteStaff(staff.email);
+                              if (!res.success) alert(res.error || "Failed to delete staff user");
+                            }
+                          }}
+                          className="text-[10px] font-bold text-rose-600 hover:underline"
+                        >
+                          Revoke
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
