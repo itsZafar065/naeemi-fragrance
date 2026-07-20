@@ -101,52 +101,56 @@ export default function Home() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Cinematic 3D Perfume Podium */}
-        <div className="relative w-full md:w-1/2 flex items-center justify-center min-h-[380px] select-none z-10">
+             {/* RIGHT COLUMN: Cinematic 3D Perfume Podium */}
+        <div className="relative w-full md:w-1/2 flex items-center justify-center min-h-[450px] select-none z-10 md:mt-0 mt-8">
           
-          {/* Subtle warm golden spotlight flare from top */}
-          <div className="absolute top-[-80px] w-64 h-96 bg-gradient-to-b from-amber-300/20 via-amber-200/5 to-transparent blur-2xl pointer-events-none" />
+          {/* Volumetric Spotlight beam descending onto the pedestal */}
+          <div className="absolute top-[-100px] w-72 h-[500px] bg-gradient-to-b from-amber-300/15 via-amber-200/5 to-transparent blur-xl pointer-events-none" />
 
-          {/* Background circular halo light behind bottle */}
-          <div className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-amber-300/30 to-rose-200/20 blur-3xl animate-pulse pointer-events-none" />
+          {/* Golden background halo radial gradient glow */}
+          <div className="absolute w-80 h-80 rounded-full bg-gradient-to-tr from-amber-300/25 via-amber-100/10 to-transparent blur-3xl animate-pulse pointer-events-none" />
 
-          {/* Floating fine gold light particles/orbits */}
-          <div className="absolute w-80 h-40 rounded-full border border-amber-500/10 rotate-[-12deg] scale-[1.1] animate-[spin_25s_linear_infinite] pointer-events-none" />
-          <div className="absolute w-72 h-36 rounded-full border border-amber-400/20 rotate-[8deg] scale-[0.9] animate-[spin_20s_linear_infinite_reverse] pointer-events-none" />
+          {/* Floating fine gold light orbits */}
+          <div className="absolute w-96 h-48 rounded-full border border-amber-500/10 rotate-[-15deg] scale-[1.15] animate-[spin_30s_linear_infinite] pointer-events-none" />
+          <div className="absolute w-80 h-40 rounded-full border border-amber-400/20 rotate-[10deg] scale-[0.95] animate-[spin_25s_linear_infinite_reverse] pointer-events-none" />
 
           {/* 3D Pedestal Construct */}
-          <div className="relative mt-8 flex flex-col items-center justify-center">
+          <div className="relative flex flex-col items-center justify-center w-full">
             
-            {/* Float container for perfume bottle */}
-            <div className="relative z-20 transition-all duration-700 hover:-translate-y-4 cursor-pointer select-none">
+            {/* LARGE PERFUME BOTTLE: Highlighted scale, floats gently on hover */}
+            <div className="relative z-30 transition-all duration-700 hover:-translate-y-4 cursor-pointer select-none -mb-32">
               <img
                 src="/heroimg.webp"
                 alt="Naeemi Fragrance Premium Bottle"
-                className="w-auto h-auto max-h-[300px] object-contain drop-shadow-[0_25px_45px_rgba(212,175,55,0.4)]"
+                className="w-auto h-auto max-h-[380px] md:max-h-[440px] object-contain drop-shadow-[0_30px_60px_rgba(180,135,30,0.45)]"
               />
               
-              {/* Specular bottle light reflection overlay */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-white/10 to-white/0 rounded-full mix-blend-overlay pointer-events-none" />
+              {/* Gold Specular Light Streak overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-white/15 to-white/0 rounded-full mix-blend-overlay pointer-events-none" />
             </div>
 
-            {/* 3D Cylindrical Display Pedestal (Podium) */}
-            <div className="relative w-72 h-20 -mt-16 flex flex-col items-center justify-start pointer-events-none">
+            {/* LUXURY LAYERED 3D PEDESTAL (Marble & Gold Core) */}
+            <div className="relative w-80 h-36 flex flex-col items-center justify-start pointer-events-none">
               
-              {/* Podium Top Face (3D Ellipse with radial gold gradient and glass luster) */}
-              <div className="absolute top-0 z-10 w-64 h-14 rounded-full bg-gradient-to-b from-amber-50/90 to-amber-200/60 border border-amber-300/30 shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),_0_4px_20px_rgba(180,130,40,0.15)] flex items-center justify-center">
-                {/* Golden specular inner reflection ring */}
-                <div className="w-[96%] h-[90%] rounded-full border border-white/60 bg-gradient-to-b from-white/30 to-amber-100/10" />
+              {/* TIER 3 (Top Gold Cap): Sits directly under the bottle base */}
+              <div className="absolute top-0 z-20 w-52 h-10 rounded-full bg-gradient-to-b from-amber-100 to-amber-300 border border-amber-300/40 shadow-[inset_0_1px_2px_rgba(255,255,255,0.7),_0_2px_10px_rgba(180,130,40,0.25)] flex items-center justify-center">
+                <div className="w-[96%] h-[88%] rounded-full border border-white/50 bg-gradient-to-b from-white/30 to-amber-200/20" />
               </div>
+              <div className="absolute top-5 z-10 w-52 h-6 rounded-full bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 border-b border-amber-500/30" />
 
-              {/* Podium Cylindrical Front Face (Adds depth thickness) */}
-              <div className="absolute top-7 w-64 h-8 rounded-full bg-gradient-to-b from-amber-200/90 via-amber-300/80 to-amber-400/50 border-x border-b border-amber-400/30 shadow-[0_12px_24px_rgba(160,110,30,0.3)]" />
+              {/* TIER 2 (Middle Marble Stand): Glassmorphic marble cylinder */}
+              <div className="absolute top-6 z-10 w-68 h-16 rounded-full bg-gradient-to-b from-stone-50/95 via-stone-100/90 to-amber-50/70 border border-white shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),_0_8px_20px_rgba(180,130,40,0.18)]" />
+              <div className="absolute top-14 w-68 h-10 rounded-full bg-gradient-to-b from-stone-200 via-stone-300 to-amber-100/50 border-b border-stone-350/30" />
+
+              {/* TIER 1 (Base Gold Ring): Wide metallic base */}
+              <div className="absolute top-18 w-76 h-10 rounded-full bg-gradient-to-b from-amber-200 to-amber-400 border border-amber-400/20 shadow-[0_12px_24px_rgba(160,110,30,0.25)]" />
 
               {/* Soft ground ambient occlusion shadow */}
-              <div className="absolute top-10 w-68 h-12 rounded-full bg-amber-950/20 blur-md" />
+              <div className="absolute top-22 w-80 h-14 bg-amber-950/25 rounded-full blur-lg" />
             </div>
             
           </div>
-        </div>
+        </div>     
       </section>
 
       {/* SECTION 2: ACCORD EXPLORER */}
