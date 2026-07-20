@@ -13,10 +13,25 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((reg) => console.log("Service Worker registered successfully:", reg.scope))
-        .catch((err) => console.error("Service Worker registration failed:", err));
+      if (process.env.NODE_ENV === "production") {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => console.log("Service Worker registered successfully:", reg.scope))
+          .catch((err) => console.error("Service Worker registration failed:", err));
+      } else {
+        // Automatically unregister active service workers in dev mode to prevent HMR infinite loops
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister().then((success) => {
+              if (success) {
+                console.log("Dev Mode: Active Service Worker unregistered successfully.");
+                // Hard reload once to clear cached pages completely
+                window.location.reload();
+              }
+            });
+          }
+        });
+      }
     }
   }, []);
 
