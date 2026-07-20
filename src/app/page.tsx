@@ -148,8 +148,8 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredProducts.map((product) => (
-            <FragranceCard key={product.id} product={product} />
+          {featuredProducts.map((product, idx) => (
+            <FragranceCard key={product.id || `featured-${idx}`} product={product} />
           ))}
         </div>
       </section>
@@ -240,9 +240,9 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {bestSellers.map((product) => (
+          {bestSellers.map((product, idx) => (
             <Link
-              key={product.id}
+              key={product.id || `bestseller-${idx}`}
               href={`/product/${product.id}`}
               className="group p-4 bg-white/40 border border-white/60 rounded-2xl hover:bg-white/70 transition-all flex flex-col justify-between"
             >
