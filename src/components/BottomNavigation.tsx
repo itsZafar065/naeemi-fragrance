@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "../context/CartContext";
-import { Home, Compass, ShoppingBag, Heart, Shield } from "lucide-react";
+import { Home, Compass, ShoppingBag, Heart, Menu } from "lucide-react";
 
 export const BottomNavigation: React.FC = () => {
   const pathname = usePathname();
@@ -13,7 +13,7 @@ export const BottomNavigation: React.FC = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/98 backdrop-blur-xl border-t border-stone-200/70 shadow-[0_-6px_20px_rgba(160,140,115,0.08)] py-2 px-3 flex items-center justify-around">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/75 backdrop-blur-xl border-t border-white/40 shadow-[0_-10px_30px_rgba(160,140,115,0.12)] py-2 px-3 flex items-center justify-around">
       {/* Home */}
       <Link
         href="/"
@@ -68,15 +68,15 @@ export const BottomNavigation: React.FC = () => {
         <span className="text-[9px] font-bold mt-0.5">Favs</span>
       </Link>
 
-      {/* Admin */}
+      {/* More / Menu */}
       <Link
-        href="/admin"
+        href="/more"
         className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-300 ${
-          isActive("/admin") ? "text-amber-600 scale-105" : "text-stone-500 hover:text-amber-500"
+          isActive("/more") ? "text-amber-600 scale-105" : "text-stone-500 hover:text-amber-500"
         }`}
       >
-        <Shield className="w-5.5 h-5.5" />
-        <span className="text-[9px] font-bold mt-0.5">Admin</span>
+        <Menu className="w-5.5 h-5.5" />
+        <span className="text-[9px] font-bold mt-0.5">More</span>
       </Link>
     </div>
   );
