@@ -248,7 +248,7 @@ export default function Home() {
             >
               <div className="aspect-square rounded-xl overflow-hidden mb-3" style={{ background: product.imageUrl }} />
               <div>
-                <span className="text-[9px] font-bold uppercase text-stone-400 block">{product.type.split(" ")[0]}</span>
+                <span className="text-[9px] font-bold uppercase text-stone-400 block">{product.type ? product.type.split(" ")[0] : "PARFUM"}</span>
                 <h4 className="font-bold text-xs text-stone-800 group-hover:text-amber-700 truncate">{product.name}</h4>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs font-black text-stone-700">Rs. {product.price.toLocaleString()}</span>
