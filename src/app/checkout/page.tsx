@@ -255,10 +255,18 @@ export default function CheckoutPage() {
               <div className="divide-y divide-stone-200/40 max-h-60 overflow-y-auto pr-1">
                 {cart.map((item) => (
                   <div key={item.product.id} className="py-3 flex gap-3 items-center">
-                    <div
-                      className="w-12 h-12 rounded-lg border shrink-0"
-                      style={{ background: item.product.imageUrl }}
-                    />
+                    {item.product.imageUrl && item.product.imageUrl.startsWith("linear-gradient") ? (
+                      <div
+                        className="w-12 h-12 rounded-lg border shrink-0"
+                        style={{ background: item.product.imageUrl }}
+                      />
+                    ) : (
+                      <img
+                        src={item.product.imageUrl}
+                        alt={item.product.name}
+                        className="w-12 h-12 rounded-lg border shrink-0 object-contain bg-white"
+                      />
+                    )}
                     <div className="flex-grow min-w-0 text-xs">
                       <h4 className="font-bold text-stone-800 truncate">{item.product.name}</h4>
                       <p className="text-[10px] text-stone-400">

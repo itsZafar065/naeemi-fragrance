@@ -34,10 +34,18 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
       {/* Visual Image Container */}
       <div className="relative aspect-square w-full rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-inner flex items-center justify-center">
         {/* Colorful Abstract Perfume Backdrop */}
-        <div
-          className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110"
-          style={{ background: product.imageUrl }}
-        />
+        {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
+          <div
+            className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110"
+            style={{ background: product.imageUrl }}
+          />
+        ) : (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="relative z-10 w-full h-full object-contain p-4 transition-transform duration-700 ease-out group-hover:scale-110"
+          />
+        )}
 
         {/* Gloss Overlay */}
         <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30" />

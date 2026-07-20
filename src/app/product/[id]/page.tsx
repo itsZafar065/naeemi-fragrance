@@ -97,8 +97,16 @@ export default function ProductDetailPage() {
           <div className="relative aspect-square rounded-[40px] overflow-hidden border border-white/60 shadow-xl flex items-center justify-center p-8 bg-white/40 backdrop-blur-md">
             {/* Colorful Luxury Pattern Background */}
             <div className="absolute inset-2 rounded-[32px] overflow-hidden">
-              <div className="absolute inset-0" style={{ background: product.imageUrl }} />
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30" />
+              {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
+                <div className="absolute inset-0" style={{ background: product.imageUrl }} />
+              ) : (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-contain p-6 bg-white/30"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30 pointer-events-none" />
             </div>
 
             {/* Favorite Wishlist Icon Overlay */}

@@ -15,7 +15,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Golden Amber", "Vanilla", "Musk"],
     stock: 18,
     rating: 4.9,
-    imageUrl: "linear-gradient(135deg, #fbc531 0%, #f1c40f 100%)",
+    imageUrl: "/shams.webp",
   },
   {
     name: "Oud Un Naeemi",
@@ -29,7 +29,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Sandalwood", "Ambergris", "Vanilla"],
     stock: 25,
     rating: 5.0,
-    imageUrl: "linear-gradient(135deg, #c5a880 0%, #533a1c 100%)",
+    imageUrl: "/oud.webp",
   },
   {
     name: "Qaswa",
@@ -43,7 +43,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Smoky Vetiver", "Amber", "Cedarwood"],
     stock: 15,
     rating: 4.8,
-    imageUrl: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
+    imageUrl: "/qaswa.webp",
   },
   {
     name: "Oud Albaloshi",
@@ -57,7 +57,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Oakmoss", "Ambergris", "White Musk"],
     stock: 12,
     rating: 4.9,
-    imageUrl: "linear-gradient(135deg, #1e272e 0%, #485460 100%)",
+    imageUrl: "/albaloshi.webp",
   },
   {
     name: "Gul e Najaf",
@@ -71,7 +71,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Clean White Musk", "Vanilla"],
     stock: 20,
     rating: 4.7,
-    imageUrl: "linear-gradient(135deg, #ffd3b6 0%, #ff8b94 100%)",
+    imageUrl: "/najaf.webp",
   },
   {
     name: "Musk e Naeemi",
@@ -85,7 +85,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Madagascar Vanilla", "Amber"],
     stock: 30,
     rating: 4.8,
-    imageUrl: "linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)",
+    imageUrl: "/musk.webp",
   },
   {
     name: "Gul e Quds",
@@ -99,7 +99,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Golden Amber", "Sandalwood"],
     stock: 9,
     rating: 4.9,
-    imageUrl: "linear-gradient(135deg, #e84118 0%, #c23616 100%)",
+    imageUrl: "/quds.webp",
   },
   {
     name: "Zouq e Safar",
@@ -113,18 +113,28 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Cedarwood", "Vetiver Root", "Musk"],
     stock: 4,
     rating: 4.6,
-    imageUrl: "linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)",
+    imageUrl: "/safar.webp",
   }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const reset = searchParams.get("reset") === "true";
+
     const db = await getDb();
+
+    if (reset) {
+      // Clear out the database collections to force refresh seed
+      await db.collection("products").deleteMany({});
+      await db.collection("users").deleteMany({});
+      await db.collection("coupons").deleteMany({});
+      await db.collection("settings").deleteMany({});
+    }
 
     // 1. Seed Products if empty
     const productsCount = await db.collection("products").countDocuments();
     if (productsCount === 0) {
-      // Map products to include string IDs
       const productsToInsert = DEFAULT_PRODUCTS.map((p, idx) => ({
         ...p,
         id: (idx + 1).toString(),

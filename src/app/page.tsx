@@ -25,9 +25,10 @@ export default function Home() {
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // Split products for sections
-  const featuredProducts = products.slice(0, 3); // Shams, Oud, Qaswa
-  const bestSellers = products.slice(3, 7); // Albaloshi, Najaf, Musk, Quds
+  // Filter specific featured products dynamically by name matching
+  const featuredNames = ["Shams Un Naeemi", "Oud Albaloshi", "Qaswa"];
+  const featuredProducts = products.filter((p) => featuredNames.includes(p.name));
+  const bestSellers = products.filter((p) => !featuredNames.includes(p.name)).slice(0, 4);
 
   const categories = [
     { name: "Oud", icon: "✨", desc: "Royal & Majestic Oud blends" },

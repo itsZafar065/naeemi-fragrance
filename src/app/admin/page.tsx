@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAdmin, Perfume, Order, Coupon, StoreSettings, SystemLog } from "@/context/AdminContext";
 import { 
   TrendingUp, 
@@ -31,7 +32,8 @@ import {
   X,
   LogOut,
   ShieldCheck,
-  ClipboardList
+  ClipboardList,
+  ArrowLeft
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -117,6 +119,7 @@ export default function AdminDashboard() {
   const [heartNotes, setHeartNotes] = useState("");
   const [baseNotes, setBaseNotes] = useState("");
   const [stock, setStock] = useState(10);
+  const [imagePath, setImagePath] = useState("/shams.webp");
   
   // Stock edit states
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
@@ -160,7 +163,7 @@ export default function AdminDashboard() {
       heartNotes: heartArray.length ? heartArray : ["Floral Essence"],
       baseNotes: baseArray.length ? baseArray : ["Amber Base"],
       stock,
-      imageUrl: "linear-gradient(135deg, #c5a880 0%, #533a1c 100%)"
+      imageUrl: imagePath || "/shams.webp"
     });
 
     if (result.success) {
@@ -174,6 +177,7 @@ export default function AdminDashboard() {
       setHeartNotes("");
       setBaseNotes("");
       setStock(10);
+      setImagePath("/shams.webp");
       setShowAddForm(false);
     } else {
       alert(result.error || "Failed to add product listing");
@@ -241,8 +245,15 @@ export default function AdminDashboard() {
   // Auth gate check
   if (!adminUser) {
     return (
-      <div className="max-w-md mx-auto py-16 px-6 glass-panel rounded-[36px] border border-white/60 shadow-xl mt-12 space-y-6">
-        <div className="text-center space-y-2">
+      <div className="max-w-md mx-auto py-16 px-6 glass-panel rounded-[36px] border border-white/60 shadow-xl mt-12 space-y-6 animate-fadeIn">
+        <div className="flex justify-between items-center border-b pb-3 border-stone-200/50">
+          <Link href="/more" className="text-stone-500 hover:text-amber-700 text-xs font-bold flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" /> Back to Store
+          </Link>
+          <span className="text-[10px] text-stone-400 font-extrabold uppercase tracking-widest">Portal Access</span>
+        </div>
+
+        <div className="text-center space-y-2 pt-2">
           <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-700">
             <ShieldCheck className="w-6 h-6" />
           </div>
@@ -503,6 +514,15 @@ export default function AdminDashboard() {
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp)</label>
+                  <input
+                    type="text" required placeholder="/shams.webp" value={imagePath}
+                    onChange={(e) => setImagePath(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                  />
+                </div>
+
                 <div className="pt-2 flex justify-end gap-3">
                   <button
                     type="button" onClick={() => setShowAddForm(false)}
@@ -522,6 +542,7 @@ export default function AdminDashboard() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-stone-50/70 text-[9px] font-bold text-stone-500 uppercase tracking-widest border-b">
+                      <th className="p-3">Image</th>
                       <th className="p-3">Perfume</th>
                       <th className="p-3">Type</th>
                       <th className="p-3">Price</th>
@@ -534,7 +555,14 @@ export default function AdminDashboard() {
                   <tbody className="text-xs divide-y divide-stone-200/40">
                     {products.map((prod) => (
                       <tr key={prod.id} className="hover:bg-white/40">
-                        <td className="p-3 font-bold text-stone-850">{prod.name}</td>
+                        <td className="p-3">
+                          {prod.imageUrl && prod.imageUrl.startsWith("linear-gradient") ? (
+                            <div className="w-8 h-8 rounded border" style={{ background: prod.imageUrl }} />
+                          ) : (
+                            <img src={prod.imageUrl} className="w-8 h-8 rounded border object-contain bg-white" />
+                          )}
+                        </td>
+                        <td className="p-3 font-bold text-stone-855">{prod.name}</td>
                         <td className="p-3 text-stone-500">{prod.type}</td>
                         <td className="p-3 font-extrabold text-stone-700">Rs. {prod.price.toLocaleString()}</td>
                         <td className="p-3">
