@@ -326,15 +326,15 @@ export default function Home() {
               <Check className="w-4 h-4" /> Subscription Successful! Welcome to Naeemi Fragrances.
             </div>
           ) : (
-            <div className="mx-auto max-w-md flex gap-2">
+            <div className="mx-auto max-w-md flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="Enter email address"
-                className="flex-1 px-4 py-2.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none"
+                className="flex-grow px-4 py-2.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none w-full"
               />
               <button
                 onClick={() => setNewsletterSubscribed(true)}
-                className="px-5 py-2.5 rounded-xl gold-btn text-white font-bold text-xs"
+                className="px-5 py-2.5 rounded-xl gold-btn text-white font-bold text-xs w-full sm:w-auto shrink-0"
               >
                 Subscribe
               </button>
@@ -357,7 +357,7 @@ export default function Home() {
               <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
                 <Phone className="w-4 h-4" />
               </div>
-              <span>+92 300 1234567</span>
+              <span className="font-semibold text-stone-800">03092184760</span>
             </div>
 
             <div className="flex items-center gap-3">

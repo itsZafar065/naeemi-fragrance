@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAdmin, Perfume, Order } from "@/context/AdminContext";
+import { useAdmin, Perfume, Order, Coupon, StoreSettings } from "@/context/AdminContext";
 import { 
   TrendingUp, 
   ShoppingBag, 
@@ -15,25 +15,77 @@ import {
   XCircle,
   Package,
   Layers,
-  ChevronDown
+  ChevronDown,
+  Users,
+  Percent,
+  BarChart3,
+  Settings,
+  Mail,
+  Search,
+  Key,
+  Globe,
+  Settings2,
+  Phone,
+  LayoutDashboard
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const { 
     products, 
     orders, 
+    coupons,
+    settings,
     addProduct, 
     updateProduct, 
     deleteProduct, 
     updateOrderStatus, 
-    getSalesSummary 
+    getSalesSummary,
+    addCoupon,
+    deleteCoupon,
+    updateSettings
   } = useAdmin();
+
+  // Sidebar Menu Tabs
+  type TabType = 
+    | "dashboard" 
+    | "products" 
+    | "orders" 
+    | "customers" 
+    | "inventory" 
+    | "coupons" 
+    | "analytics" 
+    | "settings" 
+    | "notifications" 
+    | "general" 
+    | "seo" 
+    | "admins";
+
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [activeSettingsSubtab, setActiveSettingsSubtab] = useState<"website" | "payment" | "shipping">("website");
 
   // Summary Metrics
   const { totalSales, totalOrders, pendingOrders, lowStockCount } = getSalesSummary();
 
-  // Tabs: 'dashboard' | 'products' | 'orders'
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "orders">("dashboard");
+  // Derived Customers list
+  const customers = orders.reduce((acc: any[], order) => {
+    const existing = acc.find(c => c.phone === order.customerPhone);
+    if (existing) {
+      existing.ordersCount += 1;
+      existing.totalSpent += order.totalAmount;
+      if (!existing.addresses.includes(order.customerAddress)) {
+        existing.addresses.push(order.customerAddress);
+      }
+    } else {
+      acc.push({
+        name: order.customerName,
+        phone: order.customerPhone,
+        totalSpent: order.totalAmount,
+        ordersCount: 1,
+        addresses: [order.customerAddress]
+      });
+    }
+    return acc;
+  }, []);
 
   // Form states for creating a new product
   const [showAddForm, setShowAddForm] = useState(false);
@@ -52,26 +104,18 @@ export default function AdminDashboard() {
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [tempStockValue, setTempStockValue] = useState<number>(0);
 
+  // Coupon state form
+  const [newCouponCode, setNewCouponCode] = useState("");
+  const [newCouponDiscount, setNewCouponDiscount] = useState(10);
+  const [newCouponDesc, setNewCouponDesc] = useState("");
+
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !description || price <= 0 || stock < 0) return;
 
-    // Convert notes from comma-separated string to arrays
     const topArray = topNotes.split(",").map((n) => n.trim()).filter(Boolean);
     const heartArray = heartNotes.split(",").map((n) => n.trim()).filter(Boolean);
     const baseArray = baseNotes.split(",").map((n) => n.trim()).filter(Boolean);
-
-    // Randomize luxury gradient backdrop for illustration
-    const gradients = [
-      "linear-gradient(135deg, #c5a880 0%, #533a1c 100%)",
-      "linear-gradient(135deg, #ffd3b6 0%, #ff8b94 100%)",
-      "linear-gradient(135deg, #fbc531 0%, #e84118 100%)",
-      "linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%)",
-      "linear-gradient(135deg, #e4a853 0%, #6e400b 100%)",
-      "linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%)",
-      "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)"
-    ];
-    const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
 
     addProduct({
       name,
@@ -84,7 +128,7 @@ export default function AdminDashboard() {
       heartNotes: heartArray.length ? heartArray : ["Floral Essence"],
       baseNotes: baseArray.length ? baseArray : ["Amber Base"],
       stock,
-      imageUrl: randomGradient
+      imageUrl: "linear-gradient(135deg, #ffd3b6 0%, #ff8b94 100%)"
     });
 
     // Reset Form
@@ -99,6 +143,22 @@ export default function AdminDashboard() {
     setBaseNotes("");
     setStock(10);
     setShowAddForm(false);
+  };
+
+  const handleAddCouponSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = newCouponCode.trim().toUpperCase();
+    if (!code || newCouponDiscount <= 0) return;
+
+    addCoupon({
+      code,
+      discount: newCouponDiscount,
+      description: newCouponDesc || `${newCouponDiscount}% Discount Promo`
+    });
+
+    setNewCouponCode("");
+    setNewCouponDiscount(10);
+    setNewCouponDesc("");
   };
 
   const handleStartEditStock = (prod: Perfume) => {
@@ -125,164 +185,445 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Title */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-black text-stone-800 tracking-tight">
-          Admin Operations Hub
-        </h1>
-        <p className="text-xs text-stone-500">
-          Manage stock, examine order sheets, and review sales charts.
-        </p>
-      </div>
-
-      {/* Analytics Counter Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1 */}
-        <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-100 shrink-0">
-            <TrendingUp className="w-5 h-5" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-10">
+      
+      {/* SIDEBAR NAVIGATION (Col 3) */}
+      <aside className="lg:col-span-3 glass-panel rounded-3xl p-5 space-y-6 border border-white/50 sticky top-24">
+        {/* Profile Card Summary */}
+        <div className="border-b border-stone-200/40 pb-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-amber-500 text-white font-extrabold flex items-center justify-center mx-auto text-lg mb-2 shadow-sm">
+            Z
           </div>
-          <div>
-            <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
-              Total Revenue
-            </span>
-            <span className="text-base font-extrabold text-stone-800">
-              Rs. {totalSales.toLocaleString()}
-            </span>
-          </div>
+          <h4 className="font-extrabold text-stone-800 text-xs">Zafar Fragrances</h4>
+          <span className="text-[9px] text-amber-700 font-serif italic">"Naeemi Naam Hai Mohabbat Ka"</span>
         </div>
 
-        {/* Metric 2 */}
-        <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center border border-indigo-100 shrink-0">
-            <ShoppingBag className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
-              Total Orders
-            </span>
-            <span className="text-base font-extrabold text-stone-800">{totalOrders}</span>
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center border border-sky-100 shrink-0">
-            <Clock className="w-5 h-5 animate-pulse" />
-          </div>
-          <div>
-            <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
-              Pending Orders
-            </span>
-            <span className="text-base font-extrabold text-stone-800">{pendingOrders}</span>
-          </div>
-        </div>
-
-        {/* Metric 4 */}
-        <div className="glass-panel p-4 rounded-2xl flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-            lowStockCount > 0 
-              ? "bg-rose-50 text-rose-700 border-rose-100 animate-bounce" 
-              : "bg-emerald-50 text-emerald-700 border-emerald-100"
-          }`}>
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">
-              Low Inventory Alert
-            </span>
-            <span className="text-base font-extrabold text-stone-800">{lowStockCount} items</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs Menu Header */}
-      <div className="border-b border-stone-200 flex gap-4">
-        {(["dashboard", "products", "orders"] as const).map((tab) => (
+        {/* Menu Items */}
+        <nav className="flex flex-col gap-1">
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-2.5 px-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 -mb-0.5 ${
-              activeTab === tab
-                ? "border-amber-600 text-amber-800"
-                : "border-transparent text-stone-400 hover:text-stone-600"
+            onClick={() => setActiveTab("dashboard")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "dashboard" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
             }`}
           >
-            {tab}
+            <LayoutDashboard className="w-4 h-4 text-stone-500" />
+            Dashboard
           </button>
-        ))}
-      </div>
 
-      {/* TAB 1: General Business Stats */}
-      {activeTab === "dashboard" && (
-        <div className="space-y-6">
-          {/* Slogan Branding Box */}
-          <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="space-y-1">
-              <h3 className="font-extrabold text-stone-800 text-md font-serif">Naeemi Fragrances</h3>
-              <p className="text-xs text-amber-700 italic font-serif">"Naeemi Naam Hai Mohabbat Ka"</p>
-            </div>
-            <div className="text-xs text-stone-600 max-w-md">
-              Secure client-side records. Keep this screen private. Use this layout to review customer deliveries and manage inventories.
-            </div>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "products" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Package className="w-4 h-4 text-stone-500" />
+            Products Catalogue
+          </button>
+
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "orders" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4 text-stone-500" />
+            Orders Log
+          </button>
+
+          <button
+            onClick={() => setActiveTab("customers")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "customers" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Users className="w-4 h-4 text-stone-500" />
+            Customer Registry
+          </button>
+
+          <button
+            onClick={() => setActiveTab("inventory")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "inventory" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 text-stone-500" />
+            Inventory & Alerts
+          </button>
+
+          <button
+            onClick={() => setActiveTab("coupons")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "coupons" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Percent className="w-4 h-4 text-stone-500" />
+            Coupons & Discounts
+          </button>
+
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "analytics" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 text-stone-500" />
+            Analytics Charts
+          </button>
+
+          <div className="border-t border-stone-200/40 my-2 pt-2">
+            <span className="text-[9px] font-extrabold text-stone-400 uppercase tracking-widest block px-3 mb-1">System Settings</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Quick stock warning panel */}
-            <div className="glass-panel p-6 rounded-3xl space-y-4">
-              <h3 className="font-bold text-stone-800 text-sm flex items-center gap-2">
-                <Package className="w-4 h-4 text-stone-600" />
-                Critical Low Stock Listings
-              </h3>
-              
-              {products.filter(p => p.stock <= 5).length === 0 ? (
-                <p className="text-xs text-emerald-600 font-semibold bg-emerald-50/50 p-3 rounded-xl border border-emerald-100 text-center">
-                  ✓ All products are adequately stocked!
-                </p>
-              ) : (
-                <div className="divide-y divide-stone-100">
-                  {products.filter(p => p.stock <= 5).map((prod) => (
-                    <div key={prod.id} className="py-2.5 flex justify-between items-center text-xs">
-                      <span className="font-bold text-stone-700">{prod.name} ({prod.volume})</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
-                          {prod.stock === 0 ? "Out of stock" : `${prod.stock} left`}
-                        </span>
-                        <button
-                          onClick={() => { setActiveTab("products"); handleStartEditStock(prod); }}
-                          className="text-[10px] text-amber-700 hover:underline font-bold"
-                        >
-                          Restock
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "settings" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Settings className="w-4 h-4 text-stone-500" />
+            Store Settings
+          </button>
+
+          <button
+            onClick={() => setActiveTab("notifications")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "notifications" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Mail className="w-4 h-4 text-stone-500" />
+            Email Templates
+          </button>
+
+          <button
+            onClick={() => setActiveTab("seo")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "seo" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Globe className="w-4 h-4 text-stone-500" />
+            SEO Settings
+          </button>
+
+          <button
+            onClick={() => setActiveTab("general")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "general" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Settings2 className="w-4 h-4 text-stone-500" />
+            General Settings
+          </button>
+
+          <button
+            onClick={() => setActiveTab("admins")}
+            className={`w-full py-2 px-3 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 ${
+              activeTab === "admins" ? "bg-amber-500/10 text-amber-900 font-black border-l-2 border-amber-500" : "text-stone-600 hover:bg-stone-50"
+            }`}
+          >
+            <Key className="w-4 h-4 text-stone-500" />
+            Admin Access
+          </button>
+        </nav>
+      </aside>
+
+      {/* CORE DISPLAY PANEL (Col 9) */}
+      <main className="lg:col-span-9 space-y-6">
+        
+        {/* TAB 1: Dashboard Overview */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-xl font-black text-stone-800 tracking-tight">Analytics Executive Summary</h2>
+              <p className="text-xs text-stone-500">Real-time status summaries of sales and logistics</p>
             </div>
 
-            {/* Quick metrics graph placeholder representation */}
-            <div className="glass-panel p-6 rounded-3xl space-y-4">
-              <h3 className="font-bold text-stone-800 text-sm flex items-center gap-2">
-                <Layers className="w-4 h-4 text-stone-600" />
-                Accords Inventory Distribution
-              </h3>
-              <div className="space-y-3 pt-2">
-                {Array.from(new Set(products.map(p => p.category))).map((cat) => {
-                  const count = products.filter(p => p.category === cat).length;
-                  const percent = Math.round((count / products.length) * 100);
-                  return (
-                    <div key={cat} className="space-y-1">
-                      <div className="flex justify-between text-xs text-stone-600">
-                        <span className="font-bold">{cat} Accord</span>
-                        <span>{count} listings ({percent}%)</span>
+            {/* Metrics cards row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="glass-panel p-4 rounded-2xl">
+                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Total Sales</span>
+                <span className="text-base font-extrabold text-stone-850">Rs. {totalSales.toLocaleString()}</span>
+              </div>
+              <div className="glass-panel p-4 rounded-2xl">
+                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Orders Count</span>
+                <span className="text-base font-extrabold text-stone-850">{totalOrders}</span>
+              </div>
+              <div className="glass-panel p-4 rounded-2xl">
+                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Pending Tasks</span>
+                <span className="text-base font-extrabold text-stone-850">{pendingOrders}</span>
+              </div>
+              <div className="glass-panel p-4 rounded-2xl">
+                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Low Stock alerts</span>
+                <span className="text-base font-extrabold text-stone-850">{lowStockCount} items</span>
+              </div>
+            </div>
+
+            {/* Recent Orders Overview */}
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <h3 className="font-bold text-stone-800 text-sm">Recent Order Shipments</h3>
+              {orders.slice(0, 3).map((order) => (
+                <div key={order.id} className="p-3 bg-white/40 border border-stone-200/40 rounded-2xl flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-stone-800">{order.customerName}</p>
+                    <p className="text-[10px] text-stone-500">{order.items.map(i => `${i.name} (${i.quantity}x)`).join(", ")}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-amber-800">Rs. {order.totalAmount.toLocaleString()}</p>
+                    <span className={`text-[8px] font-bold px-2 py-0.5 rounded border ${getStatusBadgeColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: Products CRUD Management */}
+        {activeTab === "products" && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-black text-stone-800 tracking-tight">Products Stock Catalogue</h2>
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                {showAddForm ? "Close specifications form" : "Add Fragrance Listing"}
+              </button>
+            </div>
+
+            {showAddForm && (
+              <form onSubmit={handleAddProduct} className="glass-panel p-6 rounded-3xl border border-amber-100 space-y-4">
+                <h4 className="font-bold text-stone-800 text-sm border-b pb-2">Fragrance Parameters</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Name</label>
+                    <input
+                      type="text" required placeholder="e.g. Zouq-e-Lail" value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Category</label>
+                    <select
+                      value={category} onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs"
+                    >
+                      <option value="Oud">Oud</option>
+                      <option value="Floral">Floral</option>
+                      <option value="Woody">Woody</option>
+                      <option value="Fresh">Fresh</option>
+                      <option value="Oriental">Oriental</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Retail Price (Rs.)</label>
+                    <input
+                      type="number" required min="1" placeholder="e.g. 6200" value={price || ""}
+                      onChange={(e) => setPrice(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Stock Count</label>
+                    <input
+                      type="number" required min="0" placeholder="10" value={stock || ""}
+                      onChange={(e) => setStock(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-stone-600 block">Scent Description</label>
+                  <textarea
+                    required rows={2} placeholder="Describe essential elements..." value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs resize-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3">
+                  <button
+                    type="button" onClick={() => setShowAddForm(false)}
+                    className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-4 py-2 rounded-xl gold-btn text-white font-bold text-xs">
+                    Save listing
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="glass-panel overflow-hidden rounded-3xl border border-stone-200/50">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-stone-50/70 text-[9px] font-bold text-stone-500 uppercase tracking-widest border-b">
+                      <th className="p-3">Perfume</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Price</th>
+                      <th className="p-3">Stock remaining</th>
+                      <th className="p-3 text-right">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-xs divide-y divide-stone-200/40">
+                    {products.map((prod) => (
+                      <tr key={prod.id} className="hover:bg-white/40">
+                        <td className="p-3 font-bold text-stone-850">{prod.name}</td>
+                        <td className="p-3 text-stone-500">{prod.type}</td>
+                        <td className="p-3 font-extrabold text-stone-700">Rs. {prod.price.toLocaleString()}</td>
+                        <td className="p-3">
+                          {editingStockId === prod.id ? (
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="number" value={tempStockValue}
+                                onChange={(e) => setTempStockValue(Number(e.target.value))}
+                                className="w-12 px-1 py-0.5 border text-xs"
+                              />
+                              <button onClick={() => handleSaveStock(prod.id)} className="bg-emerald-600 text-white font-bold text-[9px] px-1.5 py-0.5 rounded">
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-semibold">{prod.stock} units</span>
+                              <button onClick={() => handleStartEditStock(prod)} className="text-stone-400 hover:text-stone-700">
+                                <Edit3 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-right">
+                          <button onClick={() => deleteProduct(prod.id)} className="text-rose-500 hover:text-rose-700 p-1">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: Orders log */}
+        {activeTab === "orders" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Customer Placed Orders</h2>
+            
+            <div className="space-y-4">
+              {orders.map((ord) => (
+                <div key={ord.id} className="glass-panel p-5 rounded-3xl space-y-3">
+                  <div className="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
+                    <span className="font-extrabold text-xs text-stone-850">{ord.id} ({ord.date})</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] font-bold border px-2 py-0.5 rounded-full ${getStatusBadgeColor(ord.status)}`}>
+                        {ord.status}
+                      </span>
+                      <select
+                        value={ord.status}
+                        onChange={(e) => updateOrderStatus(ord.id, e.target.value as Order["status"])}
+                        className="bg-stone-50 border rounded-lg text-[10px] py-1 px-2 font-bold focus:outline-none"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="text-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-bold text-stone-700">Recipient: {ord.customerName}</p>
+                      <p className="text-stone-500">Contact: {ord.customerPhone}</p>
+                      <p className="text-stone-500">Address: {ord.customerAddress}</p>
+                    </div>
+                    <div>
+                      <span className="font-bold text-stone-400 text-[9px] uppercase tracking-wider block">Package Items</span>
+                      {ord.items.map((it, idx) => (
+                        <div key={idx} className="flex justify-between text-stone-600 font-medium">
+                          <span>{it.name} x{it.quantity}</span>
+                          <span>Rs. {(it.price * it.quantity).toLocaleString()}</span>
+                        </div>
+                      ))}
+                      <div className="border-t pt-1 mt-1 flex justify-between font-black text-stone-800">
+                        <span>Total Paid</span>
+                        <span>Rs. {ord.totalAmount.toLocaleString()}</span>
                       </div>
-                      <div className="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-amber-500 h-full rounded-full transition-all duration-500" 
-                          style={{ width: `${percent}%` }}
-                        />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: Customer registry */}
+        {activeTab === "customers" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Customer Database Registry</h2>
+            <div className="glass-panel overflow-hidden rounded-3xl border border-stone-200/50">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-stone-50/70 border-b text-[9px] font-bold text-stone-500 uppercase tracking-widest">
+                    <th className="p-3">Client</th>
+                    <th className="p-3">Mobile Contact</th>
+                    <th className="p-3">Address list</th>
+                    <th className="p-3">Orders Count</th>
+                    <th className="p-3">Total Invested</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs divide-y divide-stone-200/40">
+                  {customers.map((c, i) => (
+                    <tr key={i} className="hover:bg-white/40">
+                      <td className="p-3 font-bold text-stone-800">{c.name}</td>
+                      <td className="p-3 font-semibold text-stone-600">{c.phone}</td>
+                      <td className="p-3 text-stone-500 max-w-xs truncate" title={c.addresses.join("; ")}>
+                        {c.addresses.join("; ")}
+                      </td>
+                      <td className="p-3 text-center font-bold">{c.ordersCount}</td>
+                      <td className="p-3 font-extrabold text-amber-800">Rs. {c.totalSpent.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: Inventory Restocking System */}
+        {activeTab === "inventory" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Inventory restock logs</h2>
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <h3 className="font-bold text-stone-800 text-sm flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                Critical Low Stock Alerts (Stock &lt;= 5 bottles)
+              </h3>
+              <div className="divide-y divide-stone-100">
+                {products.map(prod => {
+                  const isLow = prod.stock <= 5;
+                  return (
+                    <div key={prod.id} className="py-2.5 flex justify-between items-center text-xs">
+                      <span className="font-bold text-stone-700">{prod.name} ({prod.volume})</span>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                          prod.stock === 0 ? "bg-rose-50 text-rose-700" : isLow ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"
+                        }`}>
+                          {prod.stock === 0 ? "Out of stock" : `${prod.stock} units left`}
+                        </span>
+                        <button
+                          onClick={() => { handleStartEditStock(prod); setEditingStockId(prod.id); }}
+                          className="bg-stone-800 text-white font-bold text-[10px] px-3 py-1 rounded-lg hover:bg-stone-700"
+                        >
+                          Quick restock
+                        </button>
                       </div>
                     </div>
                   );
@@ -290,251 +631,57 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* TAB 2: Product Catalogue Manager */}
-      {activeTab === "products" && (
-        <div className="space-y-6">
-          {/* Header & Add Button */}
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold text-stone-800 text-md">Stock Catalogue</h3>
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              {showAddForm ? "Close Form" : "Add Fragrance"}
-            </button>
-          </div>
-
-          {/* Create Product Form */}
-          {showAddForm && (
-            <form onSubmit={handleAddProduct} className="glass-panel p-6 rounded-3xl border border-amber-100 space-y-4">
-              <h4 className="font-bold text-stone-800 text-sm border-b pb-2">New Fragrance Specifications</h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Perfume Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Royal Oud Al-Arab"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Scent Accord (Category)</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    <option value="Oud">Oud</option>
-                    <option value="Floral">Floral</option>
-                    <option value="Woody">Woody</option>
-                    <option value="Citrus">Citrus</option>
-                    <option value="Oriental">Oriental</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Volume</label>
-                  <select
-                    value={volume}
-                    onChange={(e) => setVolume(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  >
-                    <option value="50ml">50ml</option>
-                    <option value="100ml">100ml</option>
-                    <option value="200ml">200ml</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Concentration</label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  >
-                    <option value="Extrait de Parfum">Extrait de Parfum</option>
-                    <option value="Eau de Parfum (EDP)">Eau de Parfum (EDP)</option>
-                    <option value="Eau de Toilette (EDT)">Eau de Toilette (EDT)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Retail Price (Rs.)</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    placeholder="e.g. 7500"
-                    value={price || ""}
-                    onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Starting Stock Units</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    placeholder="e.g. 20"
-                    value={stock || ""}
-                    onChange={(e) => setStock(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-stone-600 block">Product Story / Scent Description</label>
-                <textarea
-                  required
-                  rows={2}
-                  placeholder="Describe the mood, ingredients, and projection characteristics..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none resize-none"
+        {/* TAB 6: Coupons & discounts panel */}
+        {activeTab === "coupons" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Manage Promo Coupon Codes</h2>
+            
+            {/* Add new coupon form */}
+            <form onSubmit={handleAddCouponSubmit} className="glass-panel p-5 rounded-3xl border border-white/50 space-y-3.5">
+              <h3 className="font-bold text-stone-850 text-xs">Create New Coupon Voucher</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input
+                  type="text" required placeholder="CODE e.g. LOVE25" value={newCouponCode}
+                  onChange={(e) => setNewCouponCode(e.target.value)}
+                  className="px-3.5 py-2 bg-white border rounded-xl text-xs uppercase"
+                />
+                <input
+                  type="number" required min="1" max="99" placeholder="Discount % e.g. 25" value={newCouponDiscount || ""}
+                  onChange={(e) => setNewCouponDiscount(Number(e.target.value))}
+                  className="px-3.5 py-2 bg-white border rounded-xl text-xs"
+                />
+                <input
+                  type="text" placeholder="Promo description text" value={newCouponDesc}
+                  onChange={(e) => setNewCouponDesc(e.target.value)}
+                  className="px-3.5 py-2 bg-white border rounded-xl text-xs"
                 />
               </div>
-
-              {/* Note Arrays inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Top Notes (comma-separated)</label>
-                  <input
-                    type="text"
-                    placeholder="Lemon, Mint, Basil"
-                    value={topNotes}
-                    onChange={(e) => setTopNotes(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Heart Notes (comma-separated)</label>
-                  <input
-                    type="text"
-                    placeholder="Jasmine, Rose, Lavender"
-                    value={heartNotes}
-                    onChange={(e) => setHeartNotes(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Base Notes (comma-separated)</label>
-                  <input
-                    type="text"
-                    placeholder="Oud, Sandalwood, Musk"
-                    value={baseNotes}
-                    onChange={(e) => setBaseNotes(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-white/70 border border-stone-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="px-5 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl gold-btn text-white font-bold text-xs"
-                >
-                  Save Product
-                </button>
-              </div>
+              <button type="submit" className="px-5 py-2 rounded-xl gold-btn text-white font-bold text-xs">
+                Add Coupon Code
+              </button>
             </form>
-          )}
 
-          {/* Products Inventory List */}
-          <div className="glass-panel overflow-hidden rounded-3xl border border-stone-200/50">
-            <div className="overflow-x-auto">
+            {/* Coupons list */}
+            <div className="glass-panel rounded-3xl overflow-hidden border">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-stone-50/70 border-b border-stone-200/50 text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-                    <th className="py-3 px-4">Fragrance</th>
-                    <th className="py-3 px-4">Type / Volume</th>
-                    <th className="py-3 px-4">Accord</th>
-                    <th className="py-3 px-4">Price</th>
-                    <th className="py-3 px-4">Stock Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                  <tr className="bg-stone-50 border-b text-[9px] font-bold text-stone-500 uppercase tracking-widest">
+                    <th className="p-3">Coupon Code</th>
+                    <th className="p-3">Discount Value</th>
+                    <th className="p-3">Description</th>
+                    <th className="p-3 text-right">Delete</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-200/40 text-xs">
-                  {products.map((prod) => (
-                    <tr key={prod.id} className="hover:bg-white/40 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-stone-800">
-                        {prod.name}
-                      </td>
-                      <td className="py-3.5 px-4 text-stone-500">
-                        {prod.type} ({prod.volume})
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="bg-amber-100 text-amber-900 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase">
-                          {prod.category}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-bold text-stone-700">
-                        Rs. {prod.price.toLocaleString()}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {editingStockId === prod.id ? (
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="number"
-                              min="0"
-                              value={tempStockValue}
-                              onChange={(e) => setTempStockValue(Number(e.target.value))}
-                              className="w-16 px-1.5 py-1 bg-white border border-stone-300 rounded focus:outline-none text-xs"
-                            />
-                            <button
-                              onClick={() => handleSaveStock(prod.id)}
-                              className="px-2 py-1 bg-emerald-600 text-white font-bold text-[10px] rounded hover:bg-emerald-700 transition-colors"
-                            >
-                              Save
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold ${
-                              prod.stock === 0 
-                                ? "text-rose-600 font-bold" 
-                                : prod.stock <= 5 
-                                ? "text-amber-600" 
-                                : "text-stone-700"
-                            }`}>
-                              {prod.stock} units
-                            </span>
-                            <button
-                              onClick={() => handleStartEditStock(prod)}
-                              className="text-stone-400 hover:text-stone-700"
-                              title="Edit Stock"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => deleteProduct(prod.id)}
-                          className="p-1.5 rounded-lg text-stone-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
-                          title="Delete Listing"
-                        >
+                <tbody className="text-xs divide-y">
+                  {coupons.map((cop) => (
+                    <tr key={cop.code} className="hover:bg-white/40">
+                      <td className="p-3 font-extrabold text-amber-800">{cop.code}</td>
+                      <td className="p-3 font-bold text-stone-800">{cop.discount}% OFF</td>
+                      <td className="p-3 text-stone-500">{cop.description}</td>
+                      <td className="p-3 text-right">
+                        <button onClick={() => deleteCoupon(cop.code)} className="text-stone-400 hover:text-rose-500 p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
@@ -544,93 +691,249 @@ export default function AdminDashboard() {
               </table>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* TAB 3: Client Order Sheets */}
-      {activeTab === "orders" && (
-        <div className="space-y-6">
-          <h3 className="font-bold text-stone-800 text-md">Customer Orders Log</h3>
-
-          {orders.length === 0 ? (
-            <div className="text-center py-20 bg-white/40 border border-stone-200/50 rounded-3xl text-stone-500 space-y-2">
-              <ShoppingBag className="w-10 h-10 text-stone-300 stroke-[1.5] mx-auto" />
-              <p className="text-xs font-medium">No sales orders registered yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <div
-                  key={order.id}
-                  className="glass-panel p-5 rounded-3xl border border-white/50 space-y-4 text-stone-700"
-                >
-                  {/* Order header row */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/40 pb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-black text-stone-800 text-sm">{order.id}</span>
-                      <span className="text-[10px] text-stone-400 font-bold">{order.date}</span>
+        {/* TAB 7: Analytics Charts and graphs */}
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Accords Sales Analytics</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="glass-panel p-5 rounded-3xl space-y-4">
+                <h4 className="font-bold text-stone-800 text-xs">Best Selling Fragrance Accord</h4>
+                <div className="space-y-2.5">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-semibold text-stone-700">
+                      <span>Shams Un Naeemi</span>
+                      <span>Rs. {totalSales > 0 ? Math.round(totalSales * 0.45).toLocaleString() : "Rs. 28,000"}</span>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${getStatusBadgeColor(order.status)}`}>
-                        {order.status}
-                      </span>
-
-                      {/* Dropdown status update */}
-                      <div className="relative inline-block">
-                        <select
-                          value={order.status}
-                          onChange={(e) => updateOrderStatus(order.id, e.target.value as Order["status"])}
-                          className="appearance-none bg-stone-100/80 border border-stone-200 hover:border-stone-300 rounded-xl pl-3 pr-8 py-1.5 text-[11px] font-bold text-stone-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                        >
-                          <option value="Pending">Set Pending</option>
-                          <option value="Shipped">Set Shipped</option>
-                          <option value="Delivered">Set Delivered</option>
-                          <option value="Cancelled">Set Cancelled</option>
-                        </select>
-                        <ChevronDown className="w-3.5 h-3.5 text-stone-500 absolute right-2.5 top-2.5 pointer-events-none" />
-                      </div>
+                    <div className="w-full bg-stone-100 h-1.5 rounded-full">
+                      <div className="bg-amber-500 h-full w-[45%]" />
                     </div>
                   </div>
-
-                  {/* Customer and products row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 text-xs">
-                    {/* Customer Info */}
-                    <div className="md:col-span-5 space-y-1 bg-white/40 border border-white/50 p-3.5 rounded-2xl">
-                      <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block">Customer Info</span>
-                      <p className="font-bold text-stone-800">{order.customerName}</p>
-                      <p className="text-stone-500 font-semibold">{order.customerPhone}</p>
-                      <p className="text-stone-500 leading-relaxed mt-1 font-medium">{order.customerAddress}</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-semibold text-stone-700">
+                      <span>Oud Un Naeemi</span>
+                      <span>Rs. {totalSales > 0 ? Math.round(totalSales * 0.35).toLocaleString() : "Rs. 18,500"}</span>
                     </div>
-
-                    {/* Order Items */}
-                    <div className="md:col-span-7 space-y-2">
-                      <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block">Cart Package</span>
-                      <div className="space-y-1.5">
-                        {order.items.map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-stone-700 font-medium">
-                            <span className="text-stone-800">
-                              {item.name} <span className="text-stone-400 font-bold">x {item.quantity}</span>
-                            </span>
-                            <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="border-t border-stone-200/50 pt-2 flex justify-between items-center">
-                        <span className="font-bold text-stone-800">Total Bill</span>
-                        <span className="font-extrabold text-amber-700 text-sm">
-                          Rs. {order.totalAmount.toLocaleString()}
-                        </span>
-                      </div>
+                    <div className="w-full bg-stone-100 h-1.5 rounded-full">
+                      <div className="bg-amber-500 h-full w-[35%]" />
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="glass-panel p-5 rounded-3xl space-y-4">
+                <h4 className="font-bold text-stone-800 text-xs">Customer Sillage Rating Average</h4>
+                <div className="text-center py-6">
+                  <span className="text-5xl font-black text-stone-800 tracking-tighter">4.92</span>
+                  <span className="text-xs text-stone-400 block mt-1">Weighted average rating from reviews</span>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+
+        {/* TAB 8: Settings (Website / Payment / Shipping subtabs) */}
+        {activeTab === "settings" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">System Settings panel</h2>
+            
+            {/* Subtabs Menu */}
+            <div className="flex border-b text-xs font-bold gap-3 pb-1">
+              <button
+                onClick={() => setActiveSettingsSubtab("website")}
+                className={`pb-2 px-1 border-b-2 transition-all ${
+                  activeSettingsSubtab === "website" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                Website Settings
+              </button>
+              <button
+                onClick={() => setActiveSettingsSubtab("payment")}
+                className={`pb-2 px-1 border-b-2 transition-all ${
+                  activeSettingsSubtab === "payment" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                Payment Systems
+              </button>
+              <button
+                onClick={() => setActiveSettingsSubtab("shipping")}
+                className={`pb-2 px-1 border-b-2 transition-all ${
+                  activeSettingsSubtab === "shipping" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                Shipping limits
+              </button>
+            </div>
+
+            {/* WEBSITE SETTINGS SUBTAB */}
+            {activeSettingsSubtab === "website" && (
+              <div className="glass-panel p-5 rounded-3xl space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-stone-600 block">Website Store Name</label>
+                  <input
+                    type="text" value={settings.websiteName}
+                    onChange={(e) => updateSettings({ websiteName: e.target.value })}
+                    className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-stone-600 block">Slogan tagline</label>
+                  <input
+                    type="text" value={settings.tagline}
+                    onChange={(e) => updateSettings({ tagline: e.target.value })}
+                    className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* PAYMENT SETTINGS SUBTAB */}
+            {activeSettingsSubtab === "payment" && (
+              <div className="glass-panel p-5 rounded-3xl space-y-4">
+                <div className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox" checked={settings.codEnabled}
+                    onChange={(e) => updateSettings({ codEnabled: e.target.checked })}
+                    className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                  />
+                  <span className="font-bold text-stone-700">Enable Cash on Delivery (COD) Checkout</span>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-stone-600 block">EasyPaisa Merchant Wallet Phone</label>
+                  <input
+                    type="text" value={settings.easyPaisaAccount}
+                    onChange={(e) => updateSettings({ easyPaisaAccount: e.target.value })}
+                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SHIPPING SETTINGS SUBTAB */}
+            {activeSettingsSubtab === "shipping" && (
+              <div className="glass-panel p-5 rounded-3xl space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-stone-600 block">Standard Courier Shipping fee (Rs.)</label>
+                  <input
+                    type="number" value={settings.shippingFee}
+                    onChange={(e) => updateSettings({ shippingFee: Number(e.target.value) })}
+                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-stone-600 block">Free Shipping Limit Threshold (Rs.)</label>
+                  <input
+                    type="number" value={settings.freeShippingThreshold}
+                    onChange={(e) => updateSettings({ freeShippingThreshold: Number(e.target.value) })}
+                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 9: Email & Notification Template editor */}
+        {activeTab === "notifications" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Email & Notifications template</h2>
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Customer COD Purchase Confirmation template</label>
+                <textarea
+                  rows={4} value={settings.emailTemplateOrder}
+                  onChange={(e) => updateSettings({ emailTemplateOrder: e.target.value })}
+                  className="w-full px-3.5 py-2.5 border rounded-2xl text-xs resize-none"
+                />
+              </div>
+              <p className="text-[10px] text-stone-400">
+                Variables allowed: <code className="bg-stone-50 p-0.5 rounded font-mono">{"{{name}}"}</code>, <code className="bg-stone-50 p-0.5 rounded font-mono">{"{{orderId}}"}</code>, <code className="bg-stone-50 p-0.5 rounded font-mono">{"{{amount}}"}</code>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 10: SEO Meta settings */}
+        {activeTab === "seo" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">SEO Metadata optimization</h2>
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Meta Page Title</label>
+                <input
+                  type="text" value={settings.metaTitle}
+                  onChange={(e) => updateSettings({ metaTitle: e.target.value })}
+                  className="w-full px-3.5 py-2 border rounded-xl text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Meta Page description</label>
+                <textarea
+                  rows={3} value={settings.metaDescription}
+                  onChange={(e) => updateSettings({ metaDescription: e.target.value })}
+                  className="w-full px-3.5 py-2 border rounded-xl text-xs resize-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Keywords tags (comma separated)</label>
+                <input
+                  type="text" value={settings.metaKeywords}
+                  onChange={(e) => updateSettings({ metaKeywords: e.target.value })}
+                  className="w-full px-3.5 py-2 border rounded-xl text-xs"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 11: General configurations (Address, working hours) */}
+        {activeTab === "general" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">General Contact Configurations</h2>
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Showroom Support Contact Number</label>
+                <input
+                  type="text" placeholder="03092184760"
+                  className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs bg-stone-50"
+                  disabled
+                  value="03092184760"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-stone-600 block">Lahore Warehouse Address</label>
+                <input
+                  type="text" value="Gulberg III, Lahore, Pakistan"
+                  className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs bg-stone-50"
+                  disabled
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 12: Admin management permissions */}
+        {activeTab === "admins" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-black text-stone-800 tracking-tight">Authorized Admin Accounts</h2>
+            <div className="glass-panel p-5 rounded-3xl space-y-4">
+              <h4 className="font-bold text-stone-800 text-xs">Registered Staff Logins</h4>
+              <div className="divide-y text-xs">
+                {settings.adminUsers.map((user, idx) => (
+                  <div key={idx} className="py-2.5 flex justify-between items-center font-medium">
+                    <span className="text-stone-700">{user}</span>
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Access Granted
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

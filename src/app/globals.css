@@ -10,6 +10,10 @@
   --glass-border: rgba(255, 255, 255, 0.45);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -43,14 +47,15 @@ body {
 }
 
 .glass-nav {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(250, 247, 242, 0.97); /* High opacity to block underlying scrolled text */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15); /* Light luxury gold separator */
+  box-shadow: 0 4px 24px rgba(160, 140, 115, 0.05); /* Slight shadow for separation */
 }
 
 .glass-bottom-nav {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid rgba(255, 255, 255, 0.45);

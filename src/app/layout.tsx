@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { CartDrawer } from "@/components/CartDrawer";
+import { Footer } from "@/components/Footer";
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
@@ -35,7 +36,7 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${jakarta.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col pb-24 md:pb-0">
+      <body className="min-h-full flex flex-col pb-24 md:pb-0 bg-[#faf7f2]">
         <AdminProvider>
           <CartProvider>
             {/* Desktop Navbar */}
@@ -45,6 +46,9 @@ export default function RootLayout({
             <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6">
               {children}
             </main>
+
+            {/* Persistent Global Footer */}
+            <Footer />
 
             {/* Mobile Bottom Navigation */}
             <BottomNavigation />

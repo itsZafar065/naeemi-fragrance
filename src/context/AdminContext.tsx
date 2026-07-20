@@ -36,15 +36,40 @@ export interface Order {
   date: string;
 }
 
+export interface Coupon {
+  code: string;
+  discount: number;
+  description: string;
+}
+
+export interface StoreSettings {
+  websiteName: string;
+  tagline: string;
+  codEnabled: boolean;
+  easyPaisaAccount: string;
+  shippingFee: number;
+  freeShippingThreshold: number;
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string;
+  emailTemplateOrder: string;
+  adminUsers: string[];
+}
+
 interface AdminContextType {
   products: Perfume[];
   orders: Order[];
+  coupons: Coupon[];
+  settings: StoreSettings;
   addProduct: (product: Omit<Perfume, "id" | "rating">) => void;
   updateProduct: (id: string, updatedProduct: Partial<Perfume>) => void;
   deleteProduct: (id: string) => void;
   placeOrder: (customerName: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number) => void;
   updateOrderStatus: (orderId: string, status: Order["status"]) => void;
   getSalesSummary: () => { totalSales: number; totalOrders: number; pendingOrders: number; lowStockCount: number };
+  addCoupon: (coupon: Coupon) => void;
+  deleteCoupon: (code: string) => void;
+  updateSettings: (settings: Partial<StoreSettings>) => void;
 }
 
 const DEFAULT_PRODUCTS: Perfume[] = [
@@ -197,11 +222,32 @@ const DEFAULT_ORDERS: Order[] = [
   }
 ];
 
+const DEFAULT_COUPONS: Coupon[] = [
+  { code: "NAEEMI10", discount: 10, description: "10% Off for Naeemi Fragrance launches" },
+  { code: "MOHABBAT20", discount: 20, description: "20% Off - Naam Hai Mohabbat Ka promo" },
+];
+
+const DEFAULT_SETTINGS: StoreSettings = {
+  websiteName: "Naeemi Fragrance",
+  tagline: "Naeemi Naam Hai Mohabbat Ka",
+  codEnabled: true,
+  easyPaisaAccount: "03092184760",
+  shippingFee: 250,
+  freeShippingThreshold: 6000,
+  metaTitle: "Naeemi Fragrance | Premium Scent & Oud Store",
+  metaDescription: "Explore luxury fragrances including Shams Un Naeemi, Oud Un Naeemi, and Qaswa. Crafted for high sillage and longevity.",
+  metaKeywords: "Naeemi Fragrance, Shams Un Naeemi, Oud Un Naeemi, Qaswa, Lahore Perfumes",
+  emailTemplateOrder: "Dear {{name}}, Thank you for placing your order {{orderId}} for Rs. {{amount}}. Your shipment will arrive shortly.",
+  adminUsers: ["admin@naeemi.com", "zafar@naeemi.com"],
+};
+
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Perfume[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
 
   // Load from LocalStorage
   useEffect(() => {
@@ -220,6 +266,22 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setOrders(DEFAULT_ORDERS);
       localStorage.setItem("naeemi_orders", JSON.stringify(DEFAULT_ORDERS));
     }
+
+    const savedCoupons = localStorage.getItem("naeemi_coupons");
+    if (savedCoupons) {
+      setCoupons(JSON.parse(savedCoupons));
+    } else {
+      setCoupons(DEFAULT_COUPONS);
+      localStorage.setItem("naeemi_coupons", JSON.stringify(DEFAULT_COUPONS));
+    }
+
+    const savedSettings = localStorage.getItem("naeemi_settings");
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    } else {
+      setSettings(DEFAULT_SETTINGS);
+      localStorage.setItem("naeemi_settings", JSON.stringify(DEFAULT_SETTINGS));
+    }
   }, []);
 
   const saveProducts = (updated: Perfume[]) => {
@@ -236,7 +298,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const newProduct: Perfume = {
       ...product,
       id: Date.now().toString(),
-      rating: 5.0, // Default for new fragrances
+      rating: 5.0,
     };
     saveProducts([...products, newProduct]);
   };
@@ -307,17 +369,40 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   };
 
+  const addCoupon = (coupon: Coupon) => {
+    const updated = [...coupons, coupon];
+    setCoupons(updated);
+    localStorage.setItem("naeemi_coupons", JSON.stringify(updated));
+  };
+
+  const deleteCoupon = (code: string) => {
+    const updated = coupons.filter((c) => c.code !== code);
+    setCoupons(updated);
+    localStorage.setItem("naeemi_coupons", JSON.stringify(updated));
+  };
+
+  const updateSettings = (updatedFields: Partial<StoreSettings>) => {
+    const updated = { ...settings, ...updatedFields };
+    setSettings(updated);
+    localStorage.setItem("naeemi_settings", JSON.stringify(updated));
+  };
+
   return (
     <AdminContext.Provider
       value={{
         products,
         orders,
+        coupons,
+        settings,
         addProduct,
         updateProduct,
         deleteProduct,
         placeOrder,
         updateOrderStatus,
         getSalesSummary,
+        addCoupon,
+        deleteCoupon,
+        updateSettings,
       }}
     >
       {children}
