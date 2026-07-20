@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-6 pt-1">
               <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100">
                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                {product.rating.toFixed(1)} / 5.0 rating
+                {(product.rating && typeof product.rating === 'number') ? product.rating.toFixed(1) : '5.0'} / 5.0 rating
               </div>
               <span className="text-3xl font-black text-stone-800 tracking-tight">
                 Rs. {product.price.toLocaleString()}

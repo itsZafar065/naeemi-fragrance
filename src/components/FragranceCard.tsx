@@ -79,7 +79,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
           </span>
           <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md">
             <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-            {product.rating.toFixed(1)}
+            {typeof product.rating === 'number' ? product.rating.toFixed(1) : '5.0'}
           </div>
         </div>
 
