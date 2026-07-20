@@ -17,11 +17,16 @@ function ShopContent() {
   const [priceRange, setPriceRange] = useState<number>(10000);
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
-  // Sync category filter with query parameter if present
+  // Sync category and search query filters with parameters if present
   useEffect(() => {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       setSelectedCategory(categoryParam);
+    }
+
+    const queryParam = searchParams.get("query");
+    if (queryParam) {
+      setSearchQuery(decodeURIComponent(queryParam));
     }
   }, [searchParams]);
 

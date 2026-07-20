@@ -2,34 +2,59 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "../context/CartContext";
 import { ShoppingBag, User, Search, Shield, X, Heart } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const { setIsCartOpen, cartCount, wishlist } = useCart();
-  const [showSearchAlert, setShowSearchAlert] = useState(false);
-  const [showAccountAlert, setShowAccountAlert] = useState(false);
+  const router = useRouter();
+  const { setIsCartOpen, cartCount } = useCart();
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const isActive = (path: string) => pathname === path;
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/shop?query=${encodeURIComponent(searchQuery.trim())}`);
+    setShowSearchInput(false);
+    setSearchQuery("");
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full glass-nav border-b border-stone-200/30">
       {/* 1. DESKTOP NAVIGATION BAR */}
       <div className="hidden md:flex max-w-7xl mx-auto px-6 h-20 items-center justify-between">
-        {/* Brand Logo & Name */}
-        <Link href="/" className="flex flex-col items-start select-none">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-            <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
-              NAEEMI FRAGRANCE
-            </h1>
-          </div>
-          <span className="text-[10px] tracking-[0.2em] font-medium text-amber-600/80 -mt-0.5 ml-4 uppercase">
-            Naeemi Naam Hai Mohabbat Ka
-          </span>
-        </Link>
+        {/* Brand Logo or Search Input */}
+        {!showSearchInput ? (
+          <Link href="/" className="flex flex-col items-start select-none">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+              <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
+                NAEEMI FRAGRANCE
+              </h1>
+            </div>
+            <span className="text-[10px] tracking-[0.2em] font-medium text-amber-600/80 -mt-0.5 ml-4 uppercase">
+              Naeemi Naam Hai Mohabbat Ka
+            </span>
+          </Link>
+        ) : (
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-72 animate-fadeIn">
+            <input
+              type="text"
+              placeholder="Search note, name, concentration..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3.5 py-1.5 bg-white border border-amber-500/30 rounded-xl text-xs focus:outline-none"
+              autoFocus
+            />
+            <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
+              <X className="w-4 h-4" />
+            </button>
+          </form>
+        )}
 
         {/* Desktop Links */}
         <nav className="flex items-center gap-8">
@@ -75,20 +100,20 @@ export const Navbar: React.FC = () => {
           </Link>
 
           <button
-            onClick={() => setShowSearchAlert(true)}
+            onClick={() => setShowSearchInput(!showSearchInput)}
             className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors"
             title="Search"
           >
             <Search className="w-5 h-5" />
           </button>
 
-          <button
-            onClick={() => setShowAccountAlert(true)}
-            className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors"
+          <Link
+            href="/more"
+            className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors block"
             title="My Account"
           >
             <User className="w-5 h-5" />
-          </button>
+          </Link>
 
           <button
             onClick={() => setIsCartOpen(true)}
@@ -107,30 +132,46 @@ export const Navbar: React.FC = () => {
 
       {/* 2. MOBILE SCENT HEADER */}
       <div className="flex md:hidden h-14 px-4 items-center justify-between max-w-md mx-auto">
-        <Link href="/" className="flex items-center gap-1.5 select-none">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <span className="font-extrabold text-sm font-serif tracking-widest text-stone-800">
-            NAEEMI
-          </span>
-        </Link>
+        {!showSearchInput ? (
+          <Link href="/" className="flex items-center gap-1.5 select-none">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-extrabold text-sm font-serif tracking-widest text-stone-800">
+              NAEEMI
+            </span>
+          </Link>
+        ) : (
+          <form onSubmit={handleSearchSubmit} className="flex-1 flex items-center gap-2 animate-fadeIn pr-2">
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-1 bg-white border border-amber-500/30 rounded-xl text-[11px] focus:outline-none"
+              autoFocus
+            />
+            <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
+              <X className="w-4 h-4" />
+            </button>
+          </form>
+        )}
 
         {/* Mobile action shortcuts */}
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => setShowSearchAlert(true)}
+            onClick={() => setShowSearchInput(!showSearchInput)}
             className="p-1.5 text-stone-650 hover:text-amber-600"
             title="Search"
           >
             <Search className="w-5 h-5" />
           </button>
 
-          <button
-            onClick={() => setShowAccountAlert(true)}
+          <Link
+            href="/more"
             className="p-1.5 text-stone-650 hover:text-amber-600"
             title="My Account"
           >
             <User className="w-5 h-5" />
-          </button>
+          </Link>
 
           <button
             onClick={() => setIsCartOpen(true)}
@@ -146,26 +187,6 @@ export const Navbar: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Mock Search Alert Banner */}
-      {showSearchAlert && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 flex justify-between items-center text-[11px] text-amber-900 font-semibold animate-fadeIn">
-          <span>💡 Search or filter fragrances directly in the <Link href="/shop" className="underline hover:text-amber-700">Catalog</Link>!</span>
-          <button onClick={() => setShowSearchAlert(false)} className="text-amber-700 hover:text-amber-900 ml-2">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Mock Account Alert Box */}
-      {showAccountAlert && (
-        <div className="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6 flex justify-between items-center text-[11px] text-amber-900 font-semibold animate-fadeIn">
-          <span>👤 Profile: Salman Khan (Premium VIP)</span>
-          <button onClick={() => setShowAccountAlert(false)} className="text-amber-700 hover:text-amber-900 ml-2">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
     </header>
   );
 };
