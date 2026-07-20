@@ -93,32 +93,16 @@ export default function Home() {
               Our Story
             </Link>
           </div>
-        </div>
-
-        {/* Hero Decorative Bottle Illustration */}
+             {/* Hero Decorative Bottle Illustration */}
         <div className="relative w-64 h-64 md:w-80 md:h-80 shrink-0 select-none flex items-center justify-center">
+          {/* Glass floating sphere background glow */}
           <div className="absolute w-56 h-56 rounded-full bg-gradient-to-tr from-amber-200/40 via-amber-300/20 to-rose-200/40 blur-2xl animate-pulse" />
-          <div className="relative w-44 h-56 rounded-[40px] bg-white/45 backdrop-blur-lg border border-white/60 shadow-2xl flex flex-col justify-between p-6 hover:rotate-2 hover:scale-105 transition-transform duration-500">
-            {/* Cap */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-6 bg-gradient-to-r from-amber-400 to-amber-600 rounded-t-xl shadow-md border-b border-amber-300" />
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-8 h-2 bg-amber-600/80 rounded-t-sm" />
-
-            <div className="flex justify-between items-start pt-2">
-              <span className="text-[9px] font-extrabold text-amber-800 tracking-wider">PARFUM</span>
-              <span className="text-[9px] text-stone-500 font-semibold">100ML</span>
-            </div>
-
-            <div className="text-center py-4 space-y-1">
-              <span className="text-3xl">✨</span>
-              <h2 className="font-extrabold text-lg text-stone-800 font-serif tracking-wider">OUD ROYALE</h2>
-              <p className="text-[7px] tracking-[0.25em] text-amber-700 uppercase font-semibold">Naeemi</p>
-            </div>
-
-            <div className="border-t border-stone-200/40 pt-2 text-center">
-              <span className="text-[8px] italic text-stone-400">Naam hai mohabbat ka</span>
-            </div>
-          </div>
-        </div>
+          <img
+            src="/heroimg.webp"
+            alt="Naeemi Fragrance"
+            className="relative z-10 w-auto h-auto max-h-[300px] object-contain drop-shadow-[0_25px_50px_rgba(212,175,55,0.25)] hover:scale-105 transition-transform duration-500"
+          />
+        </div>       </div>
       </section>
 
       {/* SECTION 2: ACCORD EXPLORER */}
