@@ -52,7 +52,10 @@ export default function CheckoutPage() {
   const discountAmount = Math.round(cartTotal * (appliedDiscount / 100));
   const finalTotal = cartTotal - discountAmount + shippingFee;
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const [checkoutError, setCheckoutError] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !address || cart.length === 0) return;
 
@@ -63,15 +66,19 @@ export default function CheckoutPage() {
       price: item.product.price,
     }));
 
-    const generatedId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-    setPlacedOrderId(generatedId);
+    setCheckoutLoading(true);
+    setCheckoutError("");
 
-    // Call Context to mutate local storage states
-    placeOrder(name, phone, address, orderItems, finalTotal);
+    const result = await placeOrder(name, phone, address, orderItems, finalTotal);
+    setCheckoutLoading(false);
 
-    // Set success flags & clear carts
-    setOrderComplete(true);
-    clearCart();
+    if (result.success) {
+      setPlacedOrderId(result.orderId || "");
+      setOrderComplete(true);
+      clearCart();
+    } else {
+      setCheckoutError(result.error || "Failed to process checkout order. Please check stock details.");
+    }
   };
 
   if (orderComplete) {
@@ -138,6 +145,12 @@ export default function CheckoutPage() {
                 <ShieldCheck className="w-5 h-5 text-amber-600" />
                 Shipping Information (COD)
               </h3>
+
+              {checkoutError && (
+                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold rounded-xl text-center">
+                  {checkoutError}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -224,9 +237,10 @@ export default function CheckoutPage() {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-2xl gold-btn font-extrabold text-xs shadow-md"
+                  disabled={checkoutLoading}
+                  className="w-full py-4 rounded-2xl gold-btn font-extrabold text-xs shadow-md disabled:bg-stone-300"
                 >
-                  Place Cash on Delivery Order (Rs. {finalTotal.toLocaleString()})
+                  {checkoutLoading ? "Processing Scent Package..." : `Place Cash on Delivery Order (Rs. ${finalTotal.toLocaleString()})`}
                 </button>
               </div>
             </form>
