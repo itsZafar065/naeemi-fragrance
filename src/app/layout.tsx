@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   description: "Naeemi Naam Hai Mohabbat Ka. Discover exotic Ouds, floral perfumes, and luxury fragrances.",
   keywords: "perfume store, nextjs, naeemi fragrance, oud, premium scent, mobile fragrance app",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 import { LayoutWrapper } from "@/components/LayoutWrapper";

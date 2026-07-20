@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
 export interface Perfume {
   id: string;
@@ -88,8 +88,8 @@ interface AdminContextType {
   placeOrder: (customerName: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number) => Promise<{ success: boolean; orderId?: string; error?: string }>;
   updateOrderStatus: (orderId: string, status: Order["status"]) => Promise<{ success: boolean; error?: string }>;
   getSalesSummary: () => { totalSales: number; totalOrders: number; pendingOrders: number; lowStockCount: number };
-  addCoupon: (coupon: Coupon) => void;
-  deleteCoupon: (code: string) => void;
+  addCoupon: (coupon: Coupon) => Promise<{ success: boolean; error?: string }>;
+  deleteCoupon: (code: string) => Promise<{ success: boolean; error?: string }>;
   updateSettings: (settings: Partial<StoreSettings>) => void;
 }
 
@@ -118,6 +118,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const settingsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Load Initial Public Data & Check Session
   useEffect(() => {
     async function initData() {
@@ -130,13 +132,29 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setProducts(prodData);
         }
 
-        // 2. Check Auth Session
+        // 2. Fetch Settings
+        const settingsRes = await fetch("/api/settings");
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          if (settingsData && Object.keys(settingsData).length > 0) {
+            setSettings(settingsData);
+          }
+        }
+
+        // 3. Fetch Coupons
+        const couponsRes = await fetch("/api/coupons");
+        if (couponsRes.ok) {
+          const couponsData = await couponsRes.json();
+          setCoupons(couponsData);
+        }
+
+        // 4. Check Auth Session
         const sessionRes = await fetch("/api/auth/session");
         if (sessionRes.ok) {
           const sessionData = await sessionRes.json();
           if (sessionData.authenticated) {
             setAdminUser(sessionData.user);
-            // 3. Fetch Admin Data (Orders & Logs)
+            // 5. Fetch Admin Data (Orders & Logs)
             await fetchAdminData();
           }
         }
@@ -344,22 +362,62 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   };
 
-  const addCoupon = (coupon: Coupon) => {
-    const updated = [...coupons, coupon];
-    setCoupons(updated);
-    localStorage.setItem("naeemi_coupons", JSON.stringify(updated));
+  const addCoupon = async (coupon: Coupon): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch("/api/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(coupon),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, error: errorData.error || "Failed to create coupon." };
+      }
+
+      setCoupons([...coupons, coupon]);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
   };
 
-  const deleteCoupon = (code: string) => {
-    const updated = coupons.filter((c) => c.code !== code);
-    setCoupons(updated);
-    localStorage.setItem("naeemi_coupons", JSON.stringify(updated));
+  const deleteCoupon = async (code: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch(`/api/coupons?code=${code}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        return { success: false, error: errorData.error || "Failed to delete coupon." };
+      }
+
+      setCoupons(coupons.filter((c) => c.code !== code));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
   };
 
   const updateSettings = (updatedFields: Partial<StoreSettings>) => {
     const updated = { ...settings, ...updatedFields };
     setSettings(updated);
-    localStorage.setItem("naeemi_settings", JSON.stringify(updated));
+
+    // Debounced update to MongoDB to prevent rapid keypress API flood
+    if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current);
+
+    settingsTimeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated),
+        });
+      } catch (err) {
+        console.error("Failed to save settings modifications to database:", err);
+      }
+    }, 1000);
   };
 
   return (

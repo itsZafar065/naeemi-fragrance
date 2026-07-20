@@ -184,20 +184,24 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddCouponSubmit = (e: React.FormEvent) => {
+  const handleAddCouponSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = newCouponCode.trim().toUpperCase();
     if (!code || newCouponDiscount <= 0) return;
 
-    addCoupon({
+    const result = await addCoupon({
       code,
       discount: newCouponDiscount,
       description: newCouponDesc || `${newCouponDiscount}% Discount Promo`
     });
 
-    setNewCouponCode("");
-    setNewCouponDiscount(10);
-    setNewCouponDesc("");
+    if (result.success) {
+      setNewCouponCode("");
+      setNewCouponDiscount(10);
+      setNewCouponDesc("");
+    } else {
+      alert(result.error || "Failed to create coupon voucher");
+    }
   };
 
   const handleStartEditStock = (prod: Perfume) => {
@@ -301,10 +305,8 @@ export default function AdminDashboard() {
           </button>
         </form>
 
-        <div className="border-t border-stone-200/50 pt-4 text-center space-y-1">
-          <p className="text-[10px] text-stone-400">Owner Access: owner@naeemi.com / NaeemiOwner123!</p>
-          <p className="text-[10px] text-stone-400">Admin Access: admin@naeemi.com / NaeemiAdmin123!</p>
-          <p className="text-[10px] text-stone-400">Manager Access: manager@naeemi.com / NaeemiManager123!</p>
+        <div className="border-t border-stone-200/50 pt-4 text-center">
+          <p className="text-[10px] text-stone-450 italic">Naeemi Fragrances secure operations terminal.</p>
         </div>
       </div>
     );
@@ -773,7 +775,10 @@ export default function AdminDashboard() {
                       <td className="p-3 font-bold text-stone-800">{cop.discount}% OFF</td>
                       <td className="p-3 text-stone-500">{cop.description}</td>
                       <td className="p-3 text-right">
-                        <button onClick={() => deleteCoupon(cop.code)} className="text-stone-400 hover:text-rose-500 p-1">
+                        <button onClick={async () => {
+                          const result = await deleteCoupon(cop.code);
+                          if (!result.success) alert(result.error || "Failed to delete coupon");
+                        }} className="text-stone-400 hover:text-rose-500 p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
