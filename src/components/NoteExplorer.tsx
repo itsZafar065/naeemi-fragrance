@@ -62,8 +62,7 @@ export const NoteExplorer: React.FC<NoteExplorerProps> = ({ topNotes, heartNotes
           {sections.map((section, idx) => {
             const Icon = section.icon;
             const isSelected = activeSection === section.id;
-            // Widths to represent a pyramid on desktop, normal full width on mobile
-            const widthClass = idx === 0 ? "sm:w-2/3 sm:mx-auto w-full" : idx === 1 ? "sm:w-5/6 sm:mx-auto w-full" : "w-full";
+            const widthClass = "w-full";
 
             return (
               <button

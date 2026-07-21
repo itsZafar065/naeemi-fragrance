@@ -550,17 +550,17 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2 pt-2.5">
                 <button
                   type="button"
                   onClick={() => setShowReviewForm(false)}
-                  className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-bold text-[10px] uppercase tracking-wide bg-white/50 hover:bg-white transition-colors"
+                  className="px-4 py-2 sm:px-5 sm:py-2 text-[10px] font-bold text-stone-600 uppercase tracking-wide border border-stone-200 rounded-lg bg-white/50 hover:bg-white transition-all text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 gold-btn text-white rounded-xl font-extrabold text-[10px] uppercase tracking-wide shadow-sm"
+                  className="px-4 py-2 sm:px-6 sm:py-2 gold-btn text-white rounded-lg font-bold text-[10px] uppercase tracking-wide shadow-sm text-center"
                 >
                   Submit Review
                 </button>
