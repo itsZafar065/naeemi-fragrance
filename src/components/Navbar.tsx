@@ -27,34 +27,18 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-40 w-full glass-nav border-b border-stone-200/30">
       {/* 1. DESKTOP NAVIGATION BAR */}
       <div className="hidden md:flex max-w-7xl mx-auto px-6 h-20 items-center justify-between">
-        {/* Brand Logo or Search Input */}
-        {!showSearchInput ? (
-          <Link href="/" className="flex flex-col items-start select-none">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-              <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
-                NAEEMI FRAGRANCE
-              </h1>
-            </div>
-            <span className="text-[10px] tracking-[0.2em] font-medium text-amber-600/80 -mt-0.5 ml-4 uppercase">
-              Naeemi Naam Hai Mohabbat Ka
-            </span>
-          </Link>
-        ) : (
-          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-72 animate-fadeIn">
-            <input
-              type="text"
-              placeholder="Search note, name, concentration..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3.5 py-1.5 bg-white border border-amber-500/30 rounded-xl text-xs focus:outline-none"
-              autoFocus
-            />
-            <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
-              <X className="w-4 h-4" />
-            </button>
-          </form>
-        )}
+        {/* Brand Logo - Always visible on desktop */}
+        <Link href="/" className="flex flex-col items-start select-none">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+            <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
+              NAEEMI FRAGRANCE
+            </h1>
+          </div>
+          <span className="text-[10px] tracking-[0.2em] font-medium text-amber-600/80 -mt-0.5 ml-4 uppercase">
+            Naeemi Naam Hai Mohabbat Ka
+          </span>
+        </Link>
 
         {/* Desktop Links */}
         <nav className="flex items-center gap-8">
@@ -98,6 +82,22 @@ export const Navbar: React.FC = () => {
             <Shield className="w-3.5 h-3.5" />
             Admin
           </Link>
+
+          {showSearchInput && (
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-48 animate-fadeIn">
+              <input
+                type="text"
+                placeholder="Search catalog..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                autoFocus
+              />
+              <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
+                <X className="w-4 h-4" />
+              </button>
+            </form>
+          )}
 
           <button
             onClick={() => setShowSearchInput(!showSearchInput)}

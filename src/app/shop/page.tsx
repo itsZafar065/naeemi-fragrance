@@ -65,16 +65,16 @@ function ShopContent() {
       <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
         <div className="space-y-1">
           <h1 className="text-2xl font-black text-stone-800 tracking-tight">
-            Discover Fragrances
+            Naeemi Perfumes
           </h1>
-          <p className="text-xs text-stone-500">Find your signature scent from our premium vaults</p>
+          <p className="text-xs text-stone-500">Explore our catalog of premium, long-lasting fragrances.</p>
         </div>
 
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            placeholder="Search notes, names or concentration..."
+            placeholder="Search perfumes or fragrance notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white/70 backdrop-blur-md border border-stone-200 rounded-2xl focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-sm shadow-xs"
@@ -87,23 +87,23 @@ function ShopContent() {
         {/* Left Filter Column (Desktop View) */}
         <aside className="hidden lg:block space-y-6 p-6 rounded-3xl glass-panel border border-white/50 sticky top-28">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-stone-800 text-sm flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-stone-600" />
-              Filter Board
+            <h3 className="font-bold text-stone-800 text-xs flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-stone-650" />
+              Filters
             </h3>
             <button
               onClick={resetFilters}
-              className="text-[10px] font-bold text-amber-700 hover:text-amber-600 flex items-center gap-1 transition-colors"
+              className="text-[10px] font-bold text-amber-800 hover:text-amber-700 flex items-center gap-1 transition-colors animate-pulse"
             >
               <RotateCcw className="w-3 h-3" />
-              Reset
+              Clear All
             </button>
           </div>
 
           {/* Categories */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold text-stone-500 tracking-wider uppercase block">
-              Scent Accords
+            <label className="text-[10px] font-extrabold text-stone-400 tracking-wider uppercase block">
+              Categories
             </label>
             <div className="flex flex-col gap-1.5">
               {categories.map((cat) => (
@@ -124,8 +124,8 @@ function ShopContent() {
 
           {/* Concentration Types */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold text-stone-500 tracking-wider uppercase block">
-              Concentration
+            <label className="text-[10px] font-extrabold text-stone-400 tracking-wider uppercase block">
+              Perfume Type
             </label>
             <div className="flex flex-col gap-1.5">
               {types.map((type) => (
@@ -146,8 +146,8 @@ function ShopContent() {
 
           {/* Price Range */}
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-extrabold text-stone-500 tracking-wider uppercase">
-              <span>Max Price</span>
+            <div className="flex justify-between text-[10px] font-extrabold text-stone-400 tracking-wider uppercase">
+              <span>Price Range</span>
               <span className="text-stone-800 font-bold">Rs. {priceRange.toLocaleString()}</span>
             </div>
             <input
@@ -195,17 +195,17 @@ function ShopContent() {
         {showFiltersMobile && (
           <div className="lg:hidden p-5 rounded-2xl bg-white border border-stone-200 space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
-              <h4 className="font-bold text-stone-800 text-sm">Advanced Filter</h4>
+              <h4 className="font-bold text-stone-800 text-sm">Filters</h4>
               <button
                 onClick={resetFilters}
-                className="text-[10px] font-bold text-amber-700 flex items-center gap-1"
+                className="text-[10px] font-bold text-amber-800 flex items-center gap-1"
               >
-                <RotateCcw className="w-2.5 h-2.5" /> Reset
+                <RotateCcw className="w-2.5 h-2.5" /> Clear All
               </button>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-stone-400 uppercase">Concentration</label>
+              <label className="text-[10px] font-bold text-stone-400 uppercase">Perfume Type</label>
               <div className="flex flex-wrap gap-1.5">
                 {types.map((type) => (
                   <button
@@ -225,7 +225,7 @@ function ShopContent() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between text-[10px] font-bold text-stone-400 uppercase">
-                <span>Budget Cap</span>
+                <span>Max Price</span>
                 <span className="text-amber-800 font-bold">Rs. {priceRange.toLocaleString()}</span>
               </div>
               <input
@@ -243,7 +243,7 @@ function ShopContent() {
               onClick={() => setShowFiltersMobile(false)}
               className="w-full py-2.5 bg-stone-800 text-white rounded-xl text-xs font-bold transition-all hover:bg-stone-700"
             >
-              Apply Filter Settings
+              Show Results
             </button>
           </div>
         )}
@@ -253,15 +253,15 @@ function ShopContent() {
           {filteredProducts.length === 0 ? (
             <div className="text-center py-20 p-6 rounded-3xl bg-white/40 border border-stone-200/50 space-y-4">
               <span className="text-4xl text-stone-300">🕵️‍♂️</span>
-              <h3 className="font-bold text-stone-800 text-base">No Scents Match Filters</h3>
+              <h3 className="font-bold text-stone-800 text-base">No Perfumes Found</h3>
               <p className="text-xs text-stone-500 max-w-sm mx-auto">
-                Try widening your search terms, adjusting price ceilings, or resetting the filter dashboard.
+                Try adjusting your search filters or resetting them to view our collection.
               </p>
               <button
                 onClick={resetFilters}
                 className="px-5 py-2 bg-stone-800 text-white rounded-xl text-xs font-bold"
               >
-                Clear All Filters
+                Reset Filters
               </button>
             </div>
           ) : (

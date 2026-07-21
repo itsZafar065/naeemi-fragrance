@@ -32,7 +32,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
       className="group block relative rounded-3xl glass-panel glass-panel-hover overflow-hidden p-4"
     >
       {/* Visual Image Container */}
-      <div className="relative aspect-[4/3.2] w-full rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-inner flex items-center justify-center bg-stone-50">
+      <div className="relative aspect-square w-full rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-inner flex items-center justify-center bg-stone-50">
         {/* Colorful Abstract Perfume Backdrop */}
         {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
           <div
