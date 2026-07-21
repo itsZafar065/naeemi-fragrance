@@ -17,7 +17,10 @@ import {
   Hourglass, 
   Wind, 
   Calendar,
-  CheckCircle2
+  CheckCircle2,
+  RotateCcw,
+  Truck,
+  MessageSquare
 } from "lucide-react";
 
 const getFriendlyType = (type: string) => {
@@ -68,6 +71,7 @@ export default function ProductDetailPage() {
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewText, setNewReviewText] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Sync selected product
   useEffect(() => {
@@ -164,6 +168,7 @@ export default function ProductDetailPage() {
     setNewReviewRating(5);
     setNewReviewText("");
     setReviewSubmitted(true);
+    setShowReviewForm(false);
     setTimeout(() => setReviewSubmitted(false), 3000);
   };
 
@@ -176,7 +181,7 @@ export default function ProductDetailPage() {
   const relatedProducts = products.filter((p) => p.id !== product.id).slice(0, 3);
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-12 px-2 sm:px-4">
+    <div className="space-y-12 max-w-6xl mx-auto pb-12 px-2 sm:px-4">
       {/* Top Breadcrumbs */}
       <div className="flex justify-between items-center px-1">
         <Link
@@ -191,7 +196,7 @@ export default function ProductDetailPage() {
         </span>
       </div>
 
-      {/* Main product view grid: Split Image and checkout details */}
+      {/* 1. Main product view grid: Split Image and checkout details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-start">
         
         {/* LEFT COLUMN: Clean Product Image only */}
@@ -228,7 +233,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Actions, description, size variants */}
+        {/* RIGHT COLUMN: Actions, description, size variants, trust badges */}
         <div className="space-y-4">
           {/* Scent Accord and Strength Badges */}
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -256,14 +261,14 @@ export default function ProductDetailPage() {
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               {(product.rating && typeof product.rating === 'number') ? product.rating.toFixed(1) : '5.0'} / 5.0
             </div>
-            <span className="text-2xl font-black text-stone-850 tracking-tight">
+            <span className="text-2xl font-black text-stone-855 tracking-tight">
               Rs. {calculatedPrice.toLocaleString()}
             </span>
           </div>
 
           {/* Size Variant Selector */}
           <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] font-extrabold text-stone-400 uppercase block tracking-widest">Select Bottle Size</span>
+            <span className="text-[10px] font-extrabold text-stone-400 uppercase block tracking-widest font-sans">Select Bottle Size</span>
             <div className="flex gap-2">
               {["50ml", "100ml"].map((size) => (
                 <button
@@ -283,7 +288,7 @@ export default function ProductDetailPage() {
 
           {/* Product description block */}
           <div className="space-y-1">
-            <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest block">Description</span>
+            <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest block font-sans">Description</span>
             <p className="text-stone-600 text-xs md:text-sm leading-relaxed bg-white/40 border border-white/60 p-4 rounded-2xl font-medium">
               {product.description}
             </p>
@@ -308,11 +313,11 @@ export default function ProductDetailPage() {
 
           {/* Add to Cart & Buy Now panel */}
           {!isOutOfStock && (
-            <div className="bg-white/40 border border-white/60 p-4 rounded-2xl space-y-3.5 shadow-sm">
+            <div className="bg-white/40 border border-white/60 p-4 rounded-2xl space-y-4 shadow-sm">
               <div className="flex flex-wrap gap-4 items-center justify-between">
                 {/* Quantity selector */}
                 <div className="space-y-1">
-                  <label className="text-[9px] font-extrabold text-stone-400 uppercase block tracking-widest">Quantity</label>
+                  <label className="text-[9px] font-extrabold text-stone-400 uppercase block tracking-widest font-sans">Quantity</label>
                   <div className="flex items-center border border-stone-200 rounded-xl bg-white shadow-xs">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -333,14 +338,14 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[9px] font-extrabold text-stone-400 block uppercase tracking-widest">Subtotal</span>
+                  <span className="text-[9px] font-extrabold text-stone-400 block uppercase tracking-widest font-sans">Subtotal</span>
                   <span className="font-extrabold text-stone-850 text-lg">
                     Rs. {(calculatedPrice * quantity).toLocaleString()}
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 pt-1.5">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleAddToCart}
                   disabled={quantity > product.stock}
@@ -358,25 +363,49 @@ export default function ProductDetailPage() {
                   Buy It Now
                 </button>
               </div>
+
+              {/* Trust Badges - Placed below buy buttons with icons */}
+              <div className="grid grid-cols-3 gap-2.5 pt-4 border-t border-stone-200/40 text-[10px] font-bold text-stone-600 font-sans">
+                <div className="flex flex-col items-center text-center p-2 bg-stone-50/50 rounded-xl space-y-1 border border-stone-150">
+                  <span className="p-1 bg-amber-500/10 text-amber-700 rounded-lg">
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </span>
+                  <span>Simple Returns</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2 bg-stone-50/50 rounded-xl space-y-1 border border-stone-150">
+                  <span className="p-1 bg-amber-500/10 text-amber-700 rounded-lg">
+                    <Truck className="w-3.5 h-3.5" />
+                  </span>
+                  <span>Fast Shipping</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2 bg-stone-50/50 rounded-xl space-y-1 border border-stone-150">
+                  <span className="p-1 bg-amber-500/10 text-amber-700 rounded-lg">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </span>
+                  <span>100% Authentic</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Scent notes & metrics grid (placed below the main elements) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-stone-200/20">
-        {/* Longevity & Sillage Metrics */}
-        <div className="glass-panel p-5 rounded-3xl space-y-4 border border-white/50 flex flex-col justify-between">
-          <div className="space-y-1">
+      {/* 2. Scent notes & metrics grid (balanced layout with stretch heights and top explanation) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-stone-200/20 items-stretch">
+        {/* Fragrance Profile Metrics Card */}
+        <div className="glass-panel p-5 rounded-3xl space-y-4 border border-white/50 flex flex-col justify-between h-full">
+          <div className="space-y-2">
             <h4 className="font-bold text-stone-850 text-sm">Fragrance Profile</h4>
-            <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Metrics Guide</p>
+            <p className="text-[10px] text-stone-500 font-medium leading-relaxed font-sans">
+              This signature perfume oil concentration is blended to react dynamically with your skin's warmth, delivering a steady release of notes over time.
+            </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 pt-2">
             {/* Longevity */}
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-stone-700 flex items-center gap-1.5">
+                <span className="font-bold text-stone-750 flex items-center gap-1.5">
                   <Hourglass className="w-3.5 h-3.5 text-amber-600" /> Longevity
                 </span>
                 <span className="font-semibold text-stone-500">{longevityValue}</span>
@@ -389,7 +418,7 @@ export default function ProductDetailPage() {
             {/* Sillage */}
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-stone-700 flex items-center gap-1.5">
+                <span className="font-bold text-stone-750 flex items-center gap-1.5">
                   <Wind className="w-3.5 h-3.5 text-amber-600" /> Sillage / Projection
                 </span>
                 <span className="font-semibold text-stone-500">{sillageValue}</span>
@@ -401,7 +430,7 @@ export default function ProductDetailPage() {
 
             {/* Season */}
             <div className="flex items-center justify-between text-xs pt-2 border-t border-stone-200/40">
-              <span className="font-bold text-stone-700 flex items-center gap-1.5">
+              <span className="font-bold text-stone-750 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-amber-600" /> Season
               </span>
               <span className="font-semibold text-amber-800 bg-amber-50/80 border border-amber-100/50 px-2 py-0.5 rounded-lg">
@@ -419,137 +448,7 @@ export default function ProductDetailPage() {
         />
       </div>
 
-      {/* CUSTOMER REVIEWS SECTION */}
-      <section className="space-y-6 pt-8 border-t border-stone-200/20">
-        <div className="space-y-1">
-          <h2 className="text-xl md:text-2xl font-black text-stone-850 tracking-tight font-serif">
-            Customer Reviews
-          </h2>
-          <p className="text-xs text-stone-500 font-medium">Read verified customer experiences or share your feedback.</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Review metrics card */}
-          <div className="lg:col-span-4 p-5 rounded-3xl bg-stone-50 border border-stone-200/60 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl font-extrabold text-stone-850">
-                {product.rating ? product.rating.toFixed(1) : "5.0"}
-              </span>
-              <div className="space-y-0.5">
-                <div className="flex text-amber-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-current" />
-                  ))}
-                </div>
-                <span className="text-[9px] text-stone-400 font-extrabold uppercase tracking-wider">Out of 5 Stars</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-xs font-semibold text-stone-500">
-              <div className="flex items-center gap-2">
-                <span className="w-12 text-left text-[9px] uppercase tracking-wider">5 Star</span>
-                <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-150">
-                  <div className="bg-amber-500 h-full w-[92%]" />
-                </div>
-                <span className="w-8 text-right text-[10px] font-bold text-stone-750">92%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-12 text-left text-[9px] uppercase tracking-wider">4 Star</span>
-                <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-150">
-                  <div className="bg-amber-500 h-full w-[8%]" />
-                </div>
-                <span className="w-8 text-right text-[10px] font-bold text-stone-750">8%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-12 text-left text-[9px] uppercase tracking-wider">3 Star</span>
-                <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-150">
-                  <div className="bg-stone-200 h-full w-0" />
-                </div>
-                <span className="w-8 text-right text-[10px] font-bold text-stone-750">0%</span>
-              </div>
-            </div>
-
-            {/* WRITE A REVIEW FORM */}
-            <form onSubmit={handleSubmitReview} className="pt-4 border-t border-stone-200/50 space-y-3">
-              <span className="text-[10px] font-extrabold text-stone-550 uppercase tracking-widest block">Write a Review</span>
-              
-              {reviewSubmitted && (
-                <div className="flex items-center gap-1.5 text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-100 p-2 rounded-xl font-bold animate-fadeIn">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  Review submitted successfully!
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  value={newReviewName}
-                  onChange={(e) => setNewReviewName(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] font-extrabold text-stone-400 uppercase tracking-wider block">Rating Stars</label>
-                <div className="flex gap-1.5 text-stone-300">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setNewReviewRating(star)}
-                      className="focus:outline-none transition-colors"
-                    >
-                      <Star className={`w-4.5 h-4.5 ${star <= newReviewRating ? "text-amber-500 fill-amber-500" : "text-stone-300"}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <textarea
-                  placeholder="Share your thoughts about this scent..."
-                  value={newReviewText}
-                  onChange={(e) => setNewReviewText(e.target.value)}
-                  required
-                  rows={3}
-                  className="w-full px-3 py-2 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium resize-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-2 bg-stone-850 hover:bg-stone-750 text-white rounded-xl text-[10px] font-extrabold tracking-wider uppercase transition-colors"
-              >
-                Submit Review
-              </button>
-            </form>
-          </div>
-
-          {/* List of reviews */}
-          <div className="lg:col-span-8 space-y-3.5">
-            {reviewsList.map((rev, index) => (
-              <div key={index} className="p-5 rounded-3xl bg-white border border-stone-150 space-y-2 animate-fadeIn">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-stone-850">{rev.name}</span>
-                  <span className="text-stone-400 font-medium">{rev.date}</span>
-                </div>
-                <div className="flex text-amber-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-3 h-3 ${i < Math.floor(rev.rating) ? "fill-current" : "text-stone-200"}`} />
-                  ))}
-                </div>
-                <p className="text-xs text-stone-650 leading-relaxed font-medium pt-1">
-                  "{rev.text}"
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* RELATED PRODUCTS - "You May Also Like" */}
+      {/* 3. RELATED PRODUCTS - "You May Also Like" */}
       <section className="space-y-6 pt-8 border-t border-stone-200/20">
         <div className="space-y-1">
           <h2 className="text-xl md:text-2xl font-black text-stone-850 tracking-tight font-serif">
@@ -560,6 +459,177 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {relatedProducts.map((p) => (
             <FragranceCard key={p.id} product={p} />
+          ))}
+        </div>
+      </section>
+
+      {/* 4. CUSTOMER REVIEWS SECTION (Overhauled Redesign) */}
+      <section className="space-y-6 pt-8 border-t border-stone-200/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/20 pb-4">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-2xl font-black text-stone-855 tracking-tight font-serif">
+              Customer Experience
+            </h2>
+            <p className="text-xs text-stone-500 font-medium font-sans">Verified testimonials and client feedback from our collectors.</p>
+          </div>
+          <button
+            onClick={() => setShowReviewForm(!showReviewForm)}
+            className="px-5 py-2.5 bg-stone-850 hover:bg-stone-750 text-white rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all shadow-sm flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            {showReviewForm ? "Close Form" : "Write a Review"}
+          </button>
+        </div>
+
+        {/* Dynamic Reviews summary banner */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+          {/* Summary stats */}
+          <div className="md:col-span-4 p-6 rounded-3xl bg-stone-50 border border-stone-200/50 flex flex-col justify-center items-center text-center space-y-3">
+            <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest font-sans">Overall Rating</span>
+            <span className="text-5xl font-black text-stone-850 tracking-tight font-serif">
+              {product.rating ? product.rating.toFixed(1) : "5.0"}
+            </span>
+            <div className="flex text-amber-500 gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-current" />
+              ))}
+            </div>
+            <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider font-sans">
+              Based on {reviewsList.length} Verified Reviews
+            </span>
+          </div>
+
+          {/* Rating distribution progress bars */}
+          <div className="md:col-span-8 p-6 rounded-3xl bg-stone-50 border border-stone-200/50 flex flex-col justify-center space-y-3">
+            <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest font-sans mb-1">Rating Breakdown</span>
+            <div className="flex items-center gap-3 text-xs font-semibold text-stone-500">
+              <span className="w-12 text-left text-[9px] uppercase tracking-wider font-sans">5 Star</span>
+              <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-200">
+                <div className="bg-amber-500 h-full w-[92%]" />
+              </div>
+              <span className="w-8 text-right text-[10px] font-bold text-stone-700">92%</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-stone-500">
+              <span className="w-12 text-left text-[9px] uppercase tracking-wider font-sans">4 Star</span>
+              <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-200">
+                <div className="bg-amber-500 h-full w-[8%]" />
+              </div>
+              <span className="w-8 text-right text-[10px] font-bold text-stone-700">8%</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-stone-500">
+              <span className="w-12 text-left text-[9px] uppercase tracking-wider font-sans">3 Star</span>
+              <div className="flex-1 bg-white h-2 rounded-full overflow-hidden border border-stone-200">
+                <div className="bg-stone-200 h-full w-0" />
+              </div>
+              <span className="w-8 text-right text-[10px] font-bold text-stone-700">0%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic review submission form panel (toggled via button) */}
+        {showReviewForm && (
+          <div className="max-w-xl mx-auto p-6 rounded-3xl bg-white border border-stone-200 shadow-md space-y-4 animate-fadeIn">
+            <div className="border-b pb-2">
+              <h4 className="font-bold text-stone-850 text-sm font-serif">Share Your Experience</h4>
+              <p className="text-[10px] text-stone-500 font-medium">Your honest rating and review helps other perfume buyers.</p>
+            </div>
+            
+            <form onSubmit={handleSubmitReview} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Harris Khan"
+                    value={newReviewName}
+                    onChange={(e) => setNewReviewName(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium shadow-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Select Rating</label>
+                  <div className="flex gap-1.5 text-stone-300 py-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewReviewRating(star)}
+                        className="focus:outline-none transition-colors"
+                      >
+                        <Star className={`w-5 h-5 ${star <= newReviewRating ? "text-amber-500 fill-amber-500" : "text-stone-300"}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Review Description</label>
+                <textarea
+                  placeholder="How is the longevity, projection, and scent drydown?"
+                  value={newReviewText}
+                  onChange={(e) => setNewReviewText(e.target.value)}
+                  required
+                  rows={4}
+                  className="w-full px-3.5 py-2.5 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium resize-none shadow-xs"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewForm(false)}
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-[10px] uppercase tracking-wide"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-stone-850 text-white rounded-xl font-extrabold text-[10px] uppercase tracking-wide hover:bg-stone-750 transition-all shadow-sm"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {reviewSubmitted && (
+          <div className="max-w-xl mx-auto flex items-center justify-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-100 p-3 rounded-2xl font-bold animate-fadeIn">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            Thank you! Your experience review has been recorded.
+          </div>
+        )}
+
+        {/* List of customer reviews */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {reviewsList.map((rev, index) => (
+            <div key={index} className="p-5 rounded-3xl bg-white border border-stone-150 flex flex-col justify-between gap-3 animate-fadeIn hover:shadow-xs transition-shadow">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    {/* User circular avatar badge */}
+                    <div className="w-7 h-7 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-[10px] font-black text-stone-600">
+                      {rev.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-extrabold text-stone-850">{rev.name}</span>
+                      <span className="text-[9px] text-amber-700/80 font-bold uppercase tracking-wider">Verified Buyer</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-stone-400 font-medium">{rev.date}</span>
+                </div>
+                <div className="flex text-amber-500 gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rev.rating) ? "fill-current animate-[pulse_1s_infinite_alternate]" : "text-stone-200"}`} />
+                  ))}
+                </div>
+                <p className="text-xs text-stone-600 leading-relaxed font-medium pt-1 italic">
+                  "{rev.text}"
+                </p>
+              </div>
+            </div>
           ))}
         </div>
       </section>
