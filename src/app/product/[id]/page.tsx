@@ -152,6 +152,21 @@ export default function ProductDetailPage() {
     router.push("/checkout");
   };
 
+  const handleToggleReviewForm = () => {
+    setShowReviewForm((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => {
+          const element = document.getElementById("review-form-section");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 150);
+      }
+      return next;
+    });
+  };
+
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newReviewName.trim() || !newReviewText.trim()) return;
@@ -177,8 +192,11 @@ export default function ProductDetailPage() {
   const longevityValue = parseInt(product.id) % 2 === 0 ? "Up to 12 Hours" : "Long Lasting";
   const seasonalPreference = parseInt(product.id) % 3 === 0 ? "Fall & Winter" : "All Season";
 
-  // Related products selection
-  const relatedProducts = products.filter((p) => p.id !== product.id).slice(0, 3);
+  // Related products selection: exclude currently opened product (using base ID splits)
+  const baseCurrentId = product.id.toString().split("-")[0];
+  const relatedProducts = products
+    .filter((p) => p.id.toString() !== baseCurrentId)
+    .slice(0, 3);
 
   return (
     <div className="space-y-12 max-w-6xl mx-auto pb-12 px-2 sm:px-4">
@@ -339,7 +357,7 @@ export default function ProductDetailPage() {
 
                 <div className="text-right">
                   <span className="text-[9px] font-extrabold text-stone-400 block uppercase tracking-widest font-sans">Subtotal</span>
-                  <span className="font-extrabold text-stone-850 text-lg">
+                  <span className="font-extrabold text-stone-855 text-lg">
                     Rs. {(calculatedPrice * quantity).toLocaleString()}
                   </span>
                 </div>
@@ -418,7 +436,7 @@ export default function ProductDetailPage() {
             {/* Sillage */}
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-stone-750 flex items-center gap-1.5">
+                <span className="font-bold text-stone-755 flex items-center gap-1.5">
                   <Wind className="w-3.5 h-3.5 text-amber-600" /> Sillage / Projection
                 </span>
                 <span className="font-semibold text-stone-500">{sillageValue}</span>
@@ -448,7 +466,7 @@ export default function ProductDetailPage() {
         />
       </div>
 
-      {/* 3. RELATED PRODUCTS - "You May Also Like" */}
+      {/* 3. RELATED PRODUCTS - "You May Also Like" (excluding current product by base id) */}
       <section className="space-y-6 pt-8 border-t border-stone-200/20">
         <div className="space-y-1">
           <h2 className="text-xl md:text-2xl font-black text-stone-850 tracking-tight font-serif">
@@ -472,14 +490,91 @@ export default function ProductDetailPage() {
             </h2>
             <p className="text-xs text-stone-500 font-medium font-sans">Verified testimonials and client feedback from our collectors.</p>
           </div>
+          {/* Write a Review trigger button - Gold theme styled */}
           <button
-            onClick={() => setShowReviewForm(!showReviewForm)}
-            className="px-5 py-2.5 bg-stone-850 hover:bg-stone-750 text-white rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all shadow-sm flex items-center gap-1.5 self-start sm:self-auto"
+            onClick={handleToggleReviewForm}
+            className="px-5 py-2.5 bg-amber-550/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/20 rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
           >
             <MessageSquare className="w-3.5 h-3.5" />
-            {showReviewForm ? "Close Form" : "Write a Review"}
+            {showReviewForm ? "Close Review Form" : "Write a Review"}
           </button>
         </div>
+
+        {/* Dynamic review submission form panel (toggled via button - beautiful glass design) */}
+        {showReviewForm && (
+          <div id="review-form-section" className="w-full p-6 rounded-3xl bg-white/45 backdrop-blur-md border border-white/60 shadow-lg space-y-4 animate-fadeIn">
+            <div className="border-b border-stone-200/20 pb-2">
+              <h4 className="font-bold text-stone-855 text-sm font-serif">Share Your Experience</h4>
+              <p className="text-[10px] text-stone-500 font-medium font-sans">Your honest rating and review helps other perfume buyers.</p>
+            </div>
+            
+            <form onSubmit={handleSubmitReview} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Harris Khan"
+                    value={newReviewName}
+                    onChange={(e) => setNewReviewName(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 border border-stone-200 rounded-xl text-xs focus:outline-none bg-white/60 focus:border-amber-550 font-medium shadow-xs"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Select Rating</label>
+                  <div className="flex gap-1.5 text-stone-300 py-2.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewReviewRating(star)}
+                        className="focus:outline-none transition-colors"
+                      >
+                        <Star className={`w-5 h-5 ${star <= newReviewRating ? "text-amber-500 fill-amber-500" : "text-stone-300"}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Review Description</label>
+                <textarea
+                  placeholder="How is the longevity, projection, and scent drydown?"
+                  value={newReviewText}
+                  onChange={(e) => setNewReviewText(e.target.value)}
+                  required
+                  rows={4}
+                  className="w-full px-4 py-2.5 border border-stone-200 rounded-xl text-xs focus:outline-none bg-white/60 focus:border-amber-555 font-medium resize-none shadow-xs"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewForm(false)}
+                  className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-bold text-[10px] uppercase tracking-wide bg-white/50 hover:bg-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 gold-btn text-white rounded-xl font-extrabold text-[10px] uppercase tracking-wide shadow-sm"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {reviewSubmitted && (
+          <div className="w-full flex items-center justify-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-100 p-3.5 rounded-2xl font-bold animate-fadeIn">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            Thank you! Your experience review has been recorded.
+          </div>
+        )}
 
         {/* Dynamic Reviews summary banner */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
@@ -526,82 +621,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Dynamic review submission form panel (toggled via button) */}
-        {showReviewForm && (
-          <div className="max-w-xl mx-auto p-6 rounded-3xl bg-white border border-stone-200 shadow-md space-y-4 animate-fadeIn">
-            <div className="border-b pb-2">
-              <h4 className="font-bold text-stone-850 text-sm font-serif">Share Your Experience</h4>
-              <p className="text-[10px] text-stone-500 font-medium">Your honest rating and review helps other perfume buyers.</p>
-            </div>
-            
-            <form onSubmit={handleSubmitReview} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Harris Khan"
-                    value={newReviewName}
-                    onChange={(e) => setNewReviewName(e.target.value)}
-                    required
-                    className="w-full px-3.5 py-2.5 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium shadow-xs"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Select Rating</label>
-                  <div className="flex gap-1.5 text-stone-300 py-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setNewReviewRating(star)}
-                        className="focus:outline-none transition-colors"
-                      >
-                        <Star className={`w-5 h-5 ${star <= newReviewRating ? "text-amber-500 fill-amber-500" : "text-stone-300"}`} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Review Description</label>
-                <textarea
-                  placeholder="How is the longevity, projection, and scent drydown?"
-                  value={newReviewText}
-                  onChange={(e) => setNewReviewText(e.target.value)}
-                  required
-                  rows={4}
-                  className="w-full px-3.5 py-2.5 border border-stone-250/70 rounded-xl text-xs focus:outline-none bg-white font-medium resize-none shadow-xs"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowReviewForm(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-[10px] uppercase tracking-wide"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-stone-850 text-white rounded-xl font-extrabold text-[10px] uppercase tracking-wide hover:bg-stone-750 transition-all shadow-sm"
-                >
-                  Submit Review
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {reviewSubmitted && (
-          <div className="max-w-xl mx-auto flex items-center justify-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-100 p-3 rounded-2xl font-bold animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Thank you! Your experience review has been recorded.
-          </div>
-        )}
-
         {/* List of customer reviews */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {reviewsList.map((rev, index) => (
@@ -615,17 +634,17 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="flex flex-col">
                       <span className="font-extrabold text-stone-850">{rev.name}</span>
-                      <span className="text-[9px] text-amber-700/80 font-bold uppercase tracking-wider">Verified Buyer</span>
+                      <span className="text-[9px] text-amber-700/80 font-bold uppercase tracking-wider font-sans">Verified Buyer</span>
                     </div>
                   </div>
                   <span className="text-[10px] text-stone-400 font-medium">{rev.date}</span>
                 </div>
                 <div className="flex text-amber-500 gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rev.rating) ? "fill-current animate-[pulse_1s_infinite_alternate]" : "text-stone-200"}`} />
+                    <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rev.rating) ? "fill-current" : "text-stone-200"}`} />
                   ))}
                 </div>
-                <p className="text-xs text-stone-600 leading-relaxed font-medium pt-1 italic">
+                <p className="text-xs text-stone-650 leading-relaxed font-medium pt-1 italic font-sans">
                   "{rev.text}"
                 </p>
               </div>
