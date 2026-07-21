@@ -186,12 +186,12 @@ export default function Home() {
           <div className="space-y-1">
             <h2 className="text-lg md:text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
               <Flame className="w-5 h-5 text-amber-600 fill-amber-500/20 animate-pulse" />
-              Khaas Collection (Featured Scents)
+              Naeemi Curated Selection
             </h2>
-            <p className="text-[10px] md:text-xs text-stone-500 font-medium">Naeemi Fragrances ke sab se pasandeeda aur behtareen perfumes</p>
+            <p className="text-[10px] md:text-xs text-stone-500 font-medium">Discover our most loved and signature fragrance bottles</p>
           </div>
           <Link href="/shop" className="text-xs font-extrabold text-amber-800 hover:text-amber-700 flex items-center gap-1 transition-colors shrink-0 self-start sm:self-auto">
-            Sari Collection Dekhein
+            Explore Entire Collection
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
