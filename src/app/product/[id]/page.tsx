@@ -80,7 +80,14 @@ export default function ProductDetailPage() {
       if (found) {
         setProduct(found);
         setSelectedSize(found.volume || "100ml");
-        setReviewsList(getMockReviews(found.name, found.category));
+        
+        // Load reviews from localStorage or fallback to default seed
+        const saved = localStorage.getItem(`naeemi_reviews_${found.id}`);
+        if (saved) {
+          setReviewsList(JSON.parse(saved));
+        } else {
+          setReviewsList(getMockReviews(found.name, found.category));
+        }
       }
     }
   }, [id, products]);
@@ -178,7 +185,11 @@ export default function ProductDetailPage() {
       text: newReviewText.trim(),
     };
 
-    setReviewsList([newRevObj, ...reviewsList]);
+    const updated = [newRevObj, ...reviewsList];
+    setReviewsList(updated);
+    if (product) {
+      localStorage.setItem(`naeemi_reviews_${product.id}`, JSON.stringify(updated));
+    }
     setNewReviewName("");
     setNewReviewRating(5);
     setNewReviewText("");

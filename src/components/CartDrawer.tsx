@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAdmin } from "../context/AdminContext";
+import { useRouter } from "next/navigation";
 import { X, Trash2, ShoppingBag, ShieldCheck, Plus, Minus } from "lucide-react";
 
 export const CartDrawer: React.FC = () => {
+  const router = useRouter();
   const { isCartOpen, setIsCartOpen, cart, updateQuantity, removeFromCart, cartTotal, clearCart } = useCart();
   const { placeOrder } = useAdmin();
 
@@ -242,7 +244,10 @@ export const CartDrawer: React.FC = () => {
               <span className="text-xl font-bold">Rs. {cartTotal.toLocaleString()}</span>
             </div>
             <button
-              onClick={() => setIsCheckingOut(true)}
+              onClick={() => {
+                setIsCartOpen(false);
+                router.push("/checkout");
+              }}
               className="w-full py-3.5 rounded-xl gold-btn font-semibold text-center text-sm shadow-md"
             >
               Proceed to Secure Checkout
