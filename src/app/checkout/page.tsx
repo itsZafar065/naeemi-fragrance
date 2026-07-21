@@ -142,24 +142,27 @@ export default function CheckoutPage() {
 
   if (orderComplete) {
     return (
-      <div className="max-w-md mx-auto py-16 px-6 text-center space-y-6 glass-panel rounded-[36px] shadow-xl mt-10 border border-white/50">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mx-auto border border-emerald-200">
-          <CheckCircle className="w-10 h-10" />
+      <div className="max-w-md w-full mx-auto py-10 px-5 sm:py-14 sm:px-8 text-center space-y-5 glass-panel rounded-3xl shadow-xl mt-6 sm:mt-12 border border-white/50 animate-fadeIn">
+        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mx-auto border border-emerald-250/50">
+          <CheckCircle className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-black text-stone-850 font-serif">Order Placed Successfully!</h2>
-          <p className="text-sm text-stone-600 font-medium">
+          <h2 className="text-xl sm:text-2xl font-black text-stone-850 font-serif">Order Placed Successfully!</h2>
+          <p className="text-xs sm:text-sm text-stone-600 font-medium">
             Thank you for shopping at Naeemi Fragrance. Your order ID is{" "}
             <span className="font-extrabold text-amber-700">{placedOrderId}</span>.
           </p>
-          <p className="text-xs text-stone-500 max-w-xs mx-auto font-sans leading-relaxed">
-            Our delivery agent will contact you at <span className="font-bold text-stone-700">{phone}</span> to verify shipment details.
+          <p className="text-[10px] sm:text-xs text-stone-500 max-w-xs mx-auto font-sans leading-relaxed">
+             Our delivery agent will contact you at <span className="font-bold text-stone-700">{phone}</span> to verify shipment details.
           </p>
         </div>
         <p className="text-xs text-amber-700/80 font-serif italic">"Naeemi Naam Hai Mohabbat Ka"</p>
         <button
-          onClick={() => router.push("/")}
-          className="w-full py-3 rounded-xl gold-btn font-bold text-xs shadow-md"
+          onClick={() => {
+            router.push("/");
+            setTimeout(() => window.location.reload(), 150);
+          }}
+          className="w-full py-3 rounded-xl gold-btn font-extrabold text-xs shadow-md uppercase tracking-wider transition-all"
         >
           Return to Home
         </button>
@@ -342,19 +345,19 @@ export default function CheckoutPage() {
                 Delivery Method
               </h3>
               
-              <div className="p-4 rounded-2xl border border-amber-600 bg-amber-500/5 flex items-center justify-between">
+              <div className="p-4 rounded-2xl border border-amber-600 bg-amber-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
                 <div className="flex items-center gap-3">
-                  <span className="p-2 bg-amber-500/10 text-amber-700 rounded-lg">
+                  <span className="p-2 bg-amber-500/10 text-amber-700 rounded-lg shrink-0">
                     <Truck className="w-5 h-5" />
                   </span>
-                  <div className="text-left">
+                  <div className="space-y-0.5">
                     <span className="text-xs font-bold text-stone-850 block">
                       {cartTotal > 6000 ? "Free Scent Delivery" : "Standard Courier Shipping"}
                     </span>
-                    <span className="text-[9px] text-stone-500 font-medium">Safe delivery to your doorstep within 3-5 business days.</span>
+                    <span className="text-[9px] text-stone-500 font-medium leading-normal block">Safe delivery to your doorstep within 3-5 business days.</span>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-stone-800">
+                <span className="text-xs font-bold text-stone-800 bg-amber-500/10 px-2.5 py-1 rounded-lg self-start sm:self-auto shrink-0">
                   {cartTotal > 6000 ? "FREE" : "Rs. 250"}
                 </span>
               </div>
@@ -587,7 +590,7 @@ export default function CheckoutPage() {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-stone-850 hover:bg-stone-750 text-white font-bold text-xs transition-colors"
+                    className="px-5 py-2.5 bg-stone-850 hover:bg-stone-750 text-white font-bold text-xs rounded-xl transition-colors shadow-xs"
                   >
                     Apply
                   </button>
