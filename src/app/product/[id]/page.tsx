@@ -19,6 +19,13 @@ import {
   Calendar 
 } from "lucide-react";
 
+const getFriendlyType = (type: string) => {
+  if (type === "Extrait de Parfum") return "Pure Perfume Extract";
+  if (type === "Eau de Parfum (EDP)") return "Eau de Parfum";
+  if (type === "Eau de Toilette (EDT)") return "Eau de Toilette";
+  return type;
+};
+
 export default function ProductDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -184,7 +191,7 @@ export default function ProductDetailPage() {
                 {product.category} Accord
               </span>
               <span className="bg-white/80 border border-stone-200 text-stone-600 text-[9px] font-bold tracking-widest px-3.5 py-1.5 rounded-full uppercase shadow-xs">
-                {product.type}
+                {getFriendlyType(product.type)}
               </span>
             </div>
 

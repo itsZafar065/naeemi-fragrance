@@ -32,11 +32,11 @@ function ShopContent() {
 
   // Unique categories and concentration types for filters
   const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
-  const types = [
-    "All",
-    "Extrait de Parfum",
-    "Eau de Parfum (EDP)",
-    "Eau de Toilette (EDT)",
+  const typesMap = [
+    { value: "All", label: "All Strengths" },
+    { value: "Extrait de Parfum", label: "Pure Perfume Extract (Strong)" },
+    { value: "Eau de Parfum (EDP)", label: "Eau de Parfum (Standard)" },
+    { value: "Eau de Toilette (EDT)", label: "Eau de Toilette (Light Scent)" },
   ];
 
   // Filter logic
@@ -128,17 +128,17 @@ function ShopContent() {
               Perfume Type
             </label>
             <div className="flex flex-col gap-1.5">
-              {types.map((type) => (
+              {typesMap.map((t) => (
                 <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
+                  key={t.value}
+                  onClick={() => setSelectedType(t.value)}
                   className={`text-left text-xs font-semibold px-3 py-2 rounded-xl transition-all ${
-                    selectedType === type
+                    selectedType === t.value
                       ? "bg-amber-500/10 text-amber-900 border-l-2 border-amber-500 pl-4 font-bold"
                       : "text-stone-600 hover:bg-stone-50"
                   }`}
                 >
-                  {type}
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -207,17 +207,17 @@ function ShopContent() {
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-stone-400 uppercase">Perfume Type</label>
               <div className="flex flex-wrap gap-1.5">
-                {types.map((type) => (
+                {typesMap.map((t) => (
                   <button
-                    key={type}
-                    onClick={() => setSelectedType(type)}
+                    key={t.value}
+                    onClick={() => setSelectedType(t.value)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                      selectedType === type
+                      selectedType === t.value
                         ? "bg-amber-500/10 text-amber-800 border-amber-500"
                         : "bg-stone-50 border-stone-200 text-stone-600"
                     }`}
                   >
-                    {type === "All" ? "All Strengths" : type.split(" ")[0]}
+                    {t.label.split(" (")[0]}
                   </button>
                 ))}
               </div>

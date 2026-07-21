@@ -10,6 +10,13 @@ interface FragranceCardProps {
   product: Perfume;
 }
 
+const getFriendlyType = (type: string) => {
+  if (type === "Extrait de Parfum") return "Pure Perfume Extract";
+  if (type === "Eau de Parfum (EDP)") return "Eau de Parfum";
+  if (type === "Eau de Toilette (EDT)") return "Eau de Toilette";
+  return type;
+};
+
 export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const isFav = isInWishlist(product.id);
@@ -83,7 +90,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-medium text-stone-500 tracking-wider">
-            {product.type}
+            {getFriendlyType(product.type)}
           </span>
           <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md">
             <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
