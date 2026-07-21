@@ -177,10 +177,17 @@ export const CartDrawer: React.FC = () => {
                   className="flex gap-4 p-3 bg-white/50 border border-white/60 rounded-2xl"
                 >
                   {/* Miniature Product Image Representation */}
-                  <div
-                    className="w-16 h-16 rounded-xl shrink-0 border border-white/40"
-                    style={{ background: item.product.imageUrl }}
-                  />
+                  <div className="w-16 h-16 rounded-xl shrink-0 border border-white/40 overflow-hidden relative flex items-center justify-center bg-stone-100">
+                    {item.product.imageUrl && item.product.imageUrl.startsWith("linear-gradient") ? (
+                      <div className="absolute inset-0" style={{ background: item.product.imageUrl }} />
+                    ) : (
+                      <img
+                        src={item.product.imageUrl}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
