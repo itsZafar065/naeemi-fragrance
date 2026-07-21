@@ -196,10 +196,10 @@ export default function CheckoutPage() {
           </Link>
         </div>
       ) : (
-        <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* LEFT COLUMN: Shipping form details */}
-          <div className="lg:col-span-7 space-y-6">
+          <form id="checkout-form" onSubmit={handlePlaceOrder} className="lg:col-span-7 space-y-6">
             
             {/* 1. Customer Information */}
             <div className="glass-panel p-6 rounded-3xl border border-white/50 space-y-4 shadow-sm">
@@ -533,7 +533,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-          </div>
+          </form>
 
           {/* RIGHT COLUMN: Order summary, coupons, total calculations */}
           <div className="lg:col-span-5 space-y-6">
@@ -628,6 +628,7 @@ export default function CheckoutPage() {
               <div className="pt-2">
                 <button
                   type="submit"
+                  form="checkout-form"
                   disabled={checkoutLoading || uploadingSlip}
                   className="w-full py-4 rounded-2xl gold-btn font-extrabold text-xs tracking-wider uppercase shadow-md disabled:bg-stone-300 disabled:shadow-none"
                 >
@@ -646,7 +647,7 @@ export default function CheckoutPage() {
             
           </div>
           
-        </form>
+        </div>
       )}
     </div>
   );
