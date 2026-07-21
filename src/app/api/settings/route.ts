@@ -47,6 +47,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
+    delete sanitizedBody._id; // Strip immutable _id field to prevent update error
 
     const db = await getDb();
     

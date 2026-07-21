@@ -824,21 +824,48 @@ export default function AdminDashboard() {
               <div className="divide-y divide-stone-100">
                 {products.map(prod => {
                   const isLow = prod.stock <= 5;
+                  const isEditingThis = editingStockId === prod.id;
                   return (
                     <div key={prod.id} className="py-2.5 flex justify-between items-center text-xs">
                       <span className="font-bold text-stone-700">{prod.name} ({prod.volume})</span>
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
-                          prod.stock === 0 ? "bg-rose-50 text-rose-700" : isLow ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"
-                        }`}>
-                          {prod.stock === 0 ? "Out of stock" : `${prod.stock} units left`}
-                        </span>
-                        <button
-                          onClick={() => { handleStartEditStock(prod); setEditingStockId(prod.id); }}
-                          className="bg-stone-800 text-white font-bold text-[10px] px-3 py-1 rounded-lg hover:bg-stone-700"
-                        >
-                          Quick restock
-                        </button>
+                        {isEditingThis ? (
+                          <div className="flex items-center gap-1.5 animate-fadeIn">
+                            <input
+                              type="number"
+                              value={tempStockValue}
+                              onChange={(e) => setTempStockValue(Number(e.target.value))}
+                              className="w-16 px-2 py-1 bg-white border border-stone-200 rounded-lg text-xs focus:outline-none"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => handleSaveStock(prod.id)}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingStockId(null)}
+                              className="bg-stone-200 text-stone-600 font-bold text-[10px] px-3 py-1.5 rounded-lg border border-stone-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                              prod.stock === 0 ? "bg-rose-50 text-rose-700" : isLow ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"
+                            }`}>
+                              {prod.stock === 0 ? "Out of stock" : `${prod.stock} units left`}
+                            </span>
+                            <button
+                              onClick={() => { handleStartEditStock(prod); }}
+                              className="bg-stone-800 text-white font-bold text-[10px] px-3 py-1 rounded-lg hover:bg-stone-700"
+                            >
+                              Quick restock
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
