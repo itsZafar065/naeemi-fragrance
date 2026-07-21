@@ -77,15 +77,48 @@ export default function AdminDashboard() {
     | "coupons" 
     | "analytics" 
     | "settings" 
-    | "notifications" 
-    | "general" 
-    | "seo" 
     | "admins"
     | "logs";
 
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
-  const [activeSettingsSubtab, setActiveSettingsSubtab] = useState<"website" | "payment" | "shipping">("website");
+  const [activeSettingsSubtab, setActiveSettingsSubtab] = useState<"website" | "payment" | "shipping" | "notifications" | "seo" | "storeinfo">("website");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Local settings editor state (to avoid lag/caret jumping and allow explicit saves)
+  const [localSettings, setLocalSettings] = useState<any>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings(settings);
+    }
+  }, [settings]);
+
+  const handleSaveSettings = async (updatedFieldsSubset: any) => {
+    setSaveLoading(true);
+    try {
+      const dbPayload = { ...settings, ...updatedFieldsSubset };
+      delete dbPayload._id; // Strip immutable database fields to prevent mongo write block
+
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dbPayload),
+      });
+
+      if (res.ok) {
+        updateSettings(updatedFieldsSubset);
+        alert("Settings saved successfully to the database!");
+      } else {
+        alert("Failed to save settings. Please try again.");
+      }
+    } catch (err) {
+      console.error("Settings save error:", err);
+      alert("Error saving settings.");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
 
   // Summary Metrics
   const { totalSales, totalOrders, pendingOrders, lowStockCount } = getSalesSummary();
@@ -459,54 +492,168 @@ export default function AdminDashboard() {
         {/* TAB 1: Dashboard Overview */}
         {activeTab === "dashboard" && (
           <div className="space-y-6 animate-fadeIn">
-            <div className="space-y-1">
-              <h2 className="text-xl font-black text-stone-850 tracking-tight">Executive Stats overview</h2>
-              <p className="text-xs text-stone-500">Real-time status summaries of sales and logistics</p>
+            {/* Header */}
+            <div className="flex justify-between items-center flex-wrap gap-4">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-stone-850 tracking-tight font-serif">Naeemi Operations Dashboard</h2>
+                <p className="text-xs text-stone-500 font-medium">Naeemi Fragrances sales statistics, stock levels, and logistics overview.</p>
+              </div>
+              <div className="text-right text-[10px] text-stone-450 font-bold bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl">
+                Logged in as: <span className="text-amber-800 font-extrabold">{adminUser.role}</span>
+              </div>
             </div>
 
             {/* Metrics cards row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="glass-panel p-4 rounded-2xl">
-                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Total Sales</span>
-                <span className="text-base font-extrabold text-stone-850">Rs. {totalSales.toLocaleString()}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Total Sales */}
+              <div className="glass-panel p-5 rounded-3xl border border-white/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] text-stone-400 font-extrabold uppercase tracking-wider block">Total Sales</span>
+                    <span className="text-xl font-extrabold text-stone-850 tracking-tight">Rs. {totalSales.toLocaleString()}</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3.5 flex items-center gap-1.5 text-[9px] font-bold text-stone-550">
+                  <span className="text-emerald-600">↑ 12%</span>
+                  <span>vs last week performance</span>
+                </div>
               </div>
-              <div className="glass-panel p-4 rounded-2xl">
-                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Orders Count</span>
-                <span className="text-base font-extrabold text-stone-850">{totalOrders}</span>
+
+              {/* Orders count */}
+              <div className="glass-panel p-5 rounded-3xl border border-white/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] text-stone-400 font-extrabold uppercase tracking-wider block">Orders Placed</span>
+                    <span className="text-xl font-extrabold text-stone-850 tracking-tight">{totalOrders} Orders</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-700">
+                    <ShoppingBag className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3.5 flex items-center gap-1.5 text-[9px] font-bold text-stone-550">
+                  <span className="text-blue-700">{pendingOrders} Pending</span>
+                  <span>awaiting courier dispatch</span>
+                </div>
               </div>
-              <div className="glass-panel p-4 rounded-2xl">
-                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Pending Tasks</span>
-                <span className="text-base font-extrabold text-stone-850">{pendingOrders}</span>
+
+              {/* Active Coupons */}
+              <div className="glass-panel p-5 rounded-3xl border border-white/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] text-stone-400 font-extrabold uppercase tracking-wider block">Active Vouchers</span>
+                    <span className="text-xl font-extrabold text-stone-850 tracking-tight">{coupons.length} Active</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700">
+                    <Percent className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3.5 flex items-center gap-1.5 text-[9px] font-bold text-stone-550">
+                  <span>Available for checkout discounts</span>
+                </div>
               </div>
-              <div className="glass-panel p-4 rounded-2xl">
-                <span className="text-[9px] text-stone-400 font-bold block uppercase tracking-wider">Low Stock items</span>
-                <span className="text-base font-extrabold text-stone-850">{lowStockCount} units</span>
+
+              {/* Low Stock alerts */}
+              <div className="glass-panel p-5 rounded-3xl border border-white/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] text-stone-400 font-extrabold uppercase tracking-wider block">Low Stock Alert</span>
+                    <span className="text-xl font-extrabold text-stone-855 tracking-tight">{lowStockCount} Items</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-700 animate-pulse">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="mt-3.5 flex items-center gap-1.5 text-[9px] font-bold text-stone-550">
+                  {lowStockCount > 0 ? (
+                    <span className="text-rose-700 font-bold">Needs restock attention</span>
+                  ) : (
+                    <span className="text-emerald-700 font-bold">Inventory levels normal</span>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Recent Orders Overview */}
-            <div className="glass-panel p-5 rounded-3xl space-y-4">
-              <h3 className="font-bold text-stone-800 text-sm">Recent Order Shipments</h3>
-              {orders.length === 0 ? (
-                <p className="text-xs text-stone-500 py-3 text-center">No orders placed yet.</p>
-              ) : (
-                orders.slice(0, 4).map((order) => (
-                  <div key={order.id} className="p-3 bg-white/40 border border-stone-200/40 rounded-2xl flex justify-between items-center text-xs">
-                    <div>
-                      <p className="font-bold text-stone-800">{order.customerName}</p>
-                      <p className="text-[10px] text-stone-400 truncate max-w-md">
-                        {order.items.map(i => `${i.name} (${i.quantity}x)`).join(", ")}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-bold text-amber-800">Rs. {order.totalAmount.toLocaleString()}</p>
-                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded border ${getStatusBadgeColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </div>
+            {/* Bottom Section: Recent Orders & Activity logs grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Recent Orders log list (Col 7) */}
+              <div className="lg:col-span-7 glass-panel p-5 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <h3 className="font-bold text-stone-800 text-sm">Recent Store Orders</h3>
+                  <button
+                    onClick={() => setActiveTab("orders")}
+                    className="text-[10px] font-bold text-amber-700 hover:text-amber-600 transition-colors"
+                  >
+                    View All Orders
+                  </button>
+                </div>
+
+                {orders.length === 0 ? (
+                  <p className="text-xs text-stone-500 py-6 text-center">No orders registered yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.slice(0, 4).map((order) => (
+                      <div
+                        key={order.id}
+                        className="p-3.5 bg-white/40 border border-stone-200/40 rounded-2xl flex justify-between items-center text-xs hover:bg-white/60 transition-all cursor-pointer group"
+                        onClick={() => {
+                          setOrderSearchQuery(order.id);
+                          setActiveTab("orders");
+                        }}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-stone-850 group-hover:text-amber-700 transition-colors">{order.customerName}</span>
+                            <span className="text-[9px] text-stone-400 font-semibold">{order.id}</span>
+                          </div>
+                          <p className="text-[10px] text-stone-500 font-medium truncate max-w-xs md:max-w-md">
+                            {order.items.map((i) => `${i.name} (${i.quantity}x)`).join(", ")}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0 space-y-1">
+                          <p className="font-extrabold text-stone-800">Rs. {order.totalAmount.toLocaleString()}</p>
+                          <span className={`text-[8px] font-bold px-2 py-0.5 rounded border block text-center ${getStatusBadgeColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))
-              )}
+                )}
+              </div>
+
+              {/* Staff Activity Logs (Col 5) */}
+              <div className="lg:col-span-5 glass-panel p-5 rounded-3xl space-y-4">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <h3 className="font-bold text-stone-800 text-sm">Security Audit Activity</h3>
+                  <button
+                    onClick={() => setActiveTab("logs")}
+                    className="text-[10px] font-bold text-amber-700 hover:text-amber-600 transition-colors"
+                  >
+                    Audits Feed
+                  </button>
+                </div>
+
+                {systemLogs.length === 0 ? (
+                  <p className="text-xs text-stone-500 py-6 text-center">No logs generated.</p>
+                ) : (
+                  <div className="space-y-3.5 max-h-72 overflow-y-auto pr-1">
+                    {systemLogs.slice(0, 5).map((log, idx) => (
+                      <div key={idx} className="text-xs space-y-1 relative pl-4 border-l border-stone-200">
+                        <div className="absolute left-[-4.5px] top-1.5 w-2.5 h-2.5 rounded-full bg-amber-500 border border-[#faf7f2]" />
+                        <div className="flex justify-between text-[10px] text-stone-400 font-bold">
+                          <span>{log.user.split("@")[0]} ({log.role})</span>
+                          <span>{new Date(log.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <p className="font-bold text-stone-750 text-[11px] leading-snug">{log.action}</p>
+                        <p className="text-[10px] text-stone-500 font-normal leading-relaxed">{log.details}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -682,14 +829,24 @@ export default function AdminDashboard() {
           return (
             <div className="space-y-6 animate-fadeIn">
               <div className="flex justify-between items-center flex-wrap gap-4">
-                <h2 className="text-xl font-black text-stone-850 tracking-tight">Customer Placed Orders</h2>
-                <button
-                  onClick={handleExportOrdersCSV}
-                  className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Export Orders CSV
-                </button>
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-stone-850 tracking-tight font-serif">Customer Placed Orders</h2>
+                  <p className="text-xs text-stone-500 font-medium">Aap yahan se customer ke orders track aur updates kar sakte hain.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {orderSearchQuery && (
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-200/20">
+                      {filteredOrders.length} matching {filteredOrders.length === 1 ? "order" : "orders"}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleExportOrdersCSV}
+                    className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Export Orders CSV
+                  </button>
+                </div>
               </div>
 
               {/* Live Search Order Input */}
@@ -709,65 +866,91 @@ export default function AdminDashboard() {
                   <p className="text-xs text-stone-500 py-6 text-center">No matching orders found.</p>
                 ) : (
                   filteredOrders.map((ord) => (
-                    <div key={ord.id} className="glass-panel p-5 rounded-3xl space-y-3">
-                      <div className="flex justify-between items-center border-b pb-2 flex-wrap gap-2">
-                        <span className="font-extrabold text-xs text-stone-850">{ord.id} ({ord.date})</span>
+                    <div key={ord.id} className="glass-panel p-5 rounded-3xl border border-stone-200/50 hover:border-amber-500/30 transition-all space-y-4">
+                      {/* Card Header */}
+                      <div className="flex justify-between items-center border-b pb-3 flex-wrap gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-extrabold text-sm text-stone-850">{ord.id}</span>
+                          <span className="text-[10px] text-stone-400 font-semibold">{ord.date}</span>
+                        </div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[9px] font-bold border px-2 py-0.5 rounded-full ${getStatusBadgeColor(ord.status)}`}>
-                            {ord.status}
-                          </span>
+                          <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Status:</span>
                           <select
                             value={ord.status}
                             onChange={(e) => handleOrderStatusUpdate(ord.id, e.target.value as Order["status"])}
-                            className="bg-stone-50 border rounded-lg text-[10px] py-1 px-2 font-bold focus:outline-none"
+                            className={`border text-[10px] py-1 px-2.5 rounded-xl font-bold focus:outline-none transition-colors ${
+                              ord.status === "Delivered" 
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                                : ord.status === "Cancelled"
+                                ? "bg-rose-50 border-rose-200 text-rose-800"
+                                : ord.status === "Shipped"
+                                ? "bg-blue-50 border-blue-200 text-blue-800"
+                                : "bg-amber-50 border-amber-205 text-amber-800"
+                            }`}
                           >
-                            <option value="Pending">Pending</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
+                            <option value="Pending">Pending Validation</option>
+                            <option value="Shipped">Dispatched Courier</option>
+                            <option value="Delivered">Delivered Order</option>
+                            <option value="Cancelled">Cancelled Order</option>
                           </select>
                         </div>
                       </div>
-                      <div className="text-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <p className="font-bold text-stone-705">Recipient: {ord.customerName}</p>
-                          {ord.customerEmail && <p className="text-stone-500">Email: {ord.customerEmail}</p>}
-                          <p className="text-stone-500">Contact: {ord.customerPhone}</p>
+                      
+                      {/* Card Columns */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 text-xs">
+                        {/* Customer Info (Col 5) */}
+                        <div className="md:col-span-5 space-y-2 border-r pr-4 border-stone-200/40">
+                          <span className="font-extrabold text-stone-400 text-[8px] uppercase tracking-widest block">Recipient Details</span>
+                          <p className="font-bold text-stone-800 text-sm">{ord.customerName}</p>
+                          {ord.customerEmail && <p className="text-stone-500 font-medium">Email: {ord.customerEmail}</p>}
+                          <p className="text-stone-600 font-semibold">Contact: {ord.customerPhone}</p>
                           <p className="text-stone-500 leading-relaxed font-medium">Address: {ord.customerAddress}</p>
                           
-                          {/* EasyPaisa Transfer slip visual preview */}
+                          {/* Payment Slip Attachment */}
                           {ord.paymentSlipUrl && (
-                            <div className="pt-2.5">
-                              <span className="text-[9px] font-extrabold text-stone-400 uppercase tracking-widest block mb-1">EasyPaisa Slip Screenshot</span>
-                              <a
-                                href={ord.paymentSlipUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-block relative group"
-                              >
-                                <img
-                                  src={ord.paymentSlipUrl}
-                                  alt="Payment Receipt Slip"
-                                  className="w-16 h-16 object-cover rounded-xl border hover:opacity-80 transition-opacity"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[8px] text-white font-bold rounded-xl transition-opacity">
-                                  View Full
+                            <div className="pt-2">
+                              <span className="text-[8px] font-extrabold text-stone-400 uppercase tracking-widest block mb-1">EasyPaisa Transaction Receipt</span>
+                              <a href={ord.paymentSlipUrl} target="_blank" rel="noreferrer" className="inline-block relative group">
+                                <img src={ord.paymentSlipUrl} alt="Receipt Screenshot" className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:opacity-85 transition-all" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[8px] text-white font-bold rounded-xl transition-all">
+                                  Expand Image
                                 </div>
                               </a>
                             </div>
                           )}
                         </div>
-                        <div>
-                          <span className="font-bold text-stone-400 text-[9px] uppercase tracking-wider block">Package Items</span>
-                          {ord.items.map((it, idx) => (
-                            <div key={idx} className="flex justify-between text-stone-600 font-medium">
-                              <span>{it.name} x{it.quantity}</span>
-                              <span>Rs. {(it.price * it.quantity).toLocaleString()}</span>
+
+                        {/* Items list table (Col 7) */}
+                        <div className="md:col-span-7 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <span className="font-extrabold text-stone-400 text-[8px] uppercase tracking-widest block">Package Items</span>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left border-collapse text-[11px] font-medium text-stone-600">
+                                <thead>
+                                  <tr className="border-b text-[8px] font-bold text-stone-400 uppercase tracking-widest">
+                                    <th className="pb-1.5">Item Scent</th>
+                                    <th className="pb-1.5 text-center">Qty</th>
+                                    <th className="pb-1.5 text-right">Price</th>
+                                    <th className="pb-1.5 text-right">Subtotal</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {ord.items.map((it, idx) => (
+                                    <tr key={idx} className="border-b border-stone-100/50">
+                                      <td className="py-2 text-stone-800 font-bold">{it.name}</td>
+                                      <td className="py-2 text-center font-bold text-stone-500">{it.quantity}</td>
+                                      <td className="py-2 text-right">Rs. {it.price.toLocaleString()}</td>
+                                      <td className="py-2 text-right font-bold text-stone-800">Rs. {(it.price * it.quantity).toLocaleString()}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          ))}
-                          <div className="border-t pt-1 mt-1 flex justify-between font-black text-stone-850">
-                            <span>Total Paid</span>
-                            <span>Rs. {ord.totalAmount.toLocaleString()}</span>
+                          </div>
+                          
+                          <div className="border-t pt-2 mt-4 flex justify-between items-center font-black text-stone-850">
+                            <span className="text-[10px] text-stone-400 uppercase tracking-wider">Total Invested Amount:</span>
+                            <span className="text-base text-amber-800 font-serif">Rs. {ord.totalAmount.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
@@ -972,173 +1155,277 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 8: Settings (Website / Payment / Shipping subtabs) */}
+        {/* TAB 8: Settings (Unified System Settings panel) */}
         {activeTab === "settings" && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">Settings panel</h2>
-            
-            <div className="flex border-b text-xs font-bold gap-3 pb-1">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-black text-stone-850 tracking-tight font-serif">System Settings</h2>
+              <p className="text-xs text-stone-500 font-medium">Naeemi Fragrance website configurations, payment details, courier shipping rates, email templates, and SEO configurations.</p>
+            </div>
+
+            {/* Inner Subtabs Navigation Bar */}
+            <div className="flex flex-wrap border-b text-[11px] font-bold gap-3 pb-1.5">
               <button
                 onClick={() => setActiveSettingsSubtab("website")}
-                className={`pb-2 px-1 border-b-2 transition-all ${
-                  activeSettingsSubtab === "website" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                  activeSettingsSubtab === "website" ? "border-amber-500 text-amber-800 font-extrabold" : "border-transparent text-stone-400"
                 }`}
               >
-                Website Settings
+                <Settings2 className="w-3.5 h-3.5" />
+                Website Info
               </button>
               <button
                 onClick={() => setActiveSettingsSubtab("payment")}
-                className={`pb-2 px-1 border-b-2 transition-all ${
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
                   activeSettingsSubtab === "payment" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
-                Payment Systems
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Payment Options
               </button>
               <button
                 onClick={() => setActiveSettingsSubtab("shipping")}
-                className={`pb-2 px-1 border-b-2 transition-all ${
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
                   activeSettingsSubtab === "shipping" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
-                Shipping limits
+                <Truck className="w-3.5 h-3.5" />
+                Courier Fees
+              </button>
+              <button
+                onClick={() => setActiveSettingsSubtab("notifications")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                  activeSettingsSubtab === "notifications" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5" />
+                Email Alerts
+              </button>
+              <button
+                onClick={() => setActiveSettingsSubtab("seo")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                  activeSettingsSubtab === "seo" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5" />
+                SEO Metadata
+              </button>
+              <button
+                onClick={() => setActiveSettingsSubtab("storeinfo")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                  activeSettingsSubtab === "storeinfo" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
+                }`}
+              >
+                <Phone className="w-3.5 h-3.5" />
+                Store Contact & Location
               </button>
             </div>
 
-            {activeSettingsSubtab === "website" && (
-              <div className="glass-panel p-5 rounded-3xl space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-stone-650 block">Website Store Name</label>
-                  <input
-                    type="text" value={settings.websiteName}
-                    onChange={(e) => updateSettings({ websiteName: e.target.value })}
-                    className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-stone-650 block">Slogan tagline</label>
-                  <input
-                    type="text" value={settings.tagline}
-                    onChange={(e) => updateSettings({ tagline: e.target.value })}
-                    className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
+            {/* Render Inner Subtab views */}
+            {localSettings && (
+              <div className="space-y-4">
+                {/* 1. Website Info */}
+                {activeSettingsSubtab === "website" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <h3 className="font-bold text-stone-800 text-xs border-b pb-2">Website Settings</h3>
+                    <div className="space-y-3 font-medium text-stone-700 text-xs">
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Website Brand Name</label>
+                        <input
+                          type="text"
+                          value={localSettings.websiteName || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, websiteName: e.target.value })}
+                          className="w-full max-w-md px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Brand Tagline</label>
+                        <input
+                          type="text"
+                          value={localSettings.tagline || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, tagline: e.target.value })}
+                          className="w-full max-w-md px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleSaveSettings({ websiteName: localSettings.websiteName, tagline: localSettings.tagline })}
+                      disabled={saveLoading}
+                      className="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold transition-all disabled:bg-stone-300"
+                    >
+                      {saveLoading ? "Saving Changes..." : "Save Website Info"}
+                    </button>
+                  </div>
+                )}
+
+                {/* 2. Payment Options */}
+                {activeSettingsSubtab === "payment" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <h3 className="font-bold text-stone-800 text-xs border-b pb-2">Payment Methods Settings</h3>
+                    <div className="space-y-3.5 font-medium text-stone-700 text-xs">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="cod_enabled_checkbox"
+                          checked={localSettings.codEnabled ?? true}
+                          onChange={(e) => setLocalSettings({ ...localSettings, codEnabled: e.target.checked })}
+                          className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                        />
+                        <label htmlFor="cod_enabled_checkbox" className="font-bold text-stone-700 cursor-pointer">
+                          Enable Cash on Delivery (COD) Option
+                        </label>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">EasyPaisa Merchant Wallet Phone Number</label>
+                        <input
+                          type="text"
+                          value={localSettings.easyPaisaAccount || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, easyPaisaAccount: e.target.value })}
+                          className="w-full max-w-xs px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                          placeholder="e.g. 03001234567"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleSaveSettings({ codEnabled: localSettings.codEnabled, easyPaisaAccount: localSettings.easyPaisaAccount })}
+                      disabled={saveLoading}
+                      className="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold transition-all disabled:bg-stone-300"
+                    >
+                      {saveLoading ? "Saving Changes..." : "Save Payment Details"}
+                    </button>
+                  </div>
+                )}
+
+                {/* 3. Courier Fees */}
+                {activeSettingsSubtab === "shipping" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <h3 className="font-bold text-stone-800 text-xs border-b pb-2">Shipping & Logistics Rates</h3>
+                    <div className="space-y-3 font-medium text-stone-700 text-xs">
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Standard Courier Shipping fee (Rs.)</label>
+                        <input
+                          type="number"
+                          value={localSettings.shippingFee ?? 0}
+                          onChange={(e) => setLocalSettings({ ...localSettings, shippingFee: Number(e.target.value) })}
+                          className="w-full max-w-xs px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Free Shipping Limit Threshold (Rs.)</label>
+                        <input
+                          type="number"
+                          value={localSettings.freeShippingThreshold ?? 0}
+                          onChange={(e) => setLocalSettings({ ...localSettings, freeShippingThreshold: Number(e.target.value) })}
+                          className="w-full max-w-xs px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleSaveSettings({ shippingFee: Number(localSettings.shippingFee), freeShippingThreshold: Number(localSettings.freeShippingThreshold) })}
+                      disabled={saveLoading}
+                      className="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold transition-all disabled:bg-stone-300"
+                    >
+                      {saveLoading ? "Saving Changes..." : "Save Shipping Limits"}
+                    </button>
+                  </div>
+                )}
+
+                {/* 4. Email Templates */}
+                {activeSettingsSubtab === "notifications" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <div className="space-y-1 border-b pb-2">
+                      <h3 className="font-bold text-stone-800 text-xs">Order Confirmation Email Template</h3>
+                      <p className="text-[10px] text-stone-500 font-normal leading-relaxed">
+                        Yahan aap us email ka content edit kar sakte hain jo customer ko order check-out ke baad confirm mail ke roop me bheja jata hai. 
+                        Dynamic placeholders jaise <strong className="text-amber-800">&#123;&#123;name&#125;&#125;</strong> (Customer Name), 
+                        <strong className="text-amber-800">&#123;&#123;orderId&#125;&#125;</strong> (Order ID reference), aur 
+                        <strong className="text-amber-800">&#123;&#123;amount&#125;&#125;</strong> (Total billing Rs. amount) automatically dynamic fields se replace ho jayenge.
+                      </p>
+                    </div>
+                    <div className="space-y-1.5 font-medium text-stone-700 text-xs">
+                      <label className="text-stone-600 block">Purchase Confirmation Email Body</label>
+                      <textarea
+                        rows={6}
+                        value={localSettings.emailTemplateOrder || ""}
+                        onChange={(e) => setLocalSettings({ ...localSettings, emailTemplateOrder: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-2xl resize-none focus:outline-none leading-relaxed"
+                        placeholder="Aap ka template yahan likhein..."
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleSaveSettings({ emailTemplateOrder: localSettings.emailTemplateOrder })}
+                      disabled={saveLoading}
+                      className="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold transition-all disabled:bg-stone-300"
+                    >
+                      {saveLoading ? "Saving Changes..." : "Save Email Template"}
+                    </button>
+                  </div>
+                )}
+
+                {/* 5. SEO Page Metadata */}
+                {activeSettingsSubtab === "seo" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <h3 className="font-bold text-stone-800 text-xs border-b pb-2">Search Engine Optimization (SEO)</h3>
+                    <div className="space-y-3 font-medium text-stone-700 text-xs">
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Meta Page Title (Tab Title)</label>
+                        <input
+                          type="text"
+                          value={localSettings.metaTitle || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, metaTitle: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">Meta Page Description</label>
+                        <textarea
+                          rows={3}
+                          value={localSettings.metaDescription || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, metaDescription: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-2xl resize-none focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-stone-600 block">SEO Keywords Tags (comma separated)</label>
+                        <input
+                          type="text"
+                          value={localSettings.metaKeywords || ""}
+                          onChange={(e) => setLocalSettings({ ...localSettings, metaKeywords: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleSaveSettings({ metaTitle: localSettings.metaTitle, metaDescription: localSettings.metaDescription, metaKeywords: localSettings.metaKeywords })}
+                      disabled={saveLoading}
+                      className="px-5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold transition-all disabled:bg-stone-300"
+                    >
+                      {saveLoading ? "Saving Changes..." : "Save SEO Details"}
+                    </button>
+                  </div>
+                )}
+
+                {/* 6. Store Contacts & Location */}
+                {activeSettingsSubtab === "storeinfo" && (
+                  <div className="glass-panel p-5 rounded-3xl space-y-4 animate-fadeIn">
+                    <h3 className="font-bold text-stone-800 text-xs border-b pb-2">Support Contacts & Warehouse</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-stone-600">
+                      <div className="p-3 bg-stone-50 border rounded-2xl space-y-1">
+                        <span className="text-[9px] text-stone-400 uppercase tracking-widest font-extrabold block">Support Phone Hotline</span>
+                        <p className="text-stone-800 text-xs">03092184760</p>
+                      </div>
+                      <div className="p-3 bg-stone-50 border rounded-2xl space-y-1">
+                        <span className="text-[9px] text-stone-400 uppercase tracking-widest font-extrabold block">Central Scent Warehouse</span>
+                        <p className="text-stone-800 text-xs">Gulberg III, Lahore, Pakistan</p>
+                      </div>
+                    </div>
+                    <div className="p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-[10px] text-stone-500 leading-relaxed">
+                      <strong>Note:</strong> Support contacts aur central warehouse address configurations currently hardcoded hain logistics security protocols ke tehat.
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-
-            {activeSettingsSubtab === "payment" && (
-              <div className="glass-panel p-5 rounded-3xl space-y-4">
-                <div className="flex items-center gap-2 text-xs">
-                  <input
-                    type="checkbox" checked={settings.codEnabled}
-                    onChange={(e) => updateSettings({ codEnabled: e.target.checked })}
-                    className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
-                  />
-                  <span className="font-bold text-stone-700">Enable Cash on Delivery (COD) Checkout</span>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-stone-650 block">EasyPaisa Merchant Wallet Phone</label>
-                  <input
-                    type="text" value={settings.easyPaisaAccount}
-                    onChange={(e) => updateSettings({ easyPaisaAccount: e.target.value })}
-                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeSettingsSubtab === "shipping" && (
-              <div className="glass-panel p-5 rounded-3xl space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-stone-650 block">Standard Courier Shipping fee (Rs.)</label>
-                  <input
-                    type="number" value={settings.shippingFee}
-                    onChange={(e) => updateSettings({ shippingFee: Number(e.target.value) })}
-                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-stone-650 block">Free Shipping Limit Threshold (Rs.)</label>
-                  <input
-                    type="number" value={settings.freeShippingThreshold}
-                    onChange={(e) => updateSettings({ freeShippingThreshold: Number(e.target.value) })}
-                    className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* TAB 9: Email & Notification template */}
-        {activeTab === "notifications" && (
-          <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">Email Notifications</h2>
-            <div className="glass-panel p-5 rounded-3xl space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Customer COD Purchase Confirmation template</label>
-                <textarea
-                  rows={4} value={settings.emailTemplateOrder}
-                  onChange={(e) => updateSettings({ emailTemplateOrder: e.target.value })}
-                  className="w-full px-3.5 py-2.5 border rounded-2xl text-xs resize-none focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 10: SEO Meta settings */}
-        {activeTab === "seo" && (
-          <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">SEO optimization</h2>
-            <div className="glass-panel p-5 rounded-3xl space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Meta Page Title</label>
-                <input
-                  type="text" value={settings.metaTitle}
-                  onChange={(e) => updateSettings({ metaTitle: e.target.value })}
-                  className="w-full px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Meta Page description</label>
-                <textarea
-                  rows={3} value={settings.metaDescription}
-                  onChange={(e) => updateSettings({ metaDescription: e.target.value })}
-                  className="w-full px-3.5 py-2 border rounded-xl text-xs resize-none focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Keywords tags (comma separated)</label>
-                <input
-                  type="text" value={settings.metaKeywords}
-                  onChange={(e) => updateSettings({ metaKeywords: e.target.value })}
-                  className="w-full px-3.5 py-2 border rounded-xl text-xs focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 11: General contact details */}
-        {activeTab === "general" && (
-          <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">General configurations</h2>
-            <div className="glass-panel p-5 rounded-3xl space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Support Phone</label>
-                <input
-                  type="text" className="w-full max-w-xs px-3.5 py-2 border rounded-xl text-xs bg-stone-50"
-                  disabled value="03092184760"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-stone-600 block">Warehouse location</label>
-                <input
-                  type="text" className="w-full max-w-md px-3.5 py-2 border rounded-xl text-xs bg-stone-50"
-                  disabled value="Gulberg III, Lahore, Pakistan"
-                />
-              </div>
-            </div>
           </div>
         )}
 
@@ -1305,18 +1592,15 @@ export default function AdminDashboard() {
 // Sidebar Menu Render Helper
 function renderSidebarMenu(activeTab: string, onClick: (tab: any) => void, role: string) {
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["Owner", "Admin", "Manager"] },
+    { id: "dashboard", label: "Dashboard Overview", icon: LayoutDashboard, roles: ["Owner", "Admin", "Manager"] },
     { id: "products", label: "Products Catalogue", icon: Package, roles: ["Owner", "Admin", "Manager"] },
     { id: "orders", label: "Orders Log", icon: ShoppingBag, roles: ["Owner", "Admin", "Manager"] },
     { id: "customers", label: "Customer Registry", icon: Users, roles: ["Owner", "Admin", "Manager"] },
-    { id: "inventory", label: "Inventory & Alerts", icon: AlertTriangle, roles: ["Owner", "Admin", "Manager"] },
-    { id: "coupons", label: "Coupons & Discounts", icon: Percent, roles: ["Owner", "Admin", "Manager"] },
+    { id: "inventory", label: "Inventory stock levels", icon: AlertTriangle, roles: ["Owner", "Admin", "Manager"] },
+    { id: "coupons", label: "Discount Vouchers", icon: Percent, roles: ["Owner", "Admin", "Manager"] },
     { id: "analytics", label: "Analytics Charts", icon: BarChart3, roles: ["Owner", "Admin", "Manager"] },
-    { id: "settings", label: "Store Settings", icon: Settings, roles: ["Owner", "Admin"] },
-    { id: "notifications", label: "Email Templates", icon: Mail, roles: ["Owner", "Admin"] },
-    { id: "seo", label: "SEO Settings", icon: Globe, roles: ["Owner", "Admin"] },
-    { id: "general", label: "General Settings", icon: Settings2, roles: ["Owner", "Admin", "Manager"] },
-    { id: "admins", label: "Admin Access", icon: Key, roles: ["Owner", "Admin"] },
+    { id: "settings", label: "System Settings", icon: Settings, roles: ["Owner", "Admin"] },
+    { id: "admins", label: "Admin Access control", icon: Key, roles: ["Owner", "Admin"] },
     { id: "logs", label: "Audit Action Logs", icon: ClipboardList, roles: ["Owner", "Admin"] },
   ];
 
