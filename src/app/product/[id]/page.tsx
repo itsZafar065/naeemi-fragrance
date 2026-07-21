@@ -94,7 +94,7 @@ export default function ProductDetailPage() {
         
         {/* LEFT COLUMN: Large Luxury Image Card & metrics */}
         <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
-          <div className="relative aspect-square rounded-[40px] overflow-hidden border border-white/60 shadow-xl flex items-center justify-center p-8 bg-white/40 backdrop-blur-md">
+          <div className="relative aspect-[4/5] rounded-[40px] overflow-hidden border border-white/60 shadow-xl flex items-center justify-center bg-white/40 backdrop-blur-md">
             {/* Colorful Luxury Pattern Background */}
             <div className="absolute inset-2 rounded-[32px] overflow-hidden">
               {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="w-full h-full object-contain p-6 bg-white/30"
+                  className="w-full h-full object-cover bg-white/30"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30 pointer-events-none" />
