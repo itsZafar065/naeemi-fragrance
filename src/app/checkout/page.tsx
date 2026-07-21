@@ -98,7 +98,7 @@ export default function CheckoutPage() {
     }
 
     const orderItems = cart.map((item) => ({
-      perfumeId: item.product.id,
+      perfumeId: item.product.id.includes("-") ? item.product.id.split("-")[0] : item.product.id,
       name: item.product.name,
       quantity: item.quantity,
       price: item.product.price,
