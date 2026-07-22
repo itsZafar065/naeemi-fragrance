@@ -101,16 +101,6 @@ export default function CustomerProfilePage() {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Sync edit profile fields when customer logs in or edits
-  useEffect(() => {
-    if (customer) {
-      setEditName(customer.name);
-      setEditPhone(customer.phone);
-      setEditAddress(customer.address);
-      fetchOrders();
-    }
-  }, [customer]);
-
   const fetchOrders = async () => {
     try {
       setOrdersLoading(true);
@@ -127,6 +117,16 @@ export default function CustomerProfilePage() {
       setOrdersLoading(false);
     }
   };
+
+  // Sync edit profile fields when customer logs in or edits
+  useEffect(() => {
+    if (customer) {
+      setEditName(customer.name);
+      setEditPhone(customer.phone);
+      setEditAddress(customer.address);
+      fetchOrders();
+    }
+  }, [customer]);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
