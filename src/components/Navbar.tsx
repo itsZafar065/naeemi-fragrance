@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "../context/CartContext";
@@ -12,6 +12,24 @@ export const Navbar: React.FC = () => {
   const { setIsCartOpen, cartCount } = useCart();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Secret 5-tap Admin Access
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    if (clickCountRef.current >= 5) {
+      e.preventDefault();
+      clickCountRef.current = 0;
+      router.push("/admin");
+      return;
+    }
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+  };
 
   const isActive = (path: string) => pathname === path;
 
@@ -28,7 +46,7 @@ export const Navbar: React.FC = () => {
       {/* 1. DESKTOP NAVIGATION BAR */}
       <div className="hidden md:flex max-w-7xl mx-auto px-6 h-20 items-center justify-between">
         {/* Brand Logo - Always visible on desktop */}
-        <Link href="/" className="flex flex-col items-start select-none">
+        <Link href="/" className="flex flex-col items-start select-none" onClick={handleLogoClick}>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
             <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
@@ -74,14 +92,6 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop Quick Action Icons */}
         <div className="flex items-center gap-4">
-          <Link
-            href="/admin"
-            className="text-xs font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200/50 bg-stone-50/50 text-stone-600 transition-all hover:bg-stone-50 hover:text-amber-600 hover:border-amber-500/20"
-            title="Admin Dashboard"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            Admin
-          </Link>
 
           {showSearchInput && (
             <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-48 animate-fadeIn">
@@ -133,7 +143,7 @@ export const Navbar: React.FC = () => {
       {/* 2. MOBILE SCENT HEADER */}
       <div className="flex md:hidden h-14 px-4 items-center justify-between max-w-md mx-auto">
         {!showSearchInput ? (
-          <Link href="/" className="flex items-center gap-1.5 select-none">
+          <Link href="/" className="flex items-center gap-1.5 select-none" onClick={handleLogoClick}>
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span className="font-extrabold text-sm font-serif tracking-widest text-stone-800">
               NAEEMI

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AdminProvider } from "@/context/AdminContext";
+import { CustomerProvider } from "@/context/CustomerContext";
 import { CartProvider } from "@/context/CartContext";
 
 
@@ -42,11 +43,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col pb-24 md:pb-0 bg-[#faf7f2]">
         <AdminProvider>
-          <CartProvider>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-          </CartProvider>
+          <CustomerProvider>
+            <CartProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </CartProvider>
+          </CustomerProvider>
         </AdminProvider>
       </body>
     </html>

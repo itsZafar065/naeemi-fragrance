@@ -72,9 +72,6 @@ export const Footer: React.FC = () => {
           <span>in Pakistan.</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/admin" className="text-[10px] text-stone-400 hover:text-amber-700 flex items-center gap-1 font-bold">
-            <ShieldAlert className="w-3 h-3" /> Staff Login
-          </Link>
           <div className="flex items-center gap-3 text-[10px] font-bold text-stone-400">
             <span className="hover:text-amber-600 cursor-pointer">FACEBOOK</span>
             <span className="hover:text-amber-600 cursor-pointer">INSTAGRAM</span>
