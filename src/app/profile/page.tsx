@@ -362,17 +362,21 @@ export default function CustomerProfilePage() {
           <div className="md:col-span-6 p-6 sm:p-10 flex flex-col justify-center space-y-6">
             
             {/* Mobile Header Image Overlay (Only visible on mobile) */}
-            <div className="block md:hidden relative w-full h-32 rounded-2xl overflow-hidden border border-amber-500/20 shadow-inner mb-4">
+            <div className="block md:hidden relative w-full h-32 rounded-2xl overflow-hidden border border-amber-500/20 shadow-sm mb-4">
               <div 
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url('/heroimg.webp')` }}
               />
               <div className="absolute inset-0 bg-stone-950/70" />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                <img src="/logo.svg" className="w-11 h-11 object-contain filter invert opacity-90" alt="Logo" />
-                <h2 className="font-serif text-sm font-extrabold text-white tracking-widest mt-1">NAEEMI FRAGRANCE</h2>
-                <p className="text-[8px] text-amber-400 font-bold uppercase tracking-widest leading-none mt-0.5">Naeemi Naam Hai Mohabbat Ka</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-3 space-y-1.5 animate-fadeIn">
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
+                  <img src="/logo.svg" className="w-full h-full object-cover" alt="Logo" />
+                </div>
+                <div className="text-center">
+                  <h2 className="font-serif text-xs font-extrabold text-white tracking-widest uppercase">NAEEMI FRAGRANCE</h2>
+                  <p className="text-[7.5px] text-amber-400 font-bold uppercase tracking-[0.2em] leading-none mt-0.5">Naeemi Naam Hai Mohabbat Ka</p>
+                </div>
               </div>
             </div>
 
@@ -514,26 +518,26 @@ export default function CustomerProfilePage() {
               style={{ backgroundImage: `url('/heroimg.webp')` }}
             />
             <div className="absolute inset-0 bg-stone-950/70 mix-blend-multiply" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-stone-950 via-stone-900/40 to-amber-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-stone-950 via-stone-900/40 to-amber-950/25" />
 
             {/* Brand Logo & Tagline (Top) */}
-            <div className="relative z-10 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-2.5">
-                <img src="/logo.svg" className="w-full h-full object-contain filter invert" alt="Brand Logo" />
+            <div className="relative z-10 flex items-center gap-3.5">
+              <div className="w-13 h-13 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-[0_4px_16px_rgba(212,175,55,0.15)] shrink-0">
+                <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
               </div>
               <div className="space-y-0.5">
-                <h3 className="font-extrabold tracking-widest text-xs uppercase font-serif">NAEEMI FRAGRANCE</h3>
-                <p className="text-[7.5px] font-bold text-amber-500 uppercase tracking-[0.25em] leading-none">Naeemi Naam Hai Mohabbat Ka</p>
+                <h3 className="font-extrabold tracking-widest text-sm uppercase font-serif text-white">NAEEMI FRAGRANCE</h3>
+                <p className="text-[8px] font-bold text-amber-400 uppercase tracking-[0.2em] leading-none">Naeemi Naam Hai Mohabbat Ka</p>
               </div>
             </div>
 
             {/* Large Typography Stack (Center) */}
             <div className="relative z-10 space-y-4 max-w-sm">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 w-fit block">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 w-fit block font-serif">
                 Pure Extrait de Parfum
               </span>
-              <h2 className="font-serif text-3xl font-extrabold tracking-wide leading-tight text-white">
-                Experience the Art of <span className="text-amber-300 italic font-medium">Sillage & Longevity</span>
+              <h2 className="font-serif text-3.5xl font-extrabold tracking-wide leading-tight text-white">
+                Experience the Art of <span className="text-amber-400 italic font-medium font-serif">Sillage & Longevity</span>
               </h2>
               <p className="text-xs text-stone-300 leading-relaxed font-medium">
                 Indulge in premium Arabic Ouds, exotic French florals, and rich musk profiles, handcrafted with pure essential oil concentrates to project luxury that lasts.
