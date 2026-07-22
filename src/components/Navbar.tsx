@@ -118,7 +118,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           <Link
-            href="/more"
+            href="/profile"
             className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors block"
             title="My Account"
           >
@@ -176,7 +176,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           <Link
-            href="/more"
+            href="/profile"
             className="p-1.5 text-stone-650 hover:text-amber-600"
             title="My Account"
           >
