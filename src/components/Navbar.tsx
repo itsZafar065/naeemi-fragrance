@@ -13,22 +13,22 @@ export const Navbar: React.FC = () => {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Secret 5-tap Admin Access
+  // Secret 10-tap Admin Access
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     clickCountRef.current += 1;
     if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
-    if (clickCountRef.current >= 5) {
+    if (clickCountRef.current >= 10) {
       e.preventDefault();
       clickCountRef.current = 0;
-      router.push("/admin");
+      router.push("/naeemi-fragrance-secure-vault-admin-portal");
       return;
     }
     clickTimerRef.current = setTimeout(() => {
       clickCountRef.current = 0;
-    }, 2000);
+    }, 4000);
   };
 
   const isActive = (path: string) => pathname === path;

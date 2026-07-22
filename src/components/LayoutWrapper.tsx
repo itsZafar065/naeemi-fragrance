@@ -9,7 +9,7 @@ import { CartDrawer } from "./CartDrawer";
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith("/naeemi-fragrance-secure-vault-admin-portal");
   const [showSplash, setShowSplash] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
