@@ -374,7 +374,6 @@ export default function AdminDashboard() {
             <input
               type="email"
               required
-              placeholder="admin@naeemi.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -386,7 +385,6 @@ export default function AdminDashboard() {
             <input
               type="password"
               required
-              placeholder="••••••••"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"

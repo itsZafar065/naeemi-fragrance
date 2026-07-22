@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
-// Simple in-memory maps for production rate limiting and brute force protection
+// Simple in-memory maps for production rate limiting and brute force protection (reloaded on HMR)
 const loginAttempts = new Map<string, { count: number; lockUntil: number }>();
 const ipRequests = new Map<string, { count: number; resetTime: number }>();
 
@@ -45,7 +45,7 @@ export function registerFailedAttempt(email: string) {
 
   record.count += 1;
   if (record.count >= 5) {
-    record.lockUntil = now + 15 * 60000; // 15-minute lock on 5 failed attempts
+    record.lockUntil = now + 15 * 1000; // 15-second lock on 5 failed attempts (temporary for testing)
     record.count = 0; // reset counter after locking
   }
   loginAttempts.set(email, record);

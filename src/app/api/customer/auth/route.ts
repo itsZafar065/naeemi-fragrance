@@ -270,12 +270,16 @@ export async function POST(request: Request) {
       const customer = await db.collection("customers").findOne({ email: cleanEmail });
 
       if (!customer) {
-        return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+        const response = NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+        response.cookies.delete("naeemi_customer_session");
+        return response;
       }
 
       const isMatch = await bcrypt.compare(password, customer.passwordHash);
       if (!isMatch) {
-        return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+        const response = NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+        response.cookies.delete("naeemi_customer_session");
+        return response;
       }
 
       // If unverified login attempt, trigger fresh OTP and block login until verified

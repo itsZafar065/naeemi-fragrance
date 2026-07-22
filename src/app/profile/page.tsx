@@ -527,7 +527,6 @@ export default function CustomerProfilePage() {
                     type="text"
                     required
                     maxLength={6}
-                    placeholder="123456"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                     className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -584,7 +583,6 @@ export default function CustomerProfilePage() {
                     <input
                       type="email"
                       required
-                      placeholder="salman@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -628,7 +626,6 @@ export default function CustomerProfilePage() {
                       type="text"
                       required
                       maxLength={6}
-                      placeholder="123456"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -640,7 +637,6 @@ export default function CustomerProfilePage() {
                     <input
                       type="password"
                       required
-                      placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -707,7 +703,6 @@ export default function CustomerProfilePage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Salman Khan"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -720,7 +715,6 @@ export default function CustomerProfilePage() {
                     <input
                       type="email"
                       required
-                      placeholder="salman@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -743,7 +737,6 @@ export default function CustomerProfilePage() {
                     <input
                       type="password"
                       required
-                      placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -762,7 +755,6 @@ export default function CustomerProfilePage() {
                         <input
                           type="tel"
                           required
-                          placeholder="0300 1234567"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
@@ -771,7 +763,6 @@ export default function CustomerProfilePage() {
                       <div className="space-y-1">
                         <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Shipping Address (Optional)</label>
                         <textarea
-                          placeholder="Gulberg III, Lahore, Pakistan"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
                           className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all min-h-[60px] leading-relaxed"

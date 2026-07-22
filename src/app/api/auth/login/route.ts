@@ -49,13 +49,17 @@ export async function POST(request: Request) {
     if (!user) {
       registerFailedAttempt(cleanEmail);
       await bcrypt.compare(password, "$2a$10$abcdefghijklmnopqrstuv"); // timing mitigation
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      const response = NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      response.cookies.delete("naeemi_session");
+      return response;
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       registerFailedAttempt(cleanEmail);
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      const response = NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      response.cookies.delete("naeemi_session");
+      return response;
     }
 
     // Reset failed counter on success
