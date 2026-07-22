@@ -770,7 +770,7 @@ export default function AdminDashboard() {
                           {prod.imageUrl && prod.imageUrl.startsWith("linear-gradient") ? (
                             <div className="w-8 h-8 rounded border" style={{ background: prod.imageUrl }} />
                           ) : (
-                            <img src={prod.imageUrl} className="w-8 h-8 rounded border object-contain bg-white" />
+                            <img src={prod.imageUrl} alt={prod.name} className="w-8 h-8 rounded border object-contain bg-white" />
                           )}
                         </td>
                         <td className="p-3 font-bold text-stone-855">{prod.name}</td>
