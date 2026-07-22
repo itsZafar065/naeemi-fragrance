@@ -23,6 +23,7 @@ export interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  volume?: string;
 }
 
 export interface Order {
@@ -87,12 +88,12 @@ interface AdminContextType {
   addProduct: (product: Omit<Perfume, "id" | "rating">) => Promise<{ success: boolean; error?: string }>;
   updateProduct: (id: string, updatedProduct: Partial<Perfume>) => Promise<{ success: boolean; error?: string }>;
   deleteProduct: (id: string) => Promise<{ success: boolean; error?: string }>;
-  placeOrder: (customerName: string, customerEmail: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number, paymentSlipUrl?: string | null) => Promise<{ success: boolean; orderId?: string; error?: string }>;
+  placeOrder: (customerName: string, customerEmail: string, customerPhone: string, customerAddress: string, items: OrderItem[], totalAmount: number, paymentSlipUrl?: string | null, couponCode?: string | null) => Promise<{ success: boolean; orderId?: string; error?: string }>;
   updateOrderStatus: (orderId: string, status: Order["status"]) => Promise<{ success: boolean; error?: string }>;
   getSalesSummary: () => { totalSales: number; totalOrders: number; pendingOrders: number; lowStockCount: number };
   addCoupon: (coupon: Coupon) => Promise<{ success: boolean; error?: string }>;
   deleteCoupon: (code: string) => Promise<{ success: boolean; error?: string }>;
-  updateSettings: (settings: Partial<StoreSettings>) => void;
+  updateSettings: (settings: Partial<StoreSettings>, saveToDb?: boolean) => void;
   staffUsers: AdminUser[];
   addStaff: (user: any) => Promise<{ success: boolean; error?: string }>;
   deleteStaff: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -304,7 +305,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     customerAddress: string,
     items: OrderItem[],
     totalAmount: number,
-    paymentSlipUrl?: string | null
+    paymentSlipUrl?: string | null,
+    couponCode?: string | null
   ) => {
     try {
       const res = await fetch("/api/orders", {
@@ -317,7 +319,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           customerAddress, 
           items, 
           totalAmount,
-          paymentSlipUrl: paymentSlipUrl || null
+          paymentSlipUrl: paymentSlipUrl || null,
+          couponCode: couponCode || null
         }),
       });
 
@@ -422,9 +425,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const updateSettings = (updatedFields: Partial<StoreSettings>) => {
+  const updateSettings = (updatedFields: Partial<StoreSettings>, saveToDb: boolean = true) => {
     const updated = { ...settings, ...updatedFields };
     setSettings(updated);
+
+    if (!saveToDb) return;
 
     // Debounced update to MongoDB to prevent rapid keypress API flood
     if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current);

@@ -14,7 +14,7 @@ function ShopContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
-  const [priceRange, setPriceRange] = useState<number>(10000);
+  const [priceRange, setPriceRange] = useState<number>(15000);
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
   // Sync category and search query filters with parameters if present
@@ -56,7 +56,7 @@ function ShopContent() {
     setSearchQuery("");
     setSelectedCategory("All");
     setSelectedType("All");
-    setPriceRange(10000);
+    setPriceRange(15000);
   };
 
   return (
@@ -179,7 +179,10 @@ function ShopContent() {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => {
+                setSelectedCategory(cat);
+                setShowFiltersMobile(false);
+              }}
               className={`px-4 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap border transition-all ${
                 selectedCategory === cat
                   ? "bg-amber-600 border-amber-600 text-white shadow-xs"

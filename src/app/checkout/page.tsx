@@ -53,19 +53,29 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState("");
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
-    if (code === "NAEEMI10") {
-      setAppliedDiscount(10);
-      setCouponMessage("Promo NAEEMI10 (10% Discount) Applied Successfully!");
-      setCouponError(false);
-    } else if (code === "MOHABBAT20") {
-      setAppliedDiscount(20);
-      setCouponMessage("Promo MOHABBAT20 (20% Discount) Applied Successfully!");
-      setCouponError(false);
-    } else {
-      setCouponMessage("Invalid Coupon Code. Try NAEEMI10 or MOHABBAT20");
+    if (!code) return;
+
+    setCouponMessage("Validating coupon...");
+    setCouponError(false);
+
+    try {
+      const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(code)}`);
+      const data = await res.json();
+
+      if (res.ok && data.valid) {
+        setAppliedDiscount(data.discount);
+        setCouponMessage(`Promo ${data.code} (${data.discount}% Discount) Applied Successfully!`);
+        setCouponError(false);
+      } else {
+        setCouponMessage(data.error || "Invalid Coupon Code.");
+        setCouponError(true);
+        setAppliedDiscount(0);
+      }
+    } catch (err) {
+      setCouponMessage("Failed to validate coupon code. Please try again.");
       setCouponError(true);
       setAppliedDiscount(0);
     }
@@ -123,12 +133,22 @@ export default function CheckoutPage() {
       name: item.product.name,
       quantity: item.quantity,
       price: item.product.price,
+      volume: item.product.volume || "100ml",
     }));
 
     setCheckoutLoading(true);
     setCheckoutError("");
 
-    const result = await placeOrder(name, email, phone, fullAddress, orderItems, finalTotal, paymentSlipUrl);
+    const result = await placeOrder(
+      name,
+      email,
+      phone,
+      fullAddress,
+      orderItems,
+      finalTotal,
+      paymentSlipUrl,
+      couponCode ? couponCode.trim() : null
+    );
     setCheckoutLoading(false);
 
     if (result.success) {

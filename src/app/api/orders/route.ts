@@ -6,7 +6,7 @@ import { sendOrderConfirmation, sendOrderStatusEmail } from "@/lib/email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
-function verifyAdminToken(request: Request) {
+async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
   const sessionCookie = cookieHeader
     .split("; ")
@@ -17,7 +17,10 @@ function verifyAdminToken(request: Request) {
 
   try {
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
-    return decoded;
+    const db = await getDb();
+    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    if (!dbUser) return null;
+    return { ...decoded, role: dbUser.role, name: dbUser.name };
   } catch (error) {
     return null;
   }
@@ -28,7 +31,7 @@ function verifyAdminToken(request: Request) {
 // GET all orders & system logs (Admin only)
 export async function GET(request: Request) {
   try {
-    const admin = verifyAdminToken(request);
+    const admin = await verifyAdminToken(request);
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -60,7 +63,8 @@ export async function POST(request: Request) {
       customerAddress, 
       items, 
       totalAmount,
-      paymentSlipUrl 
+      paymentSlipUrl,
+      couponCode
     } = sanitizedBody;
 
     if (!customerName || !customerPhone || !customerAddress || !items || !Array.isArray(items) || items.length === 0) {
@@ -69,7 +73,8 @@ export async function POST(request: Request) {
 
     const db = await getDb();
 
-    // Verify stock availability
+    // Verify stock availability and recalculate subtotal on the server
+    let calculatedSubtotal = 0;
     for (const item of items) {
       const prod = await db.collection("products").findOne({ id: item.perfumeId.toString() });
       if (!prod) {
@@ -78,6 +83,43 @@ export async function POST(request: Request) {
       if (prod.stock < item.quantity) {
         return NextResponse.json({ error: `Insufficient stock for ${item.name}. Only ${prod.stock} left.` }, { status: 400 });
       }
+
+      // Calculate server expected price depending on variant size comparison
+      let expectedUnitPrice = prod.price;
+      const baseVolume = prod.volume || "100ml";
+      const orderedVolume = item.volume || "100ml";
+      
+      if (baseVolume === "100ml" && orderedVolume === "50ml") {
+        expectedUnitPrice = Math.round(prod.price * 0.7);
+      } else if (baseVolume === "50ml" && orderedVolume === "100ml") {
+        expectedUnitPrice = Math.round(prod.price * 1.45);
+      }
+
+      calculatedSubtotal += expectedUnitPrice * Number(item.quantity);
+      
+      // Override client-provided item price with server-validated price
+      item.price = expectedUnitPrice;
+    }
+
+    // Verify coupon code and fetch discount from database
+    let discountPercent = 0;
+    if (couponCode) {
+      const dbCoupon = await db.collection("coupons").findOne({ code: couponCode.toUpperCase().trim() });
+      if (dbCoupon) {
+        discountPercent = Number(dbCoupon.discount);
+      } else {
+        return NextResponse.json({ error: "Invalid coupon code provided." }, { status: 400 });
+      }
+    }
+
+    // Calculate final total amount
+    const shippingFee = calculatedSubtotal > 6000 ? 0 : 250;
+    const discountAmount = Math.round(calculatedSubtotal * (discountPercent / 100));
+    const expectedTotal = calculatedSubtotal - discountAmount + shippingFee;
+
+    // Enforce pricing match validation within 2 Rs margin for safe decimal rounding
+    if (Math.abs(Number(totalAmount) - expectedTotal) > 2) {
+      return NextResponse.json({ error: "Checkout payment total mismatch. Transaction rejected." }, { status: 400 });
     }
 
     // Process order
@@ -89,7 +131,7 @@ export async function POST(request: Request) {
       customerPhone,
       customerAddress,
       items,
-      totalAmount: Number(totalAmount),
+      totalAmount: expectedTotal, // Use recalculated validated total
       paymentSlipUrl: paymentSlipUrl || null,
       status: "Pending",
       date: new Date().toISOString().split("T")[0],
@@ -121,7 +163,7 @@ export async function POST(request: Request) {
 // PUT update order status (Admin only)
 export async function PUT(request: Request) {
   try {
-    const admin = verifyAdminToken(request);
+    const admin = await verifyAdminToken(request);
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

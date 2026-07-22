@@ -107,7 +107,7 @@ export default function AdminDashboard() {
       });
 
       if (res.ok) {
-        updateSettings(updatedFieldsSubset);
+        updateSettings(updatedFieldsSubset, false);
         alert("Settings saved successfully to the database!");
       } else {
         alert("Failed to save settings. Please try again.");

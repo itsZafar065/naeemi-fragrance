@@ -24,6 +24,10 @@ import {
 export default function Home() {
   const { products } = useAdmin();
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterError, setNewsletterError] = useState("");
+
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -31,6 +35,31 @@ export default function Home() {
   const [contactMessage, setContactMessage] = useState("");
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactError, setContactError] = useState("");
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterError("");
+    setNewsletterSubmitting(true);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNewsletterSubscribed(true);
+        setNewsletterEmail("");
+      } else {
+        setNewsletterError(data.error || "Subscription failed.");
+      }
+    } catch (err) {
+      setNewsletterError("Connection failed. Please try again.");
+    } finally {
+      setNewsletterSubmitting(false);
+    }
+  };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -395,19 +424,30 @@ export default function Home() {
               <Check className="w-4 h-4" /> Subscription Successful! Welcome to Naeemi Fragrances.
             </div>
           ) : (
-            <div className="mx-auto max-w-md flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                placeholder="Enter email address"
-                className="flex-grow px-4 py-2.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none w-full"
-              />
-              <button
-                onClick={() => setNewsletterSubscribed(true)}
-                className="px-5 py-2.5 rounded-xl gold-btn text-white font-bold text-xs w-full sm:w-auto shrink-0"
-              >
-                Subscribe
-              </button>
-            </div>
+            <form onSubmit={handleNewsletterSubmit} className="mx-auto max-w-md space-y-2">
+              {newsletterError && (
+                <div className="text-[10px] font-semibold text-rose-800 bg-rose-50 border border-rose-200/50 p-2 rounded-xl text-center">
+                  {newsletterError}
+                </div>
+              )}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter email address"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  className="flex-grow px-4 py-2.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none w-full"
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterSubmitting}
+                  className="px-5 py-2.5 rounded-xl gold-btn text-white font-bold text-xs w-full sm:w-auto shrink-0 flex items-center justify-center gap-1 disabled:opacity-50"
+                >
+                  {newsletterSubmitting ? "Subscribing..." : "Subscribe"}
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </section>

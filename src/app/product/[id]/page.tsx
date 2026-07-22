@@ -73,7 +73,7 @@ export default function ProductDetailPage() {
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
 
-  // Sync selected product
+  // Sync selected product & load reviews from DB
   useEffect(() => {
     if (id) {
       const found = products.find((p) => p.id === id);
@@ -81,13 +81,22 @@ export default function ProductDetailPage() {
         setProduct(found);
         setSelectedSize(found.volume || "100ml");
         
-        // Load reviews from localStorage or fallback to default seed
-        const saved = localStorage.getItem(`naeemi_reviews_${found.id}`);
-        if (saved) {
-          setReviewsList(JSON.parse(saved));
-        } else {
-          setReviewsList(getMockReviews(found.name, found.category));
-        }
+        // Fetch reviews from DB
+        fetch(`/api/reviews?productId=${found.id}`)
+          .then((res) => {
+            if (res.ok) return res.json();
+            throw new Error();
+          })
+          .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+              setReviewsList(data);
+            } else {
+              setReviewsList(getMockReviews(found.name, found.category));
+            }
+          })
+          .catch(() => {
+            setReviewsList(getMockReviews(found.name, found.category));
+          });
       }
     }
   }, [id, products]);
@@ -174,34 +183,48 @@ export default function ProductDetailPage() {
     });
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReviewName.trim() || !newReviewText.trim()) return;
+    if (!product || !newReviewName.trim() || !newReviewText.trim()) return;
 
     const newRevObj = {
+      productId: product.id,
       name: newReviewName.trim(),
-      date: "Today",
       rating: newReviewRating,
       text: newReviewText.trim(),
     };
 
-    const updated = [newRevObj, ...reviewsList];
-    setReviewsList(updated);
-    if (product) {
-      localStorage.setItem(`naeemi_reviews_${product.id}`, JSON.stringify(updated));
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRevObj),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setReviewsList([data.review, ...reviewsList]);
+        setReviewSubmitted(true);
+        setNewReviewName("");
+        setNewReviewRating(5);
+        setNewReviewText("");
+        setShowReviewForm(false);
+        setTimeout(() => setReviewSubmitted(false), 3000);
+      }
+    } catch (err) {
+      alert("Failed to submit review. Please try again.");
     }
-    setNewReviewName("");
-    setNewReviewRating(5);
-    setNewReviewText("");
-    setReviewSubmitted(true);
-    setShowReviewForm(false);
-    setTimeout(() => setReviewSubmitted(false), 3000);
   };
 
   // Human-written metrics parameters
-  const sillageValue = parseInt(product.id) % 2 === 0 ? "Standard Sillage" : "Intense Sillage";
-  const longevityValue = parseInt(product.id) % 2 === 0 ? "Up to 12 Hours" : "Long Lasting";
-  const seasonalPreference = parseInt(product.id) % 3 === 0 ? "Fall & Winter" : "All Season";
+  const getNumericId = (idStr: string) => {
+    if (!idStr) return 0;
+    return idStr.toString().split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  };
+  const numId = getNumericId(product.id);
+  const sillageValue = numId % 2 === 0 ? "Standard Sillage" : "Intense Sillage";
+  const longevityValue = numId % 2 === 0 ? "Up to 12 Hours" : "Long Lasting";
+  const seasonalPreference = numId % 3 === 0 ? "Fall & Winter" : "All Season";
 
   // Related products selection: exclude currently opened product (using base ID splits)
   const baseCurrentId = product.id.toString().split("-")[0];

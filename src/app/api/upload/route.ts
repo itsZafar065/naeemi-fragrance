@@ -11,6 +11,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    // 1. Validate file size (limit to 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ error: "File exceeds 5MB size limit" }, { status: 400 });
+    }
+
+    // 2. Validate MIME type
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json({ error: "Invalid file type. Only PNG, JPEG, WEBP, GIF, and PDF files are allowed." }, { status: 400 });
+    }
+
+    // 3. Validate file extension to prevent spoofing
+    const allowedExtensions = [".png", ".jpeg", ".jpg", ".webp", ".gif", ".pdf"];
+    const ext = path.extname(file.name).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return NextResponse.json({ error: "Invalid file extension. Only .png, .jpeg, .jpg, .webp, .gif, and .pdf are allowed." }, { status: 400 });
+    }
+
     // Read file buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
-function verifyAdminToken(request: Request) {
+async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
   const sessionCookie = cookieHeader
     .split("; ")
@@ -16,15 +16,23 @@ function verifyAdminToken(request: Request) {
 
   try {
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
-    return decoded;
+    const db = await getDb();
+    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    if (!dbUser) return null;
+    return { ...decoded, role: dbUser.role, name: dbUser.name };
   } catch (error) {
     return null;
   }
 }
 
-// GET all coupons (Public / Admin check)
-export async function GET() {
+// GET all coupons (Admin check only)
+export async function GET(request: Request) {
   try {
+    const admin = await verifyAdminToken(request);
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const db = await getDb();
     const coupons = await db.collection("coupons").find({}).toArray();
     return NextResponse.json(coupons);
@@ -36,7 +44,7 @@ export async function GET() {
 // POST create a new coupon (Owner/Admin only)
 export async function POST(request: Request) {
   try {
-    const admin = verifyAdminToken(request);
+    const admin = await verifyAdminToken(request);
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -84,7 +92,7 @@ export async function POST(request: Request) {
 // DELETE a coupon (Owner/Admin only)
 export async function DELETE(request: Request) {
   try {
-    const admin = verifyAdminToken(request);
+    const admin = await verifyAdminToken(request);
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
