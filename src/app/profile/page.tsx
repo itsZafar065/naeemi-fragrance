@@ -40,9 +40,21 @@ interface Order {
 
 export default function CustomerProfilePage() {
   const router = useRouter();
-  const { customer, loading, login, signup, logout, updateProfile } = useCustomer();
+
+  const { 
+    customer, 
+    loading, 
+    login, 
+    signup, 
+    logout, 
+    updateProfile, 
+    verifySignup, 
+    sendOtp, 
+    resetPassword 
+  } = useCustomer();
   
-  // Tab state for auth
+  // View state for auth: login | signup | otp_verification | forgot_password
+  const [authView, setAuthView] = useState<"login" | "signup" | "otp_verification" | "forgot_password">("login");
   const [authTab, setAuthTab] = useState<"login" | "signup">("login");
   
   // Auth Form inputs
@@ -54,6 +66,16 @@ export default function CustomerProfilePage() {
   const [authError, setAuthError] = useState("");
   const [authSuccess, setAuthSuccess] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
+
+  // OTP Verification states
+  const [otpCode, setOtpCode] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [resendTimer, setResendTimer] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  // Forgot password flow states
+  const [forgotStep, setForgotStep] = useState<"request" | "verify">("request");
+  const [newPassword, setNewPassword] = useState("");
 
   // Profile Edit inputs
   const [isEditing, setIsEditing] = useState(false);
@@ -67,6 +89,17 @@ export default function CustomerProfilePage() {
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+
+  // Countdown timer for OTP Resend
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   // Sync edit profile fields when customer logs in or edits
   useEffect(() => {
@@ -104,24 +137,109 @@ export default function CustomerProfilePage() {
     if (authTab === "login") {
       const res = await login(email, password);
       if (res.success) {
-        setAuthSuccess("Successfully logged in!");
-        setEmail("");
-        setPassword("");
+        if (res.needsVerification) {
+          setVerificationEmail(res.email || email);
+          setAuthView("otp_verification");
+          setResendTimer(60);
+          setAuthSuccess("Your email is not verified yet. We have sent a new verification code.");
+        } else {
+          setAuthSuccess("Successfully logged in!");
+          setEmail("");
+          setPassword("");
+        }
       } else {
         setAuthError(res.error || "Invalid credentials.");
       }
     } else {
       const res = await signup(name, email, password, phone, address);
       if (res.success) {
-        setAuthSuccess("Account successfully registered!");
-        setName("");
-        setEmail("");
-        setPassword("");
-        setPhone("");
-        setAddress("");
+        if (res.needsVerification) {
+          setVerificationEmail(res.email || email);
+          setAuthView("otp_verification");
+          setResendTimer(60);
+          setAuthSuccess("Account successfully registered! Please verify your email address.");
+        } else {
+          setAuthSuccess("Account successfully registered!");
+        }
       } else {
         setAuthError(res.error || "Registration failed.");
       }
+    }
+    setFormSubmitting(false);
+  };
+
+  const handleOtpVerifySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthSuccess("");
+    setFormSubmitting(true);
+
+    const res = await verifySignup(verificationEmail, otpCode);
+    if (res.success) {
+      setAuthSuccess("Email verified successfully! Welcome to Naeemi Fragrances.");
+      setEmail("");
+      setPassword("");
+      setName("");
+      setPhone("");
+      setAddress("");
+      setOtpCode("");
+      setAuthView("login");
+    } else {
+      setAuthError(res.error || "Verification failed. Please check the code.");
+    }
+    setFormSubmitting(false);
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    setAuthError("");
+    setAuthSuccess("");
+    setResendLoading(true);
+
+    const res = await sendOtp(verificationEmail, "email_verification");
+    if (res.success) {
+      setAuthSuccess("A fresh verification code has been sent to your email.");
+      setResendTimer(60);
+    } else {
+      setAuthError(res.error || "Failed to resend code.");
+    }
+    setResendLoading(false);
+  };
+
+  const handleForgotPasswordRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthSuccess("");
+    setFormSubmitting(true);
+
+    const res = await sendOtp(email, "forgot_password");
+    if (res.success) {
+      setAuthSuccess("Password reset code sent to your email.");
+      setVerificationEmail(email);
+      setForgotStep("verify");
+      setResendTimer(60);
+    } else {
+      setAuthError(res.error || "Failed to send reset code.");
+    }
+    setFormSubmitting(false);
+  };
+
+  const handleForgotPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthSuccess("");
+    setFormSubmitting(true);
+
+    const res = await resetPassword(verificationEmail, otpCode, newPassword);
+    if (res.success) {
+      setAuthSuccess("Password reset successfully! Please login with your new password.");
+      setAuthView("login");
+      setForgotStep("request");
+      setOtpCode("");
+      setNewPassword("");
+      setPassword("");
+    } else {
+      setAuthError(res.error || "Reset failed. Please check the inputs.");
     }
     setFormSubmitting(false);
   };
@@ -382,30 +500,6 @@ export default function CustomerProfilePage() {
               <p className="text-xs text-stone-450">Login or sign up to experience luxury Oud orders tracking.</p>
             </div>
 
-            {/* Tab Selector */}
-            <div className="flex bg-stone-100/60 p-1.5 rounded-2xl border border-stone-200/20">
-              <button
-                onClick={() => { setAuthTab("login"); setAuthError(""); setAuthSuccess(""); }}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  authTab === "login"
-                    ? "bg-white text-amber-600 shadow-[0_4px_12px_rgba(212,175,55,0.06)] border border-stone-200/30"
-                    : "text-stone-500 hover:text-stone-850"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => { setAuthTab("signup"); setAuthError(""); setAuthSuccess(""); }}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  authTab === "signup"
-                    ? "bg-white text-amber-600 shadow-[0_4px_12px_rgba(212,175,55,0.06)] border border-stone-200/30"
-                    : "text-stone-500 hover:text-stone-850"
-                }`}
-              >
-                Create Account
-              </button>
-            </div>
-
             {authError && (
               <div className="bg-rose-50 text-rose-800 text-[11px] font-semibold p-3.5 rounded-xl border border-rose-200/50 text-center animate-fadeIn">
                 {authError}
@@ -417,93 +511,295 @@ export default function CustomerProfilePage() {
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} className="space-y-4">
-              {authTab === "signup" && (
+            {authView === "otp_verification" ? (
+              // OTP VERIFICATION VIEW
+              <form onSubmit={handleOtpVerifySubmit} className="space-y-4">
+                <div className="space-y-1 text-center">
+                  <h3 className="font-bold text-stone-850 text-base font-serif">Verify Email Address</h3>
+                  <p className="text-xs text-stone-500 leading-relaxed">
+                    We have dispatched a 6-digit verification code to <span className="font-bold text-stone-800">{verificationEmail}</span>. Enter it below to activate your account.
+                  </p>
+                </div>
+
                 <div className="space-y-1">
-                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Full Name *</label>
+                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">6-Digit Verification Code *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Salman Khan"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                    maxLength={6}
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                   />
                 </div>
-              )}
 
-              <div className="space-y-1">
-                <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="salman@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
-                />
-              </div>
+                <button
+                  type="submit"
+                  disabled={formSubmitting}
+                  className="w-full btn-primary py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 mt-4 cursor-pointer"
+                >
+                  {formSubmitting ? (
+                    <Loader className="w-4 h-4 animate-spin text-white" />
+                  ) : (
+                    <>Verify & Login</>
+                  )}
+                </button>
 
-              <div className="space-y-1">
-                <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Password *</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
-                />
-                {authTab === "signup" && (
-                  <p className="text-[9px] text-stone-450 font-semibold leading-normal mt-1">
-                    Min 8 characters, must include an uppercase, lowercase, and a number.
-                  </p>
-                )}
-              </div>
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    disabled={resendTimer > 0 || resendLoading}
+                    onClick={handleResendOtp}
+                    className="text-xs text-amber-650 font-bold hover:text-amber-700 disabled:text-stone-400 transition-all cursor-pointer"
+                  >
+                    {resendLoading && <Loader className="w-3.5 h-3.5 animate-spin inline mr-1" />}
+                    {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : "Resend Verification Code"}
+                  </button>
+                </div>
 
-              {authTab === "signup" && (
-                <>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => { setAuthView("login"); setAuthError(""); setAuthSuccess(""); }}
+                    className="text-[10px] text-stone-500 font-bold hover:text-stone-800 underline transition-all cursor-pointer"
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              </form>
+            ) : authView === "forgot_password" ? (
+              // FORGOT PASSWORD VIEW
+              forgotStep === "request" ? (
+                <form onSubmit={handleForgotPasswordRequest} className="space-y-4">
+                  <div className="space-y-1 text-center">
+                    <h3 className="font-bold text-stone-850 text-base font-serif">Forgot Password</h3>
+                    <p className="text-xs text-stone-500 leading-relaxed">
+                      Enter your account email address below. We will send you an OTP to authorize a password reset.
+                    </p>
+                  </div>
+
                   <div className="space-y-1">
-                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Phone Number *</label>
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Email Address *</label>
                     <input
-                      type="tel"
+                      type="email"
                       required
-                      placeholder="0300 1234567"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="salman@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                     />
                   </div>
+
+                  <button
+                    type="submit"
+                    disabled={formSubmitting}
+                    className="w-full btn-primary py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 mt-4 cursor-pointer"
+                  >
+                    {formSubmitting ? (
+                      <Loader className="w-4 h-4 animate-spin text-white" />
+                    ) : (
+                      <>Send Reset OTP</>
+                    )}
+                  </button>
+
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => { setAuthView("login"); setForgotStep("request"); setAuthError(""); setAuthSuccess(""); }}
+                      className="text-xs text-stone-550 font-bold hover:text-stone-850 underline transition-all cursor-pointer"
+                    >
+                      Back to Login
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleForgotPasswordReset} className="space-y-4">
+                  <div className="space-y-1 text-center">
+                    <h3 className="font-bold text-stone-850 text-base font-serif">Set New Password</h3>
+                    <p className="text-xs text-stone-500 leading-relaxed">
+                      Enter the 6-digit OTP code sent to your email along with your new password.
+                    </p>
+                  </div>
+
                   <div className="space-y-1">
-                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Shipping Address (Optional)</label>
-                    <textarea
-                      placeholder="Gulberg III, Lahore, Pakistan"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all min-h-[60px] leading-relaxed"
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">6-Digit Reset OTP *</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      placeholder="123456"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                     />
                   </div>
-                </>
-              )}
 
-              <button
-                type="submit"
-                disabled={formSubmitting}
-                className="w-full btn-primary py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 mt-4 cursor-pointer"
-              >
-                {formSubmitting ? (
-                  <Loader className="w-4 h-4 animate-spin text-white" />
-                ) : authTab === "login" ? (
-                  <>
-                    <Lock className="w-4 h-4" /> Sign In
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Register Profile
-                  </>
-                )}
-              </button>
-            </form>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">New Password *</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                    />
+                    <p className="text-[9px] text-stone-450 font-semibold leading-normal mt-1">
+                      Min 8 characters, must include an uppercase, lowercase, and a number.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={formSubmitting}
+                    className="w-full btn-primary py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 mt-4 cursor-pointer"
+                  >
+                    {formSubmitting ? (
+                      <Loader className="w-4 h-4 animate-spin text-white" />
+                    ) : (
+                      <>Update Password</>
+                    )}
+                  </button>
+
+                  <div className="text-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setForgotStep("request")}
+                      className="text-xs text-stone-550 font-bold hover:text-stone-850 underline transition-all cursor-pointer"
+                    >
+                      Resend Code / Change Email
+                    </button>
+                  </div>
+                </form>
+              )
+            ) : (
+              // DEFAULT VIEW: TABS SELECTOR & LOGIN/SIGNUP FORMS
+              <>
+                {/* Tab Selector */}
+                <div className="flex bg-stone-100/60 p-1.5 rounded-2xl border border-stone-200/20">
+                  <button
+                    onClick={() => { setAuthTab("login"); setAuthError(""); setAuthSuccess(""); }}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      authTab === "login"
+                        ? "bg-white text-amber-600 shadow-[0_4px_12px_rgba(212,175,55,0.06)] border border-stone-200/30"
+                        : "text-stone-500 hover:text-stone-850"
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => { setAuthTab("signup"); setAuthError(""); setAuthSuccess(""); }}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      authTab === "signup"
+                        ? "bg-white text-amber-600 shadow-[0_4px_12px_rgba(212,175,55,0.06)] border border-stone-200/30"
+                        : "text-stone-500 hover:text-stone-850"
+                    }`}
+                  >
+                    Create Account
+                  </button>
+                </div>
+
+                <form onSubmit={handleAuthSubmit} className="space-y-4">
+                  {authTab === "signup" && (
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Salman Khan"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="salman@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Password *</label>
+                      {authTab === "login" && (
+                        <button
+                          type="button"
+                          onClick={() => { setAuthView("forgot_password"); setForgotStep("request"); setAuthError(""); setAuthSuccess(""); }}
+                          className="text-[9px] font-bold text-amber-600 hover:underline cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                    />
+                    {authTab === "signup" && (
+                      <p className="text-[9px] text-stone-450 font-semibold leading-normal mt-1">
+                        Min 8 characters, must include an uppercase, lowercase, and a number.
+                      </p>
+                    )}
+                  </div>
+
+                  {authTab === "signup" && (
+                    <>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Phone Number *</label>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="0300 1234567"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Shipping Address (Optional)</label>
+                        <textarea
+                          placeholder="Gulberg III, Lahore, Pakistan"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all min-h-[60px] leading-relaxed"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={formSubmitting}
+                    className="w-full btn-primary py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 mt-4 cursor-pointer"
+                  >
+                    {formSubmitting ? (
+                      <Loader className="w-4 h-4 animate-spin text-white" />
+                    ) : authTab === "login" ? (
+                      <>
+                        <Lock className="w-4 h-4" /> Sign In
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" /> Register Profile
+                      </>
+                    )}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
 
           {/* RIGHT SIDE: Beautiful Luxury Brand Banner (Only visible on desktop) */}

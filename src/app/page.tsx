@@ -17,13 +17,49 @@ import {
   Phone,
   MapPin,
   Send,
-  Check
+  Check,
+  Loader
 } from "lucide-react";
 
 export default function Home() {
   const { products } = useAdmin();
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactError, setContactError] = useState("");
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactError("");
+    setContactSubmitting(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: contactName,
+          email: contactEmail,
+          phone: contactPhone,
+          message: contactMessage,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit inquiry.");
+      }
+
+      setContactSubmitted(true);
+    } catch (err: any) {
+      setContactError(err.message);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
 
   // Filter specific featured products dynamically by name matching
   const featuredNames = ["Shams Un Naeemi", "Oud Albaloshi", "Qaswa"];
@@ -413,40 +449,68 @@ export default function Home() {
         <div className="md:col-span-7">
           {contactSubmitted ? (
             <div className="p-6 text-center bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-3xl space-y-2 animate-fadeIn">
-              <Check className="w-8 h-8 mx-auto stroke-[2.5]" />
-              <h4 className="font-bold text-sm">Message Sent Securely</h4>
-              <p className="text-xs text-emerald-700">Thank you. The Naeemi care team will contact you shortly.</p>
+              <Check className="w-8 h-8 mx-auto stroke-[2.5] text-emerald-600" />
+              <h4 className="font-bold text-sm">Inquiry Dispatched</h4>
+              <p className="text-xs text-emerald-750 font-medium">Thank you. The Naeemi care team will contact you shortly.</p>
             </div>
           ) : (
             <form
-              onSubmit={(e) => { e.preventDefault(); setContactSubmitted(true); }}
+              onSubmit={handleContactSubmit}
               className="bg-white/40 border border-white/60 p-5 rounded-3xl space-y-3.5"
             >
-              <div className="grid grid-cols-2 gap-3">
+              {contactError && (
+                <div className="text-[11px] font-semibold text-rose-800 bg-rose-50 border border-rose-200/50 p-3 rounded-xl text-center">
+                  {contactError}
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
                   required
                   placeholder="Your Name"
-                  className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                 />
                 <input
-                  type="tel"
+                  type="email"
                   required
-                  placeholder="Phone Number"
-                  className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                  placeholder="Email Address"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                 />
               </div>
+
+              <input
+                type="tel"
+                required
+                placeholder="Phone Number"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
+              />
+
               <textarea
                 required
-                rows={2}
+                rows={3}
                 placeholder="How can we assist you with Naeemi Fragrances?"
-                className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none resize-none"
+                value={contactMessage}
+                onChange={(e) => setContactMessage(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all resize-none min-h-[70px] leading-relaxed"
               />
+
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-xl gold-btn text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                disabled={contactSubmitting}
+                className="w-full py-2.5 rounded-xl gold-btn text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Send className="w-3.5 h-3.5" />
+                {contactSubmitting ? (
+                  <Loader className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
                 Send Inquiry
               </button>
             </form>

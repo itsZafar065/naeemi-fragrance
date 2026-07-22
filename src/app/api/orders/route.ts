@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
-import nodemailer from "nodemailer";
+import { sendOrderConfirmation, sendOrderStatusEmail } from "@/lib/email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
@@ -23,53 +23,7 @@ function verifyAdminToken(request: Request) {
   }
 }
 
-// SMTP Confirmation Email Dispatcher
-async function sendConfirmationEmail(customerEmail: string, orderId: string, customerName: string, amount: number) {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
 
-  if (!host || !user || !pass || !customerEmail) {
-    console.log("SMTP environment credentials or recipient email missing. Email dispatch skipped.");
-    return;
-  }
-
-  try {
-    const db = await getDb();
-    const settings = await db.collection("settings").findOne({});
-    const template = settings?.emailTemplateOrder || "Dear {{name}}, Thank you for placing order {{orderId}} for Rs. {{amount}}.";
-
-    // Compile templates variables
-    const emailBody = template
-      .replace(/{{name}}/g, customerName)
-      .replace(/{{orderId}}/g, orderId)
-      .replace(/{{amount}}/g, amount.toLocaleString());
-
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
-
-    await transporter.sendMail({
-      from: `"Naeemi Fragrance" <${user}>`,
-      to: customerEmail,
-      subject: `Naeemi Order Confirmation - ${orderId}`,
-      text: emailBody,
-      html: `<div style="font-family: sans-serif; padding: 25px; background-color: #faf7f2; border: 1px solid #d4af37; border-radius: 16px; color: #1c1917; max-width: 500px; mx-auto;">
-        <h2 style="color: #aa7c11; font-family: serif; border-bottom: 1px solid #e8dec9; pb-10;">Naeemi Fragrances</h2>
-        <p style="font-size: 13px; line-height: 1.6; color: #444;">${emailBody.replace(/\n/g, "<br />")}</p>
-        <hr style="border: 0; border-top: 1px solid #e8dec9; margin-top: 25px; margin-bottom: 15px;" />
-        <span style="font-size: 10px; color: #aa7c11; font-weight: bold; letter-spacing: 0.15em; uppercase">Naeemi Naam Hai Mohabbat Ka</span>
-      </div>`,
-    });
-    console.log(`Confirmation email successfully delivered to ${customerEmail} for order ${orderId}`);
-  } catch (error) {
-    console.error("Nodemailer dispatcher failed:", error);
-  }
-}
 
 // GET all orders & system logs (Admin only)
 export async function GET(request: Request) {
@@ -153,7 +107,9 @@ export async function POST(request: Request) {
 
     // Asynchronously dispatch SMTP confirmation email if configurations are set
     if (newOrder.customerEmail) {
-      sendConfirmationEmail(newOrder.customerEmail, orderId, customerName, newOrder.totalAmount);
+      sendOrderConfirmation(newOrder.customerEmail, newOrder).catch((err) => {
+        console.error(`Failed to send order confirmation for ${orderId}:`, err);
+      });
     }
 
     return NextResponse.json({ success: true, orderId });
@@ -201,6 +157,14 @@ export async function PUT(request: Request) {
       date: new Date().toISOString(),
       details: `Updated order status for ${orderId} to '${status}'.`,
     });
+
+    // Asynchronously dispatch order status update notification to customer
+    const updatedOrder = await db.collection("orders").findOne({ id: orderId });
+    if (updatedOrder && updatedOrder.customerEmail) {
+      sendOrderStatusEmail(updatedOrder, status).catch((err) => {
+        console.error(`Failed to send order status email for ${orderId}:`, err);
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
