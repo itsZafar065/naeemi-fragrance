@@ -130,7 +130,7 @@ export default function Home() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="#story"
+              href="/about"
               className="px-6 py-3.5 rounded-2xl border border-stone-200 bg-white/40 backdrop-blur-md text-stone-700 font-bold text-xs hover:bg-white/60 transition-all"
             >
               Our Story

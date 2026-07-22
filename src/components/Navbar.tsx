@@ -81,14 +81,18 @@ export const Navbar: React.FC = () => {
             Shop
           </Link>
           <Link
-            href="/#about"
-            className="text-sm font-semibold tracking-wide text-stone-600 hover:text-amber-500 transition-colors"
+            href="/about"
+            className={`text-sm font-semibold tracking-wide transition-colors ${
+              isActive("/about") ? "text-amber-600" : "text-stone-600 hover:text-amber-500"
+            }`}
           >
             About
           </Link>
           <Link
-            href="/#contact"
-            className="text-sm font-semibold tracking-wide text-stone-600 hover:text-amber-500 transition-colors"
+            href="/contact"
+            className={`text-sm font-semibold tracking-wide transition-colors ${
+              isActive("/contact") ? "text-amber-600" : "text-stone-600 hover:text-amber-500"
+            }`}
           >
             Contact
           </Link>
