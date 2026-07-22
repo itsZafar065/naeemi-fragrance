@@ -10,15 +10,20 @@ export const Footer: React.FC = () => {
       <div className="hidden md:grid max-w-7xl mx-auto px-6 py-12 grid-cols-1 md:grid-cols-12 gap-8 text-stone-700">
         {/* Column 1: Brand Info */}
         <div className="md:col-span-4 space-y-4">
-          <div className="space-y-1">
-            <h3 className="font-extrabold text-xl tracking-wide font-serif text-stone-800">
-              NAEEMI FRAGRANCE
-            </h3>
-            <p className="text-[10px] tracking-[0.2em] font-medium text-amber-600 uppercase">
-              Naeemi Naam Hai Mohabbat Ka
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm shrink-0">
+              <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-lg tracking-wide font-serif text-stone-800 leading-none">
+                NAEEMI FRAGRANCE
+              </h3>
+              <p className="text-[9px] tracking-[0.15em] font-bold text-amber-600 uppercase leading-none mt-1">
+                Naeemi Naam Hai Mohabbat Ka
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-stone-500 leading-relaxed max-w-sm">
+          <p className="text-xs text-stone-500 leading-relaxed max-w-sm pt-1">
             Handcrafted with love and imported essential oils, creating exquisite perfumes with incredible longevity and sillage.
           </p>
         </div>

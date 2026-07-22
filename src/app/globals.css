@@ -98,3 +98,14 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.5);
 }
+
+/* Override browser default input autofill background to preserve white luxury inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #1c1917 !important;
+  box-shadow: 0 0 0 30px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

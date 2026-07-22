@@ -356,27 +356,23 @@ export default function CustomerProfilePage() {
         // ==========================================
         // --- CUSTOMER NOT LOGGED IN (AUTH SCREEN) ---
         // ==========================================
-        <div className="grid grid-cols-1 md:grid-cols-12 rounded-[32px] overflow-hidden border border-white/60 bg-white/20 backdrop-blur-md shadow-xl min-h-[580px] max-w-5xl mx-auto items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-12 rounded-[32px] overflow-hidden border-0 md:border border-white/60 bg-transparent md:bg-white/25 backdrop-blur-none md:backdrop-blur-md shadow-none md:shadow-xl min-h-[580px] max-w-5xl mx-auto items-stretch">
           
           {/* LEFT SIDE: Dynamic Forms (col-span-12 on Mobile, col-span-6 on Desktop) */}
-          <div className="md:col-span-6 p-6 sm:p-10 flex flex-col justify-center space-y-6">
+          <div className="md:col-span-6 p-4 sm:p-10 flex flex-col justify-center space-y-5">
             
-            {/* Mobile Header Image Overlay (Only visible on mobile) */}
-            <div className="block md:hidden relative w-full h-32 rounded-2xl overflow-hidden border border-amber-500/20 shadow-sm mb-4">
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url('/heroimg.webp')` }}
-              />
-              <div className="absolute inset-0 bg-stone-950/70" />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-3 space-y-1.5 animate-fadeIn">
-                <div className="w-11 h-11 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
-                  <img src="/logo.svg" className="w-full h-full object-cover" alt="Logo" />
-                </div>
-                <div className="text-center">
-                  <h2 className="font-serif text-xs font-extrabold text-white tracking-widest uppercase">NAEEMI FRAGRANCE</h2>
-                  <p className="text-[7.5px] text-amber-400 font-bold uppercase tracking-[0.2em] leading-none mt-0.5">Naeemi Naam Hai Mohabbat Ka</p>
-                </div>
+            {/* Mobile Header Brand Area (Only visible on mobile - Premium & Theme-matching) */}
+            <div className="block md:hidden text-center space-y-2.5 mb-4 animate-fadeIn">
+              <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-md">
+                <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+              </div>
+              <div className="space-y-1 select-none">
+                <h2 className="font-serif text-lg font-extrabold text-stone-850 tracking-widest uppercase leading-none">
+                  NAEEMI FRAGRANCE
+                </h2>
+                <p className="text-[9px] text-amber-600 font-bold uppercase tracking-[0.2em] leading-none mt-1">
+                  Naeemi Naam Hai Mohabbat Ka
+                </p>
               </div>
             </div>
 
@@ -387,7 +383,7 @@ export default function CustomerProfilePage() {
             </div>
 
             {/* Tab Selector */}
-            <div className="flex bg-stone-100/60 p-1 rounded-2xl border border-stone-200/20">
+            <div className="flex bg-stone-100/60 p-1.5 rounded-2xl border border-stone-200/20">
               <button
                 onClick={() => { setAuthTab("login"); setAuthError(""); setAuthSuccess(""); }}
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -421,7 +417,7 @@ export default function CustomerProfilePage() {
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
               {authTab === "signup" && (
                 <div className="space-y-1">
                   <label className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">Full Name *</label>
@@ -431,7 +427,7 @@ export default function CustomerProfilePage() {
                     placeholder="e.g. Salman Khan"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                   />
                 </div>
               )}
@@ -444,7 +440,7 @@ export default function CustomerProfilePage() {
                   placeholder="salman@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                 />
               </div>
 
@@ -456,10 +452,10 @@ export default function CustomerProfilePage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                  className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                 />
                 {authTab === "signup" && (
-                  <p className="text-[9px] text-stone-400 font-medium leading-normal mt-1">
+                  <p className="text-[9px] text-stone-450 font-semibold leading-normal mt-1">
                     Min 8 characters, must include an uppercase, lowercase, and a number.
                   </p>
                 )}
@@ -475,7 +471,7 @@ export default function CustomerProfilePage() {
                       placeholder="0300 1234567"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all"
                     />
                   </div>
                   <div className="space-y-1">
@@ -484,7 +480,7 @@ export default function CustomerProfilePage() {
                       placeholder="Gulberg III, Lahore, Pakistan"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 min-h-[60px] leading-relaxed"
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all min-h-[60px] leading-relaxed"
                     />
                   </div>
                 </>

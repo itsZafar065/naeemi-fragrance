@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       ?.split("=")[1];
 
     if (!sessionCookie) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false });
     }
 
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const customer = await db.collection("customers").findOne({ _id: new ObjectId(decoded.customerId) });
 
     if (!customer) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false });
     }
 
     return NextResponse.json({
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false });
   }
 }
 

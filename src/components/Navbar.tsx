@@ -46,16 +46,20 @@ export const Navbar: React.FC = () => {
       {/* 1. DESKTOP NAVIGATION BAR */}
       <div className="hidden md:flex max-w-7xl mx-auto px-6 h-20 items-center justify-between">
         {/* Brand Logo - Always visible on desktop */}
-        <Link href="/" className="flex flex-col items-start select-none" onClick={handleLogoClick}>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-            <h1 className="font-extrabold text-2xl tracking-wide font-serif text-stone-800">
-              NAEEMI FRAGRANCE
-            </h1>
+        <Link href="/" className="flex items-center gap-3 select-none" onClick={handleLogoClick}>
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
+            <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
           </div>
-          <span className="text-[10px] tracking-[0.2em] font-medium text-amber-600/80 -mt-0.5 ml-4 uppercase">
-            Naeemi Naam Hai Mohabbat Ka
-          </span>
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-extrabold text-lg lg:text-xl tracking-wide font-serif text-stone-800 leading-none">
+                NAEEMI FRAGRANCE
+              </h1>
+            </div>
+            <span className="text-[9px] tracking-[0.18em] font-bold text-amber-600/80 mt-1 uppercase leading-none">
+              Naeemi Naam Hai Mohabbat Ka
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Links */}
@@ -143,9 +147,11 @@ export const Navbar: React.FC = () => {
       {/* 2. MOBILE SCENT HEADER */}
       <div className="flex md:hidden h-14 px-4 items-center justify-between max-w-md mx-auto">
         {!showSearchInput ? (
-          <Link href="/" className="flex items-center gap-1.5 select-none" onClick={handleLogoClick}>
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="font-extrabold text-sm font-serif tracking-widest text-stone-800">
+          <Link href="/" className="flex items-center gap-2 select-none" onClick={handleLogoClick}>
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
+              <img src="/logo.svg" className="w-full h-full object-cover" alt="Logo" />
+            </div>
+            <span className="font-extrabold text-sm font-serif tracking-widest text-stone-850">
               NAEEMI
             </span>
           </Link>
