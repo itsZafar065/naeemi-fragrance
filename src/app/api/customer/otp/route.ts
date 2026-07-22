@@ -49,7 +49,8 @@ export async function POST(request: Request) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
-    // Remove any existing active OTP codes of the same type for this email
+    // Remove any existing active OTP codes of the same type for this email and purge expired ones
+    await db.collection("otps").deleteMany({ expiresAt: { $lt: new Date() } });
     await db.collection("otps").deleteMany({ email: cleanEmail, type });
 
     // Save new OTP code

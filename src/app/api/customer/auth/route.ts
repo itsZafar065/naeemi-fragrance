@@ -132,7 +132,8 @@ export async function POST(request: Request) {
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
-      // Store OTP
+      // Store OTP and purge expired ones
+      await db.collection("otps").deleteMany({ expiresAt: { $lt: new Date() } });
       await db.collection("otps").deleteMany({ email: cleanEmail, type: "email_verification" });
       await db.collection("otps").insertOne({
         email: cleanEmail,
@@ -282,6 +283,7 @@ export async function POST(request: Request) {
         const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
+        await db.collection("otps").deleteMany({ expiresAt: { $lt: new Date() } });
         await db.collection("otps").deleteMany({ email: cleanEmail, type: "email_verification" });
         await db.collection("otps").insertOne({
           email: cleanEmail,
