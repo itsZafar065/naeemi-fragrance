@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   keywords: "perfume store, nextjs, naeemi fragrance, oud, premium scent, mobile fragrance app",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.svg",
+    apple: "/logo.svg",
   },
 };
 

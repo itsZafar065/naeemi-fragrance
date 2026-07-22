@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Solid Theme Background to make it stand out and look premium on any home screen -->
+  <rect width="512" height="512" fill="#faf7f2" rx="100"/>
+  
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3e7c4" />
+      <stop offset="50%" stop-color="#d4af37" />
+      <stop offset="100%" stop-color="#aa7c11" />
+    </linearGradient>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#8a7647" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Outer Elegant Gold Frame -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#goldGrad)" stroke-width="6" filter="url(#subtleShadow)" />
+  <circle cx="256" cy="256" r="198" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6" stroke-dasharray="8 4" />
+
+  <!-- Center Decorative Diamond Accent -->
+  <path d="M 256,60 L 270,74 L 256,88 L 242,74 Z" fill="url(#goldGrad)" />
+  <path d="M 256,424 L 270,438 L 256,452 L 242,438 Z" fill="url(#goldGrad)" />
+
+  <!-- Stylized Luxury Perfume Bottle Line-Art -->
+  <g transform="translate(156, 110)" filter="url(#subtleShadow)">
+    <!-- Bottle Cap -->
+    <rect x="70" y="0" width="60" height="40" rx="6" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+    <line x1="70" y1="20" x2="130" y2="20" stroke="url(#goldGrad)" stroke-width="2" />
+    
+    <!-- Bottle Neck -->
+    <rect x="85" y="40" width="30" height="15" fill="url(#goldGrad)" />
+    
+    <!-- Bottle Shoulders and Body -->
+    <path d="M 30,70 L 170,70 L 180,90 L 180,210 L 160,230 L 40,230 L 20,210 L 20,90 Z" fill="none" stroke="url(#goldGrad)" stroke-width="5" stroke-linejoin="round" />
+    
+    <!-- Inner Frame / Label -->
+    <rect x="45" y="100" width="110" height="100" rx="8" fill="#faf7f2" stroke="url(#goldGrad)" stroke-width="3" />
+    
+    <!-- Monogram N in the Center -->
+    <text x="100" y="165" font-family="'Playfair Display', 'Georgia', serif" font-size="64" font-weight="bold" fill="url(#goldGrad)" text-anchor="middle">N</text>
+    
+    <!-- Fine lines/details -->
+    <path d="M 10,215 L 190,215" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" />
+  </g>
+
+  <!-- Brand Name Typography inside Logo -->
+  <text x="256" y="380" font-family="'Plus Jakarta Sans', 'sans-serif'" font-size="22" font-weight="bold" fill="#3f3a36" letter-spacing="8" text-anchor="middle">NAEEMI</text>
+  <text x="256" y="405" font-family="'Plus Jakarta Sans', 'sans-serif'" font-size="10" font-weight="600" fill="url(#goldGrad)" letter-spacing="4" text-anchor="middle">FRAGRANCE</text>
+</svg>
