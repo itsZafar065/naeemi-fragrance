@@ -71,8 +71,8 @@ const emailBaseTemplate = (title: string, bodyContent: string) => `
 
     <!-- Brand Footer -->
     <div style="background-color: #faf7f2; padding: 25px; text-align: center; border-top: 1px solid #e8dec9; font-size: 10px; color: #8a827c; font-weight: 500;">
-      <p style="margin: 0 0 10px 0;">If you have any questions, reach us on WhatsApp at <strong>03092184760</strong> or email <strong>support@naeemi.com</strong></p>
-      <p style="margin: 0;">© ${new Date().getFullYear()} Naeemi Fragrance. Gulberg III, Lahore, Pakistan.</p>
+      <p style="margin: 0 0 10px 0;">If you have any questions, reach us on WhatsApp at <strong>03092184760</strong> or email <strong>naeemifragrance@gmail.com</strong></p>
+      <p style="margin: 0;">© ${new Date().getFullYear()} Naeemi Fragrance. Bin Qasim Town Karachi Pakistan.</p>
     </div>
   </div>
 </div>

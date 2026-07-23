@@ -1839,7 +1839,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="p-3 bg-stone-50 border rounded-2xl space-y-1">
                         <span className="text-[9px] text-stone-400 uppercase tracking-widest font-extrabold block">Central Scent Warehouse</span>
-                        <p className="text-stone-800 text-xs">Gulberg III, Lahore, Pakistan</p>
+                        <p className="text-stone-800 text-xs">Bin Qasim Town Karachi Pakistan</p>
                       </div>
                     </div>
                     <div className="p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-[10px] text-stone-500 leading-relaxed">

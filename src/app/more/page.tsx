@@ -139,11 +139,11 @@ export default function MoreMenuPage() {
           </div>
           <div className="flex items-center gap-3">
             <Mail className="w-4 h-4 text-amber-600" />
-            <span>support@naeemi.com</span>
+            <span>naeemifragrance@gmail.com</span>
           </div>
           <div className="flex items-center gap-3">
             <MapPin className="w-4 h-4 text-amber-600" />
-            <span>Gulberg III, Lahore, Pakistan</span>
+            <span>Bin Qasim Town Karachi Pakistan</span>
           </div>
         </div>
       </div>

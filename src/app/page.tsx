@@ -473,14 +473,14 @@ export default function Home() {
               <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
                 <Mail className="w-4 h-4" />
               </div>
-              <span>support@naeemi.com</span>
+              <span>naeemifragrance@gmail.com</span>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
                 <MapPin className="w-4 h-4" />
               </div>
-              <span>Gulberg III, Lahore, Pakistan</span>
+              <span>Bin Qasim Town Karachi Pakistan</span>
             </div>
           </div>
         </div>

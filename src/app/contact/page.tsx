@@ -87,7 +87,7 @@ export default function ContactPage() {
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Email Inquiry</p>
-                  <p className="text-xs font-bold text-stone-800">support@naeemi.com</p>
+                  <p className="text-xs font-bold text-stone-800">naeemifragrance@gmail.com</p>
                 </div>
               </div>
 
@@ -97,10 +97,21 @@ export default function ContactPage() {
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Vault Location</p>
-                  <p className="text-xs font-bold text-stone-850">Gulberg III, Lahore, Pakistan</p>
+                  <p className="text-xs font-bold text-stone-850">Bin Qasim Town Karachi Pakistan</p>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Interactive Google Map of Bin Qasim Town, Karachi */}
+          <div className="glass-panel p-2 rounded-[32px] border border-white/50 overflow-hidden aspect-video relative shadow-md">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115939.81432415174!2d67.24765660856018!3d24.842776882200388!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3eb349cae20340d3%3A0xc3317769e6b4d32a!2sBin%20Qasim%20Town%2C%20Karachi%2C%20Karachi%20City%2C%20Sindh%2C%20Pakistan!5e0!3m2!1sen!2s!4v1721743516000!5m2!1sen!2s" 
+              className="w-full h-full rounded-[26px] border-0" 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
 
           <div className="p-5 bg-amber-500/5 border border-amber-500/10 rounded-[28px] text-[11px] text-stone-500 leading-relaxed text-center italic">

@@ -59,11 +59,11 @@ export const Footer: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-stone-600">
               <Mail className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>support@naeemi.com</span>
+              <span>naeemifragrance@gmail.com</span>
             </div>
             <div className="flex items-center gap-2 text-stone-600">
               <MapPin className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Gulberg III, Lahore, Pakistan</span>
+              <span>Bin Qasim Town Karachi Pakistan</span>
             </div>
           </div>
         </div>
