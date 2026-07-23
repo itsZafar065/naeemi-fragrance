@@ -9,54 +9,64 @@ export default function AboutPage() {
     <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-16 text-stone-850 animate-fadeIn mt-4">
       
       {/* HERO SECTION: Spiritual Leader & Legacy */}
-      <section className="relative overflow-hidden rounded-[40px] border border-amber-500/20 bg-gradient-to-b from-amber-50/50 via-stone-50/30 to-white p-8 md:p-12 text-center space-y-6 shadow-md">
+      <section className="relative overflow-hidden rounded-[40px] border border-amber-500/20 bg-gradient-to-b from-amber-50/50 via-stone-50/30 to-white p-6 md:p-10 shadow-md">
         {/* Background glow effects */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[10px] font-extrabold tracking-widest uppercase">
-          <Sparkles className="w-3.5 h-3.5 fill-amber-600/30 text-amber-600 animate-pulse" />
-          Ruhani-Rehnumai & Spiritual Blessing
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[10px] font-extrabold tracking-widest uppercase">
+            <Sparkles className="w-3.5 h-3.5 fill-amber-600/30 text-amber-600 animate-pulse" />
+            Ruhani-Rehnumai & Spiritual Blessing
+          </div>
         </div>
 
-        {/* Spiritual Master Image Container */}
-        <div className="flex justify-center my-2">
-          <div className="relative w-36 h-36 md:w-40 md:h-40 rounded-full p-1 bg-gradient-to-br from-amber-500 to-amber-600 shadow-md">
-            <div className="w-full h-full rounded-full overflow-hidden bg-stone-100 border border-white relative flex items-center justify-center">
-              <img 
-                src="/mufti-jan.webp" 
-                alt="Mufti Muhammad Jan Naeemi" 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aa7c11' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-                }}
-              />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center pt-2">
+          {/* Left Side: Arched Premium Frame for Murshid Photo */}
+          <div className="md:col-span-5 flex justify-center">
+            <div className="relative group w-full max-w-[260px] aspect-[4/5] rounded-[48px] overflow-hidden p-2 bg-gradient-to-br from-amber-500/20 to-amber-600/5 shadow-xl border border-amber-100/50">
+              <div className="w-full h-full rounded-[40px] overflow-hidden relative bg-white flex items-center justify-center border border-white">
+                <img 
+                  src="/mufti-jan.webp" 
+                  alt="Mufti Muhammad Jan Naeemi" 
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aa7c11' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+                  }}
+                />
+                
+                {/* Gold frames */}
+                <div className="absolute inset-3 border border-amber-500/20 rounded-[32px] pointer-events-none" />
+                <div className="absolute inset-3.5 border border-amber-500/10 rounded-[30px] pointer-events-none" />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Calligraphy Frame / Title */}
-        <div className="space-y-4 max-w-3xl mx-auto">
-          <p className="text-xs text-stone-500 font-medium tracking-wide uppercase">
-            Hamare buzurgo ki duaon, pehchan aur unke karam se chalne wala azeem legacy:
-          </p>
-          <div className="py-4 border-y border-amber-505/20 my-2">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 leading-normal font-sans py-1">
-              جانِ اہلسنت مفتیِ اعظم سندھ شیخ الحدیث <br />
-              <span className="gold-gradient-text text-3xl sm:text-4xl md:text-5xl font-serif">مفتی محمد جان نعیمی</span>
-            </h2>
+          {/* Right Side: Arabic Title, Description, and Blessing */}
+          <div className="md:col-span-7 text-left space-y-5">
+            <div className="space-y-3.5">
+              <p className="text-[10px] font-extrabold text-amber-700 uppercase tracking-widest">
+                Hamare buzurgo ki duaon aur unke karam se chalne wala azeem legacy:
+              </p>
+              <div className="py-3 border-y border-amber-500/10">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 leading-normal font-sans">
+                  جانِ اہلسنت مفتیِ اعظم سندھ شیخ الحدیث <br />
+                  <span className="gold-gradient-text text-2xl sm:text-3xl md:text-4xl font-serif">مفتی محمد جان نعیمی</span>
+                </h2>
+              </div>
+              <p className="text-[11px] sm:text-xs text-stone-500 leading-relaxed">
+                Aap na sirf hamare rehnuma hain, balkay hamare nihayat shafiq **Ustad** hain jinse humne ilm o adab seekha, aur hamare **Murshid-e-Kamil** hain. Hamare karobar ka ek ek qatra aap hi ki duaon ka azeem samar ha. Hamein fakhra ha ke hum aap ke dar ke adna talib-e-ilm hain.
+              </p>
+            </div>
+
+            {/* Spiritual Quote box inside right column */}
+            <div className="p-4 bg-white/70 border border-amber-100/50 rounded-2xl flex gap-3 text-left items-start shadow-xs">
+              <Quote className="w-6 h-6 text-amber-650 shrink-0 opacity-40 rotate-180" />
+              <p className="text-[10px] text-stone-500 leading-relaxed italic">
+                "Naeemi Naam Hai Mohabbat Ka — Ye sirf ek tagline nahi, balkay hamare ustad o murshid ki sachi sikhai hui mohabbat ka amli aayena-dar ha jo hum har fragrance ke sath aap tak pohnchate hain."
+              </p>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-2xl mx-auto leading-relaxed">
-            Aap na sirf hamare rehnuma hain, balkay hamare nihayat shafiq **Ustad** hain jinse humne ilm o adab seekha, aur hamare **Murshid-e-Kamil** hain. Hamare karobar ka ek ek qatra aap hi ki duaon ka azeem samar ha. Hamein fakhra ha ke hum aap ke dar ke adna talib-e-ilm hain.
-          </p>
-        </div>
-
-        {/* Spiritual Quote box */}
-        <div className="max-w-xl mx-auto p-4.5 bg-white/60 border border-amber-100 rounded-2xl flex gap-3.5 text-left items-start shadow-xs">
-          <Quote className="w-8 h-8 text-amber-500 shrink-0 opacity-40 rotate-180" />
-          <p className="text-[11px] text-stone-500 leading-relaxed italic">
-            "Naeemi Naam Hai Mohabbat Ka — Ye sirf ek tagline nahi, balkay hamare ustad o murshid ki sachi sikhai hui mohabbat ka amli aayena-dar ha jo hum har fragrance ke sath aap tak pohnchate hain."
-          </p>
         </div>
       </section>
 
