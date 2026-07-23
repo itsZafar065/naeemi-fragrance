@@ -217,7 +217,10 @@ export default function AdminDashboard() {
       try {
         const jsonStart = details.indexOf("{");
         if (jsonStart !== -1) {
-          const jsonStr = details.substring(jsonStart);
+          let jsonStr = details.substring(jsonStart).trim();
+          if (jsonStr.endsWith(".")) {
+            jsonStr = jsonStr.slice(0, -1).trim();
+          }
           const parsed = JSON.parse(jsonStr);
           const idMatch = details.match(/ID (\w+)/);
           const id = idMatch ? idMatch[1] : "";
