@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { sanitizeInput, validateEmail } from "@/lib/security";
+import { sendNewsletterWelcome } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     // Check if already subscribed
     const existing = await db.collection("newsletter_subscribers").findOne({ email: cleanEmail });
     if (existing) {
-      return NextResponse.json({ success: true, message: "You are already subscribed to our list!" });
+      return NextResponse.json({ error: "This email is already subscribed to our newsletter list." }, { status: 400 });
     }
 
     await db.collection("newsletter_subscribers").insertOne({
@@ -31,7 +32,12 @@ export async function POST(request: Request) {
       subscribed_at: new Date().toISOString(),
     });
 
-    return NextResponse.json({ success: true, message: "Thank you for subscribing to our scent newsletter!" });
+    // Dispatch welcome email with 10% discount coupon code
+    await sendNewsletterWelcome(cleanEmail).catch((err) => {
+      console.error("Failed to dispatch newsletter welcome email:", err);
+    });
+
+    return NextResponse.json({ success: true, message: "Thank you for subscribing! We have sent a 10% OFF discount coupon code to your email." });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

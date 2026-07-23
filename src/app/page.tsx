@@ -421,7 +421,7 @@ export default function Home() {
 
           {newsletterSubscribed ? (
             <div className="mx-auto max-w-sm py-2 px-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 animate-fadeIn">
-              <Check className="w-4 h-4" /> Subscription Successful! Welcome to Naeemi Fragrances.
+              <Check className="w-4 h-4" /> Subscription Successful! Check your email for your 10% OFF discount coupon.
             </div>
           ) : (
             <form onSubmit={handleNewsletterSubmit} className="mx-auto max-w-md space-y-2">

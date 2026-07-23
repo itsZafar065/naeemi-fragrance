@@ -283,3 +283,25 @@ export async function sendContactInquiry(name: string, email: string, phone: str
   // Send inquiry email to business owner
   return sendMailHelper(businessEmail, `Naeemi Fragrance Care Inquiry - From ${name}`, emailBaseTemplate(title, content));
 }
+
+// 7. Send Newsletter Subscription Welcome & Discount Code
+export async function sendNewsletterWelcome(email: string) {
+  const title = "Welcome to the Scent Club!";
+  const content = `
+    <p>Dear Scent Enthusiast,</p>
+    <p>Thank you for subscribing to the <strong>Naeemi Fragrance</strong> newsletter. You are now part of our exclusive inner circle!</p>
+    <p>As a warm welcome, please accept this <strong>10% OFF discount coupon</strong> to be used on your next purchase of Ouds or luxury French floral imports:</p>
+    
+    <div style="background-color: #faf7f2; border: 1px dashed #d4af37; border-radius: 16px; padding: 20px; text-align: center; margin: 30px 0; letter-spacing: 2px; font-size: 24px; font-weight: 900; color: #aa7c11;">
+      NAEEMI10
+    </div>
+    
+    <p style="color: #8a827c; font-size: 11px;">* Simply copy the code and paste it into the coupon input during your checkout to claim your 10% discount.</p>
+    <p>We will keep you updated with private batch launches, secret collections, and seasonal promotions.</p>
+    
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/shop" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Shop Collection</a>
+    </div>
+  `;
+  return sendMailHelper(email, "Naeemi Fragrance - Welcome to the Scent Club (10% OFF Coupon)", emailBaseTemplate(title, content));
+}
