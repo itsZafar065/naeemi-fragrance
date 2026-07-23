@@ -37,7 +37,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowInstallBanner(true);
+      // Check if user has previously dismissed the install prompt
+      if (typeof window !== "undefined" && localStorage.getItem("pwa-install-dismissed") !== "true") {
+        setShowInstallBanner(true);
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -47,12 +50,22 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const dismissInstallBanner = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pwa-install-dismissed", "true");
+    }
+    setShowInstallBanner(false);
+  };
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to install prompt: ${outcome}`);
     setDeferredPrompt(null);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pwa-install-dismissed", "true");
+    }
     setShowInstallBanner(false);
   };
 
@@ -153,7 +166,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               <p className="text-[10px] text-stone-300">Enjoy offline tracking and faster checkouts on your mobile screen!</p>
             </div>
             <button 
-              onClick={() => setShowInstallBanner(false)}
+              onClick={dismissInstallBanner}
               className="text-stone-400 hover:text-white p-1 cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -167,7 +180,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               Install App
             </button>
             <button
-              onClick={() => setShowInstallBanner(false)}
+              onClick={dismissInstallBanner}
               className="px-4 py-2 border border-stone-700 hover:bg-stone-800 text-stone-300 font-bold text-[10px] rounded-xl transition-all cursor-pointer"
             >
               Maybe Later
