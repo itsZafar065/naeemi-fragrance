@@ -104,6 +104,46 @@ export default function CustomerProfilePage() {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Request system notification permissions on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          console.log("OS notifications permission status:", permission);
+        });
+      }
+    }
+  }, []);
+
+  const triggerSystemNotification = (orderId: string, status: string) => {
+    // Show local custom web app toast overlay
+    setToastMessage(`Order #${orderId} status has been updated to '${status}'!`);
+    setTimeout(() => setToastMessage(null), 8000);
+
+    // Trigger native OS system notification bar alert
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+      const title = `Naeemi Fragrance Order Update`;
+      const options = {
+        body: `Order #${orderId} status has been updated to '${status}'!`,
+        icon: "/logo.png",
+        badge: "/logo.png",
+        vibrate: [200, 100, 200],
+        tag: `order-update-${orderId}`,
+        renotify: true
+      };
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification(title, options);
+        }).catch(() => {
+          new Notification(title, options);
+        });
+      } else {
+        new Notification(title, options);
+      }
+    }
+  };
+
   const fetchOrders = async (isPolling = false) => {
     try {
       if (!isPolling) setOrdersLoading(true);
@@ -116,8 +156,7 @@ export default function CustomerProfilePage() {
               data.orders.forEach((newOrd: any) => {
                 const match = prevOrders.find((oldOrd) => oldOrd.id === newOrd.id);
                 if (match && match.status !== newOrd.status) {
-                  setToastMessage(`Order #${newOrd.id} status has been updated to '${newOrd.status}'!`);
-                  setTimeout(() => setToastMessage(null), 8000);
+                  triggerSystemNotification(newOrd.id, newOrd.status);
                 }
               });
             }
@@ -154,8 +193,7 @@ export default function CustomerProfilePage() {
         setOrders((prevOrders) => {
           return prevOrders.map((ord) => {
             if (ord.id === data.orderId && ord.status !== data.status) {
-              setToastMessage(`Order #${data.orderId} status has been updated to '${data.status}'!`);
-              setTimeout(() => setToastMessage(null), 8000);
+              triggerSystemNotification(data.orderId, data.status);
               return { ...ord, status: data.status as any };
             }
             return ord;
