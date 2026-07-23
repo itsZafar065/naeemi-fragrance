@@ -13,7 +13,11 @@ import {
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("Missing JWT_SECRET environment variable");
+}
+const SECRET = JWT_SECRET || "fallback_secret_key";
 
 // GET current customer session
 export async function GET(request: Request) {
@@ -28,7 +32,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false });
     }
 
-    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, SECRET) as any;
 
     // Fetch latest user data from DB to ensure it's fresh
     const db = await getDb();
@@ -197,7 +201,7 @@ export async function POST(request: Request) {
           email: cleanEmail,
           name: customer.name,
         },
-        JWT_SECRET,
+        SECRET,
         { expiresIn: "30d" }
       );
 
@@ -314,7 +318,7 @@ export async function POST(request: Request) {
           email: cleanEmail,
           name: customer.name,
         },
-        JWT_SECRET,
+        SECRET,
         { expiresIn: "30d" }
       );
 
@@ -359,7 +363,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, SECRET) as any;
 
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
@@ -393,6 +397,43 @@ export async function PUT(request: Request) {
         address: address || "",
       }
     });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE permanently delete customer account from database
+export async function DELETE(request: Request) {
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const sessionCookie = cookieHeader
+      .split("; ")
+      .find((c) => c.startsWith("naeemi_customer_session="))
+      ?.split("=")[1];
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const decoded = jwt.verify(sessionCookie, SECRET) as any;
+    const db = await getDb();
+    const ObjectId = require("mongodb").ObjectId;
+
+    // Delete customer document from DB
+    const deleteResult = await db.collection("customers").deleteOne({
+      _id: new ObjectId(decoded.customerId)
+    });
+
+    if (deleteResult.deletedCount === 0) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    // Delete associated OTPs if any
+    await db.collection("otps").deleteMany({ email: decoded.email });
+
+    const response = NextResponse.json({ success: true, message: "Account deleted permanently" });
+    response.cookies.delete("naeemi_customer_session");
+    return response;
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

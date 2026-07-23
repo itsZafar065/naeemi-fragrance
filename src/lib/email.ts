@@ -216,6 +216,7 @@ export async function sendOrderStatusEmail(order: any, status: string) {
       break;
 
     case "completed":
+    case "delivered":
       title = "Delivery Confirmed - Enjoy Your Scents!";
       subject = `Naeemi Fragrance - Order Delivered (${order.id})`;
       content = `

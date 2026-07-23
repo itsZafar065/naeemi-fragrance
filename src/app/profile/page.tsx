@@ -101,20 +101,33 @@ export default function CustomerProfilePage() {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  const fetchOrders = async () => {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const fetchOrders = async (isPolling = false) => {
     try {
-      setOrdersLoading(true);
+      if (!isPolling) setOrdersLoading(true);
       const response = await fetch("/api/customer/orders");
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setOrders(data.orders);
+          setOrders((prevOrders) => {
+            if (isPolling && prevOrders.length > 0 && data.orders.length > 0) {
+              data.orders.forEach((newOrd: any) => {
+                const match = prevOrders.find((oldOrd) => oldOrd.id === newOrd.id);
+                if (match && match.status !== newOrd.status) {
+                  setToastMessage(`Order #${newOrd.id} status has been updated to '${newOrd.status}'!`);
+                  setTimeout(() => setToastMessage(null), 8000);
+                }
+              });
+            }
+            return data.orders;
+          });
         }
       }
     } catch (err) {
       console.error("Error loading customer orders:", err);
     } finally {
-      setOrdersLoading(false);
+      if (!isPolling) setOrdersLoading(false);
     }
   };
 
@@ -127,6 +140,35 @@ export default function CustomerProfilePage() {
       fetchOrders();
     }
   }, [customer]);
+
+  // Polling interval to auto-sync order status updates every 10 seconds for real-time notifications
+  useEffect(() => {
+    if (!customer) return;
+    const interval = setInterval(() => {
+      fetchOrders(true);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [customer]);
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Warning: Are you sure you want to permanently delete your account? All your personal records will be removed. This action is irreversible.")) {
+      return;
+    }
+    try {
+      const res = await fetch("/api/customer/auth", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        alert("Your account has been permanently deleted. Logging you out.");
+        window.location.href = "/";
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete account");
+      }
+    } catch (err) {
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,6 +319,12 @@ export default function CustomerProfilePage() {
 
   return (
     <div className="max-w-6xl mx-auto py-4 md:py-10 px-4 md:px-6 text-stone-800 animate-fadeIn">
+      {toastMessage && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-stone-900 border border-amber-500 text-[#faf7f2] font-bold text-xs py-3 px-6 rounded-full shadow-2xl flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
       {loading ? (
         <div className="glass-panel p-16 rounded-[36px] border border-white/50 flex flex-col items-center justify-center space-y-4">
           <Loader className="w-8 h-8 text-amber-500 animate-spin" />
@@ -408,6 +456,18 @@ export default function CustomerProfilePage() {
                     <span className="text-stone-400 font-semibold text-left">Address</span>
                     <span className="col-span-2 font-semibold text-stone-705 leading-relaxed">{customer.address || "No address saved. Add one to speed up checkout!"}</span>
                   </div>
+                </div>
+              )}
+
+              {!isEditing && (
+                <div className="border-t border-stone-200/20 pt-4 flex justify-between items-center text-[10px]">
+                  <span className="text-stone-400 font-semibold">Security Settings</span>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                  >
+                    Delete Account Permanently
+                  </button>
                 </div>
               )}
             </div>
