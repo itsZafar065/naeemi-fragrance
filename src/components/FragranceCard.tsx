@@ -105,9 +105,16 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
         <div className="flex items-center justify-between pt-1">
           <div className="flex flex-col">
             <span className="text-[10px] text-stone-400 font-medium">{product.volume}</span>
-            <span className="font-extrabold text-stone-800 text-base">
-              Rs. {product.price.toLocaleString()}
-            </span>
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="font-extrabold text-stone-800 text-base">
+                Rs. {product.price.toLocaleString()}
+              </span>
+              {product.regularPrice && product.regularPrice > product.price && (
+                <span className="line-through text-stone-400 text-xs font-bold">
+                  Rs. {product.regularPrice.toLocaleString()}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Quick Add Button */}

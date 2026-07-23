@@ -46,6 +46,7 @@ export default function AdminDashboard() {
     adminUser,
     systemLogs,
     loading,
+    registeredCustomers,
     login,
     logout,
     refreshSession,
@@ -124,32 +125,34 @@ export default function AdminDashboard() {
   // Summary Metrics
   const { totalSales, totalOrders, pendingOrders, lowStockCount } = getSalesSummary();
 
-  // Derived Customers list
-  const customers = orders.reduce((acc: any[], order) => {
-    const existing = acc.find(c => c.phone === order.customerPhone);
-    if (existing) {
-      existing.ordersCount += 1;
-      existing.totalSpent += order.totalAmount;
-      if (!existing.addresses.includes(order.customerAddress)) {
-        existing.addresses.push(order.customerAddress);
-      }
-    } else {
-      acc.push({
-        name: order.customerName,
-        phone: order.customerPhone,
-        totalSpent: order.totalAmount,
-        ordersCount: 1,
-        addresses: [order.customerAddress]
-      });
-    }
-    return acc;
-  }, []);
+  // Real registered customers mapped with calculated orders count & spent
+  const processedCustomers = registeredCustomers.map((cust) => {
+    const custOrders = orders.filter((o) => o.customerPhone === cust.phone || (cust.email && o.customerEmail?.toLowerCase() === cust.email.toLowerCase()));
+    const totalSpent = custOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const addresses = custOrders.reduce((acc: string[], o) => {
+      if (!acc.includes(o.customerAddress)) acc.push(o.customerAddress);
+      return acc;
+    }, cust.address ? [cust.address] : []);
+    
+    return {
+      name: cust.name,
+      email: cust.email,
+      phone: cust.phone || "—",
+      addresses,
+      ordersCount: custOrders.length,
+      totalSpent
+    };
+  });
 
   // Form states for creating a new product
   const [showAddForm, setShowAddForm] = useState(false);
   const [name, setName] = useState("");
+  const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
+  const [longDescription, setLongDescription] = useState("");
   const [price, setPrice] = useState(0);
+  const [regularPrice, setRegularPrice] = useState<number | "">("");
+  const [salePrice, setSalePrice] = useState<number | "">("");
   const [volume, setVolume] = useState("100ml");
   const [type, setType] = useState("Eau de Parfum (EDP)");
   const [category, setCategory] = useState("Oud");
@@ -158,10 +161,44 @@ export default function AdminDashboard() {
   const [baseNotes, setBaseNotes] = useState("");
   const [stock, setStock] = useState(10);
   const [imagePath, setImagePath] = useState("/shams.webp");
+  const [variantsList, setVariantsList] = useState<any[]>([]);
+
+  // Variant addition states
+  const [varVolume, setVarVolume] = useState("");
+  const [varPrice, setVarPrice] = useState<number | "">("");
+  const [varRegularPrice, setVarRegularPrice] = useState<number | "">("");
+  const [varStock, setVarStock] = useState<number>(10);
+  const [varSku, setVarSku] = useState("");
   
   // Stock edit states
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [tempStockValue, setTempStockValue] = useState<number>(0);
+
+  // Full product editing specifications states
+  const [editingProduct, setEditingProduct] = useState<Perfume | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editSku, setEditSku] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editLongDescription, setEditLongDescription] = useState("");
+  const [editPrice, setEditPrice] = useState(0);
+  const [editRegularPrice, setEditRegularPrice] = useState<number | "">("");
+  const [editSalePrice, setEditSalePrice] = useState<number | "">("");
+  const [editVolume, setEditVolume] = useState("100ml");
+  const [editType, setEditType] = useState("Eau de Parfum (EDP)");
+  const [editCategory, setEditCategory] = useState("Oud");
+  const [editTopNotes, setEditTopNotes] = useState("");
+  const [editHeartNotes, setEditHeartNotes] = useState("");
+  const [editBaseNotes, setEditBaseNotes] = useState("");
+  const [editStock, setEditStock] = useState(10);
+  const [editImagePath, setEditImagePath] = useState("");
+  const [editVariantsList, setEditVariantsList] = useState<any[]>([]);
+
+  // Variant addition states for editing
+  const [editVarVolume, setEditVarVolume] = useState("");
+  const [editVarPrice, setEditVarPrice] = useState<number | "">("");
+  const [editVarRegularPrice, setEditVarRegularPrice] = useState<number | "">("");
+  const [editVarStock, setEditVarStock] = useState<number>(10);
+  const [editVarSku, setEditVarSku] = useState("");
 
   const [newCouponCode, setNewCouponCode] = useState("");
   const [newCouponDiscount, setNewCouponDiscount] = useState(10);
@@ -190,7 +227,8 @@ export default function AdminDashboard() {
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !description || price <= 0 || stock < 0) return;
+    const finalPrice = salePrice ? Number(salePrice) : price ? Number(price) : 0;
+    if (!name || !description || finalPrice <= 0 || stock < 0) return;
 
     const topArray = topNotes.split(",").map((n) => n.trim()).filter(Boolean);
     const heartArray = heartNotes.split(",").map((n) => n.trim()).filter(Boolean);
@@ -198,8 +236,12 @@ export default function AdminDashboard() {
 
     const result = await addProduct({
       name,
+      sku: sku || "",
       description,
-      price,
+      longDescription: longDescription || "",
+      price: finalPrice,
+      regularPrice: regularPrice ? Number(regularPrice) : undefined,
+      salePrice: salePrice ? Number(salePrice) : undefined,
       volume,
       type,
       category,
@@ -207,13 +249,18 @@ export default function AdminDashboard() {
       heartNotes: heartArray.length ? heartArray : ["Floral Essence"],
       baseNotes: baseArray.length ? baseArray : ["Amber Base"],
       stock,
-      imageUrl: imagePath || "/shams.webp"
+      imageUrl: imagePath || "/shams.webp",
+      variants: variantsList
     });
 
     if (result.success) {
       setName("");
+      setSku("");
       setDescription("");
+      setLongDescription("");
       setPrice(0);
+      setRegularPrice("");
+      setSalePrice("");
       setVolume("100ml");
       setType("Eau de Parfum (EDP)");
       setCategory("Oud");
@@ -222,9 +269,66 @@ export default function AdminDashboard() {
       setBaseNotes("");
       setStock(10);
       setImagePath("/shams.webp");
+      setVariantsList([]);
       setShowAddForm(false);
     } else {
       alert(result.error || "Failed to add product listing");
+    }
+  };
+
+  const handleStartEditProduct = (prod: Perfume) => {
+    setEditingProduct(prod);
+    setEditName(prod.name);
+    setEditSku(prod.sku || "");
+    setEditDescription(prod.description);
+    setEditLongDescription(prod.longDescription || "");
+    setEditPrice(prod.price);
+    setEditRegularPrice(prod.regularPrice || "");
+    setEditSalePrice(prod.salePrice || "");
+    setEditVolume(prod.volume || "100ml");
+    setEditType(prod.type || "Eau de Parfum (EDP)");
+    setEditCategory(prod.category || "Oud");
+    setEditTopNotes(prod.topNotes?.join(", ") || "");
+    setEditHeartNotes(prod.heartNotes?.join(", ") || "");
+    setEditBaseNotes(prod.baseNotes?.join(", ") || "");
+    setEditStock(prod.stock);
+    setEditImagePath(prod.imageUrl);
+    setEditVariantsList(prod.variants || []);
+  };
+
+  const handleEditProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    const finalPrice = editSalePrice ? Number(editSalePrice) : editPrice ? Number(editPrice) : 0;
+    if (!editName || !editDescription || finalPrice <= 0 || editStock < 0) return;
+
+    const topArray = editTopNotes.split(",").map((n) => n.trim()).filter(Boolean);
+    const heartArray = editHeartNotes.split(",").map((n) => n.trim()).filter(Boolean);
+    const baseArray = editBaseNotes.split(",").map((n) => n.trim()).filter(Boolean);
+
+    const result = await updateProduct(editingProduct.id, {
+      name: editName,
+      sku: editSku,
+      description: editDescription,
+      longDescription: editLongDescription,
+      price: finalPrice,
+      regularPrice: editRegularPrice ? Number(editRegularPrice) : undefined,
+      salePrice: editSalePrice ? Number(editSalePrice) : undefined,
+      volume: editVolume,
+      type: editType,
+      category: editCategory,
+      topNotes: topArray,
+      heartNotes: heartArray,
+      baseNotes: baseArray,
+      stock: editStock,
+      imageUrl: editImagePath,
+      variants: editVariantsList
+    });
+
+    if (result.success) {
+      setEditingProduct(null);
+    } else {
+      alert(result.error || "Failed to update product specifications.");
     }
   };
 
@@ -681,9 +785,9 @@ export default function AdminDashboard() {
               <form onSubmit={handleAddProduct} className="glass-panel p-6 rounded-3xl border border-amber-100 space-y-4">
                 <h4 className="font-bold text-stone-855 text-xs border-b pb-2">Fragrance Parameters</h4>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-stone-600 block">Name</label>
+                    <label className="text-xs font-semibold text-stone-600 block">Name *</label>
                     <input
                       type="text" required placeholder="e.g. Zouq e Safar" value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -691,7 +795,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-stone-600 block">Category</label>
+                    <label className="text-xs font-semibold text-stone-600 block">Category *</label>
                     <select
                       value={category} onChange={(e) => setCategory(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
@@ -704,7 +808,18 @@ export default function AdminDashboard() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-stone-600 block">Retail Price (Rs.)</label>
+                    <label className="text-xs font-semibold text-stone-600 block">Product SKU</label>
+                    <input
+                      type="text" placeholder="e.g. NAE-ZOUQ-01" value={sku}
+                      onChange={(e) => setSku(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Fallback Price (Rs.) *</label>
                     <input
                       type="number" required min="1" placeholder="e.g. 6200" value={price || ""}
                       onChange={(e) => setPrice(Number(e.target.value))}
@@ -712,7 +827,23 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-stone-600 block">Starting Stock Units</label>
+                    <label className="text-xs font-semibold text-stone-600 block">Retail Price (Regular - Rs.)</label>
+                    <input
+                      type="number" placeholder="e.g. 7000" value={regularPrice}
+                      onChange={(e) => setRegularPrice(e.target.value !== "" ? Number(e.target.value) : "")}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Sale Price (Selling - Rs.)</label>
+                    <input
+                      type="number" placeholder="e.g. 5999" value={salePrice}
+                      onChange={(e) => setSalePrice(e.target.value !== "" ? Number(e.target.value) : "")}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Fallback Stock *</label>
                     <input
                       type="number" required min="0" placeholder="10" value={stock || ""}
                       onChange={(e) => setStock(Number(e.target.value))}
@@ -722,21 +853,84 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Scent Description</label>
+                  <label className="text-xs font-semibold text-stone-600 block">Scent Summary (Short Description) *</label>
                   <textarea
-                    required rows={2} placeholder="Describe essential elements..." value={description}
+                    required rows={2} placeholder="Describe essential scent profile highlights..." value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs resize-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp)</label>
+                  <label className="text-xs font-semibold text-stone-600 block">Scent Details (Detailed Long Description)</label>
+                  <textarea
+                    rows={4} placeholder="Describe complete notes composition, details, application instructions..." value={longDescription}
+                    onChange={(e) => setLongDescription(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp) *</label>
                   <input
                     type="text" required placeholder="/shams.webp" value={imagePath}
                     onChange={(e) => setImagePath(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
                   />
+                </div>
+
+                {/* Variants Manager Container */}
+                <div className="border border-stone-200 rounded-2xl p-4 bg-stone-50/50 space-y-3">
+                  <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants (e.g. 5ml, 12ml, 50ml, 100ml)</label>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-end">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-stone-500 block uppercase">Volume (Size)</label>
+                      <input type="text" placeholder="e.g. 12ml" value={varVolume} onChange={(e) => setVarVolume(e.target.value)} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-stone-500 block uppercase">Sale Price (Rs.)</label>
+                      <input type="number" placeholder="1200" value={varPrice} onChange={(e) => setVarPrice(e.target.value !== "" ? Number(e.target.value) : "")} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-stone-500 block uppercase">Retail Price (Regular)</label>
+                      <input type="number" placeholder="1500" value={varRegularPrice} onChange={(e) => setVarRegularPrice(e.target.value !== "" ? Number(e.target.value) : "")} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-stone-500 block uppercase">Stock Units</label>
+                      <input type="number" placeholder="20" value={varStock} onChange={(e) => setVarStock(Number(e.target.value))} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                    </div>
+                    <div className="space-y-1 col-span-2 md:col-span-1">
+                      <button type="button" onClick={() => {
+                        if (!varVolume || !varPrice) return;
+                        setVariantsList([...variantsList, {
+                          volume: varVolume,
+                          price: Number(varPrice),
+                          regularPrice: varRegularPrice ? Number(varRegularPrice) : undefined,
+                          stock: Number(varStock),
+                          sku: varSku || `${sku || name}-${varVolume}`
+                        }]);
+                        setVarVolume("");
+                        setVarPrice("");
+                        setVarRegularPrice("");
+                        setVarStock(10);
+                        setVarSku("");
+                      }} className="w-full py-2.5 gold-btn text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
+                        Add Variant
+                      </button>
+                    </div>
+                  </div>
+                  {variantsList.length > 0 && (
+                    <div className="pt-2 divide-y divide-stone-200 text-xs">
+                      {variantsList.map((v, idx) => (
+                        <div key={idx} className="py-2 flex justify-between items-center">
+                          <span className="font-semibold text-stone-700">{v.volume} - Rs. {v.price} {v.regularPrice ? <span className="line-through text-stone-400 ml-1">Rs. {v.regularPrice}</span> : null} (Stock: {v.stock})</span>
+                          <button type="button" onClick={() => setVariantsList(variantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer">
+                            Remove Variant
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 flex justify-end gap-3">
@@ -803,8 +997,11 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         {(adminUser.role === "Owner" || adminUser.role === "Admin") && (
-                          <td className="p-3 text-right">
-                            <button onClick={() => handleDeleteProduct(prod.id)} className="text-stone-400 hover:text-rose-500 p-1">
+                          <td className="p-3 text-right flex items-center justify-end gap-2">
+                            <button onClick={() => handleStartEditProduct(prod)} className="text-stone-400 hover:text-amber-800 p-1" title="Edit Scent Specs">
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteProduct(prod.id)} className="text-stone-400 hover:text-rose-500 p-1" title="Delete listing">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </td>
@@ -815,6 +1012,227 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </div>
+
+            {/* Modal Overlay: Full Scent Catalog specifications CRUD editor */}
+            {editingProduct && (
+              <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+                <div className="bg-white rounded-3xl p-6 border border-stone-200/50 shadow-2xl max-w-3xl w-full my-8 relative max-h-[90vh] overflow-y-auto space-y-4 animate-scaleUp">
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <h3 className="font-bold text-stone-855 text-sm uppercase tracking-wider">Edit Fragrance Specifications</h3>
+                    <button type="button" onClick={() => setEditingProduct(null)} className="text-stone-400 hover:text-stone-700">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <form onSubmit={handleEditProductSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Name *</label>
+                        <input
+                          type="text" required value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Category *</label>
+                        <select
+                          value={editCategory} onChange={(e) => setEditCategory(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        >
+                          <option value="Oud">Oud</option>
+                          <option value="Floral">Floral</option>
+                          <option value="Woody">Woody</option>
+                          <option value="Fresh">Fresh</option>
+                          <option value="Oriental">Oriental</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Product SKU</label>
+                        <input
+                          type="text" placeholder="e.g. NAE-ZOUQ-01" value={editSku}
+                          onChange={(e) => setEditSku(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Fallback Price (Rs.) *</label>
+                        <input
+                          type="number" required min="1" value={editPrice || ""}
+                          onChange={(e) => setEditPrice(Number(e.target.value))}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Retail Price (Regular - Rs.)</label>
+                        <input
+                          type="number" value={editRegularPrice}
+                          onChange={(e) => setEditRegularPrice(e.target.value !== "" ? Number(e.target.value) : "")}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Sale Price (Selling - Rs.)</label>
+                        <input
+                          type="number" value={editSalePrice}
+                          onChange={(e) => setEditSalePrice(e.target.value !== "" ? Number(e.target.value) : "")}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Fallback Stock *</label>
+                        <input
+                          type="number" required min="0" value={editStock || ""}
+                          onChange={(e) => setEditStock(Number(e.target.value))}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Scent Volume *</label>
+                        <input
+                          type="text" required value={editVolume}
+                          onChange={(e) => setEditVolume(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Scent Concentration Type *</label>
+                        <select
+                          value={editType} onChange={(e) => setEditType(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                        >
+                          <option value="Extrait de Parfum">Extrait de Parfum (Pure Scent)</option>
+                          <option value="Eau de Parfum (EDP)">Eau de Parfum (EDP)</option>
+                          <option value="Eau de Toilette (EDT)">Eau de Toilette (EDT)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Top Notes (comma-separated)</label>
+                        <input
+                          type="text" value={editTopNotes} onChange={(e) => setEditTopNotes(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Heart Notes (comma-separated)</label>
+                        <input
+                          type="text" value={editHeartNotes} onChange={(e) => setEditHeartNotes(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-stone-600 block">Base Notes (comma-separated)</label>
+                        <input
+                          type="text" value={editBaseNotes} onChange={(e) => setEditBaseNotes(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-stone-600 block">Scent Summary (Short Description) *</label>
+                      <textarea
+                        required rows={2} value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-stone-600 block">Scent Details (Detailed Long Description)</label>
+                      <textarea
+                        rows={3} value={editLongDescription}
+                        onChange={(e) => setEditLongDescription(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp) *</label>
+                      <input
+                        type="text" required value={editImagePath}
+                        onChange={(e) => setEditImagePath(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Variants Manager Container */}
+                    <div className="border border-stone-200 rounded-2xl p-4 bg-stone-50/50 space-y-3">
+                      <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants</label>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-end">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-stone-500 block uppercase">Volume</label>
+                          <input type="text" placeholder="e.g. 12ml" value={editVarVolume} onChange={(e) => setEditVarVolume(e.target.value)} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-stone-500 block uppercase">Sale Price (Rs.)</label>
+                          <input type="number" placeholder="1200" value={editVarPrice} onChange={(e) => setEditVarPrice(e.target.value !== "" ? Number(e.target.value) : "")} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-stone-500 block uppercase">Retail Price</label>
+                          <input type="number" placeholder="1500" value={editVarRegularPrice} onChange={(e) => setEditVarRegularPrice(e.target.value !== "" ? Number(e.target.value) : "")} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-stone-500 block uppercase">Stock Units</label>
+                          <input type="number" placeholder="20" value={editVarStock} onChange={(e) => setEditVarStock(Number(e.target.value))} className="w-full p-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none" />
+                        </div>
+                        <div className="space-y-1 col-span-2 md:col-span-1">
+                          <button type="button" onClick={() => {
+                            if (!editVarVolume || !editVarPrice) return;
+                            setEditVariantsList([...editVariantsList, {
+                              volume: editVarVolume,
+                              price: Number(editVarPrice),
+                              regularPrice: editVarRegularPrice ? Number(editVarRegularPrice) : undefined,
+                              stock: Number(editVarStock),
+                              sku: editVarSku || `${editSku || editName}-${editVarVolume}`
+                            }]);
+                            setEditVarVolume("");
+                            setEditVarPrice("");
+                            setEditVarRegularPrice("");
+                            setEditVarStock(10);
+                            setEditVarSku("");
+                          }} className="w-full py-2.5 gold-btn text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
+                            Add Variant
+                          </button>
+                        </div>
+                      </div>
+                      {editVariantsList.length > 0 && (
+                        <div className="pt-2 divide-y divide-stone-200 text-xs">
+                          {editVariantsList.map((v, idx) => (
+                            <div key={idx} className="py-2 flex justify-between items-center">
+                              <span className="font-semibold text-stone-700">{v.volume} - Rs. {v.price} {v.regularPrice ? <span className="line-through text-stone-400 ml-1">Rs. {v.regularPrice}</span> : null} (Stock: {v.stock})</span>
+                              <button type="button" onClick={() => setEditVariantsList(editVariantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer">
+                                Remove Variant
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 flex justify-end gap-3">
+                      <button
+                        type="button" onClick={() => setEditingProduct(null)}
+                        className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 font-bold text-xs"
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="px-4 py-2 rounded-xl gold-btn text-white font-bold text-xs">
+                        Save Scent Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -974,6 +1392,7 @@ export default function AdminDashboard() {
                 <thead>
                   <tr className="bg-stone-50/70 border-b text-[9px] font-bold text-stone-500 uppercase tracking-widest">
                     <th className="p-3">Client</th>
+                    <th className="p-3">Email Address</th>
                     <th className="p-3">Mobile Contact</th>
                     <th className="p-3">Address list</th>
                     <th className="p-3 text-center">Orders</th>
@@ -981,12 +1400,13 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-xs divide-y divide-stone-200/40">
-                  {customers.map((c, i) => (
+                  {processedCustomers.map((c, i) => (
                     <tr key={i} className="hover:bg-white/40">
                       <td className="p-3 font-bold text-stone-800">{c.name}</td>
+                      <td className="p-3 font-semibold text-stone-500">{c.email}</td>
                       <td className="p-3 font-semibold text-stone-600">{c.phone}</td>
                       <td className="p-3 text-stone-500 max-w-xs truncate" title={c.addresses.join("; ")}>
-                        {c.addresses.join("; ")}
+                        {c.addresses.join("; ") || "—"}
                       </td>
                       <td className="p-3 text-center font-bold">{c.ordersCount}</td>
                       <td className="p-3 font-extrabold text-amber-800">Rs. {c.totalSpent.toLocaleString()}</td>

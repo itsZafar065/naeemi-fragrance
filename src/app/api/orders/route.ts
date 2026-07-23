@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
 import { sendOrderConfirmation, sendOrderStatusEmail } from "@/lib/email";
+import { getPusherServer } from "@/lib/pusher";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
@@ -39,13 +40,20 @@ export async function GET(request: Request) {
     const db = await getDb();
     const orders = await db.collection("orders").find({}).sort({ date: -1 }).toArray();
     
-    // Fetch logs (Owner/Admin only)
+    // Fetch logs & customers list (Owner/Admin only)
     let logs: any[] = [];
+    let customers: any[] = [];
     if (admin.role === "Owner" || admin.role === "Admin") {
       logs = await db.collection("logs").find({}).sort({ date: -1 }).limit(100).toArray();
     }
+    
+    // Always load registered customers registry for admin view
+    customers = await db
+      .collection("customers")
+      .find({}, { projection: { passwordHash: 0 } })
+      .toArray();
 
-    return NextResponse.json({ orders, logs });
+    return NextResponse.json({ orders, logs, customers });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -154,6 +162,14 @@ export async function POST(request: Request) {
       });
     }
 
+    // Real-time synchronization broadcast via Pusher
+    const pusher = getPusherServer();
+    if (pusher) {
+      await pusher.trigger("naeemi-channel", "new-order", {
+        order: newOrder
+      }).catch((e) => console.error("Pusher trigger failed:", e));
+    }
+
     return NextResponse.json({ success: true, orderId });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -206,6 +222,15 @@ export async function PUT(request: Request) {
       sendOrderStatusEmail(updatedOrder, status).catch((err) => {
         console.error(`Failed to send order status email for ${orderId}:`, err);
       });
+    }
+
+    // Real-time synchronization broadcast via Pusher
+    const pusher = getPusherServer();
+    if (pusher) {
+      await pusher.trigger("naeemi-channel", "order-status-updated", {
+        orderId,
+        status
+      }).catch((e) => console.error("Pusher trigger failed:", e));
     }
 
     return NextResponse.json({ success: true });

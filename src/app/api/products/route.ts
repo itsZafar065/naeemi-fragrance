@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
+import { getPusherServer } from "@/lib/pusher";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
@@ -51,7 +52,24 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
-    const { name, description, price, volume, type, category, topNotes, heartNotes, baseNotes, stock, imageUrl } = sanitizedBody;
+    const { 
+      name, 
+      description, 
+      price, 
+      volume, 
+      type, 
+      category, 
+      topNotes, 
+      heartNotes, 
+      baseNotes, 
+      stock, 
+      imageUrl,
+      sku,
+      longDescription,
+      regularPrice,
+      salePrice,
+      variants
+    } = sanitizedBody;
 
     if (!name || !price || !volume) {
       return NextResponse.json({ error: "Missing required product fields" }, { status: 400 });
@@ -61,8 +79,12 @@ export async function POST(request: Request) {
     const newProduct = {
       id: Date.now().toString(),
       name,
+      sku: sku || "",
       description,
+      longDescription: longDescription || "",
       price: Number(price),
+      regularPrice: regularPrice ? Number(regularPrice) : null,
+      salePrice: salePrice ? Number(salePrice) : null,
       volume,
       type,
       category,
@@ -72,6 +94,7 @@ export async function POST(request: Request) {
       stock: Number(stock) || 0,
       rating: 5.0,
       imageUrl: imageUrl || "linear-gradient(135deg, #ffd3b6 0%, #ff8b94 100%)",
+      variants: Array.isArray(variants) ? variants : [],
     };
 
     await db.collection("products").insertOne(newProduct);
@@ -84,6 +107,15 @@ export async function POST(request: Request) {
       date: new Date().toISOString(),
       details: `Created new perfume listing: ${name} (${volume}).`,
     });
+
+    // Real-time synchronization broadcast via Pusher
+    const pusher = getPusherServer();
+    if (pusher) {
+      await pusher.trigger("naeemi-channel", "product-catalog-updated", {
+        action: "create",
+        product: newProduct
+      }).catch((e) => console.error("Pusher trigger failed:", e));
+    }
 
     return NextResponse.json({ success: true, product: newProduct });
   } catch (error: any) {
@@ -119,6 +151,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    // Fetch the updated product details to broadcast complete settings
+    const updatedProduct = await db.collection("products").findOne({ id: id.toString() });
+
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Update Product",
@@ -127,6 +162,15 @@ export async function PUT(request: Request) {
       date: new Date().toISOString(),
       details: `Updated product properties for ID ${id}: ${JSON.stringify(updates)}.`,
     });
+
+    // Real-time synchronization broadcast via Pusher
+    const pusher = getPusherServer();
+    if (pusher && updatedProduct) {
+      await pusher.trigger("naeemi-channel", "product-catalog-updated", {
+        action: "update",
+        product: updatedProduct
+      }).catch((e) => console.error("Pusher trigger failed:", e));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -171,6 +215,15 @@ export async function DELETE(request: Request) {
       date: new Date().toISOString(),
       details: `Deleted perfume listing: ${product?.name || "ID " + id}.`,
     });
+
+    // Real-time synchronization broadcast via Pusher
+    const pusher = getPusherServer();
+    if (pusher) {
+      await pusher.trigger("naeemi-channel", "product-catalog-updated", {
+        action: "delete",
+        productId: id
+      }).catch((e) => console.error("Pusher trigger failed:", e));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

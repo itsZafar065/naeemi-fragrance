@@ -12,6 +12,7 @@ import {
 } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getPusherServer } from "@/lib/pusher";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET && process.env.NODE_ENV === "production") {
@@ -193,6 +194,20 @@ export async function POST(request: Request) {
 
       // Send brand Welcome Email
       await sendWelcomeEmail(cleanEmail, customer.name);
+
+      // Real-time synchronization broadcast via Pusher
+      const pusher = getPusherServer();
+      if (pusher) {
+        await pusher.trigger("naeemi-channel", "customer-registered", {
+          customer: {
+            id: customer._id.toString(),
+            email: customer.email,
+            name: customer.name,
+            phone: customer.phone || "",
+            address: customer.address || "",
+          }
+        }).catch((e) => console.error("Pusher trigger failed:", e));
+      }
 
       // Create secure login JWT session
       const token = jwt.sign(

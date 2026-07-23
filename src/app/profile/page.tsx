@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/context/CustomerContext";
+import { getPusherClient } from "@/lib/pusher";
 import { 
   User, 
   ShoppingBag, 
@@ -141,13 +142,37 @@ export default function CustomerProfilePage() {
     }
   }, [customer]);
 
-  // Polling interval to auto-sync order status updates every 10 seconds for real-time notifications
+  // Pusher real-time updates and polling fallback subscription hook for order status changes
   useEffect(() => {
     if (!customer) return;
-    const interval = setInterval(() => {
-      fetchOrders(true);
-    }, 10000);
-    return () => clearInterval(interval);
+
+    const pusher = getPusherClient();
+    if (pusher) {
+      const channel = pusher.subscribe("naeemi-channel");
+
+      channel.bind("order-status-updated", (data: { orderId: string; status: string }) => {
+        setOrders((prevOrders) => {
+          return prevOrders.map((ord) => {
+            if (ord.id === data.orderId && ord.status !== data.status) {
+              setToastMessage(`Order #${data.orderId} status has been updated to '${data.status}'!`);
+              setTimeout(() => setToastMessage(null), 8000);
+              return { ...ord, status: data.status as any };
+            }
+            return ord;
+          });
+        });
+      });
+
+      return () => {
+        channel.unbind_all();
+        pusher.unsubscribe("naeemi-channel");
+      };
+    } else {
+      const interval = setInterval(() => {
+        fetchOrders(true);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
   }, [customer]);
 
   const handleDeleteAccount = async () => {

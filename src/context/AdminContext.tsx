@@ -1,12 +1,17 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { getPusherClient } from "@/lib/pusher";
 
 export interface Perfume {
   id: string;
   name: string;
+  sku?: string;
   description: string;
+  longDescription?: string;
   price: number;
+  regularPrice?: number;
+  salePrice?: number;
   volume: string;
   type: string;
   category: string;
@@ -16,6 +21,13 @@ export interface Perfume {
   stock: number;
   rating: number;
   imageUrl: string;
+  variants?: Array<{
+    volume: string;
+    price: number;
+    regularPrice?: number;
+    stock: number;
+    sku?: string;
+  }>;
 }
 
 export interface OrderItem {
@@ -82,6 +94,7 @@ interface AdminContextType {
   adminUser: AdminUser | null;
   systemLogs: SystemLog[];
   loading: boolean;
+  registeredCustomers: any[];
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
@@ -123,6 +136,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([]);
   const [staffUsers, setStaffUsers] = useState<AdminUser[]>([]);
+  const [registeredCustomers, setRegisteredCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const settingsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -171,6 +185,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               const data = await ordersRes.json();
               setOrders(data.orders || []);
               setSystemLogs(data.logs || []);
+              setRegisteredCustomers(data.customers || []);
             }
             
             if (staffRes.ok) {
@@ -199,6 +214,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const data = await ordersRes.json();
         setOrders(data.orders || []);
         setSystemLogs(data.logs || []);
+        setRegisteredCustomers(data.customers || []);
       }
       
       if (staffRes.ok) {
@@ -209,6 +225,81 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error("Failed to fetch admin dashboard records:", e);
     }
   };
+
+  // Pusher real-time updates subscription hook for admin dashboard operations
+  useEffect(() => {
+    if (typeof window === "undefined" || !adminUser) return;
+
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channel = pusher.subscribe("naeemi-channel");
+
+    channel.bind("new-order", (data: { order: Order }) => {
+      setOrders((prev) => {
+        const exists = prev.some((o) => o.id === data.order.id);
+        return exists ? prev : [data.order, ...prev];
+      });
+      setSystemLogs((prev) => [
+        {
+          action: "Order Placed",
+          user: data.order.customerEmail || "Guest",
+          role: "Customer",
+          date: new Date().toISOString(),
+          details: `New order ${data.order.id} placed by ${data.order.customerName} for Rs. ${data.order.totalAmount.toLocaleString()}.`
+        },
+        ...prev
+      ]);
+    });
+
+    channel.bind("order-status-updated", (data: { orderId: string; status: Order["status"] }) => {
+      setOrders((prev) => prev.map((o) => (o.id === data.orderId ? { ...o, status: data.status } : o)));
+      setSystemLogs((prev) => [
+        {
+          action: "Order Status Sync",
+          user: "System",
+          date: new Date().toISOString(),
+          details: `Synced order status for ${data.orderId} to '${data.status}' in real-time.`
+        },
+        ...prev
+      ]);
+    });
+
+    channel.bind("product-catalog-updated", (data: { action: string; product?: Perfume; productId?: string }) => {
+      if (data.action === "create" && data.product) {
+        setProducts((prev) => {
+          const exists = prev.some((p) => p.id === data.product!.id);
+          return exists ? prev : [...prev, data.product!];
+        });
+      } else if (data.action === "update" && data.product) {
+        setProducts((prev) => prev.map((p) => (p.id === data.product!.id ? data.product! : p)));
+      } else if (data.action === "delete" && data.productId) {
+        setProducts((prev) => prev.filter((p) => p.id !== data.productId));
+      }
+    });
+
+    channel.bind("customer-registered", (data: { customer: any }) => {
+      setRegisteredCustomers((prev) => {
+        const exists = prev.some((c) => c.email === data.customer.email);
+        return exists ? prev : [data.customer, ...prev];
+      });
+      setSystemLogs((prev) => [
+        {
+          action: "Customer Registered",
+          user: data.customer.email,
+          role: "Customer",
+          date: new Date().toISOString(),
+          details: `New customer verified profile: ${data.customer.name} (${data.customer.email}).`
+        },
+        ...prev
+      ]);
+    });
+
+    return () => {
+      channel.unbind_all();
+      pusher.unsubscribe("naeemi-channel");
+    };
+  }, [adminUser]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -512,6 +603,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         settings,
         adminUser,
         systemLogs,
+        registeredCustomers,
         loading,
         login,
         logout,

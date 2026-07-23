@@ -131,37 +131,51 @@ export default function ProductDetailPage() {
   }
 
   const isFav = isInWishlist(product.id);
-  const hasLowStock = product.stock > 0 && product.stock <= 5;
-  const isOutOfStock = product.stock === 0;
 
   // Dynamic price calculation based on size variant
   let calculatedPrice = product.price;
-  if (product.volume === "100ml" && selectedSize === "50ml") {
-    calculatedPrice = Math.round(product.price * 0.7);
-  } else if (product.volume === "50ml" && selectedSize === "100ml") {
-    calculatedPrice = Math.round(product.price * 1.45);
+  let calculatedRegularPrice = product.regularPrice || null;
+  let calculatedStock = product.stock;
+
+  const activeVariant = product.variants?.find((v) => v.volume === selectedSize);
+  if (activeVariant) {
+    calculatedPrice = activeVariant.price;
+    calculatedRegularPrice = activeVariant.regularPrice || null;
+    calculatedStock = activeVariant.stock;
+  } else {
+    // Fallback static calculations for backwards compatibility
+    if (product.volume === "100ml" && selectedSize === "50ml") {
+      calculatedPrice = Math.round(product.price * 0.7);
+    } else if (product.volume === "50ml" && selectedSize === "100ml") {
+      calculatedPrice = Math.round(product.price * 1.45);
+    }
   }
 
+  const hasLowStock = calculatedStock > 0 && calculatedStock <= 5;
+  const isOutOfStock = calculatedStock === 0;
+
   const handleAddToCart = () => {
-    if (quantity > product.stock) return;
+    if (quantity > calculatedStock) return;
     const variantItem = {
       ...product,
       id: `${product.id}-${selectedSize}`,
       name: `${product.name} (${selectedSize})`,
       price: calculatedPrice,
-      volume: selectedSize
+      volume: selectedSize,
+      stock: calculatedStock
     };
     addToCart(variantItem, quantity);
   };
 
   const handleBuyNow = () => {
-    if (quantity > product.stock) return;
+    if (quantity > calculatedStock) return;
     const variantItem = {
       ...product,
       id: `${product.id}-${selectedSize}`,
       name: `${product.name} (${selectedSize})`,
       price: calculatedPrice,
-      volume: selectedSize
+      volume: selectedSize,
+      stock: calculatedStock
     };
     addToCart(variantItem, quantity);
     setIsCartOpen(false);
@@ -313,16 +327,26 @@ export default function ProductDetailPage() {
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               {(product.rating && typeof product.rating === 'number') ? product.rating.toFixed(1) : '5.0'} / 5.0
             </div>
-            <span className="text-2xl font-black text-stone-855 tracking-tight">
-              Rs. {calculatedPrice.toLocaleString()}
-            </span>
+            <div className="flex items-baseline gap-2.5">
+              <span className="text-2xl font-black text-stone-855 tracking-tight">
+                Rs. {calculatedPrice.toLocaleString()}
+              </span>
+              {calculatedRegularPrice && calculatedRegularPrice > calculatedPrice && (
+                <span className="line-through text-stone-400 text-sm font-bold">
+                  Rs. {calculatedRegularPrice.toLocaleString()}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Size Variant Selector */}
           <div className="space-y-1.5 pt-1">
             <span className="text-[10px] font-extrabold text-stone-400 uppercase block tracking-widest font-sans">Select Bottle Size</span>
             <div className="flex gap-2">
-              {["50ml", "100ml"].map((size) => (
+              {(product.variants && product.variants.length > 0
+                ? product.variants.map((v) => v.volume)
+                : ["50ml", "100ml"]
+              ).map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
