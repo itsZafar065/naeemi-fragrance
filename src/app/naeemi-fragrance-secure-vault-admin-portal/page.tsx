@@ -211,6 +211,35 @@ export default function AdminDashboard() {
   const [newStaffRole, setNewStaffRole] = useState<"Admin" | "Manager">("Manager");
   const [showStaffForm, setShowStaffForm] = useState(false);
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const formatLogDetails = (details: string) => {
+    if (!details) return "";
+    if (details.includes("Updated product properties for ID")) {
+      try {
+        const jsonStart = details.indexOf("{");
+        if (jsonStart !== -1) {
+          const jsonStr = details.substring(jsonStart);
+          const parsed = JSON.parse(jsonStr);
+          const idMatch = details.match(/ID (\w+)/);
+          const id = idMatch ? idMatch[1] : "";
+          
+          const items = [];
+          if (parsed.name) items.push(`Name: "${parsed.name}"`);
+          if (parsed.price !== undefined) items.push(`Price: Rs. ${Number(parsed.price).toLocaleString()}`);
+          if (parsed.regularPrice !== undefined) items.push(`Regular: Rs. ${Number(parsed.regularPrice).toLocaleString()}`);
+          if (parsed.salePrice !== undefined) items.push(`Sale: Rs. ${Number(parsed.salePrice).toLocaleString()}`);
+          if (parsed.stock !== undefined) items.push(`Stock: ${parsed.stock} units`);
+          if (parsed.sku) items.push(`SKU: "${parsed.sku}"`);
+          if (parsed.volume) items.push(`Volume: "${parsed.volume}"`);
+          
+          return `Updated product properties for ID ${id}: ${items.length > 0 ? items.join(", ") : "no text changes"}.`;
+        }
+      } catch (e) {
+        // Fallback to raw string if parsing fails
+      }
+    }
+    return details;
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput || !passwordInput) return;
@@ -755,7 +784,7 @@ export default function AdminDashboard() {
                           <span>{new Date(log.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <p className="font-bold text-stone-750 text-[11px] leading-snug">{log.action}</p>
-                        <p className="text-[10px] text-stone-500 font-normal leading-relaxed">{log.details}</p>
+                        <p className="text-[10px] text-stone-500 font-normal leading-relaxed">{formatLogDetails(log.details)}</p>
                       </div>
                     ))}
                   </div>
@@ -1997,7 +2026,7 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="p-3 font-bold text-amber-900">{log.action}</td>
-                          <td className="p-3 text-[11px] text-stone-600 font-normal leading-relaxed">{log.details}</td>
+                          <td className="p-3 text-[11px] text-stone-600 font-normal leading-relaxed">{formatLogDetails(log.details)}</td>
                         </tr>
                       ))
                     )}

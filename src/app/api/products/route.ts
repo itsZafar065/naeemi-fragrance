@@ -154,13 +154,25 @@ export async function PUT(request: Request) {
     // Fetch the updated product details to broadcast complete settings
     const updatedProduct = await db.collection("products").findOne({ id: id.toString() });
 
+    // Format clean readable details for logging
+    const changes: string[] = [];
+    if (updates.name) changes.push(`Name: "${updates.name}"`);
+    if (updates.price !== undefined) changes.push(`Price: Rs. ${Number(updates.price).toLocaleString()}`);
+    if (updates.regularPrice !== undefined) changes.push(`Regular: Rs. ${Number(updates.regularPrice).toLocaleString()}`);
+    if (updates.salePrice !== undefined) changes.push(`Sale: Rs. ${Number(updates.salePrice).toLocaleString()}`);
+    if (updates.stock !== undefined) changes.push(`Stock: ${updates.stock} units`);
+    if (updates.sku !== undefined) changes.push(`SKU: "${updates.sku}"`);
+    if (updates.volume !== undefined) changes.push(`Volume: "${updates.volume}"`);
+    
+    const detailsText = `Updated "${updatedProduct?.name || id}": ${changes.length > 0 ? changes.join(", ") : "no text modifications"}.`;
+
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Update Product",
       user: admin.email,
       role: admin.role,
       date: new Date().toISOString(),
-      details: `Updated product properties for ID ${id}: ${JSON.stringify(updates)}.`,
+      details: detailsText,
     });
 
     // Real-time synchronization broadcast via Pusher
