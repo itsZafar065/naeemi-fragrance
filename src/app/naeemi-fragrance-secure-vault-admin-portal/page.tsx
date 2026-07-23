@@ -48,6 +48,7 @@ export default function AdminDashboard() {
     loading,
     login,
     logout,
+    refreshSession,
     addProduct, 
     updateProduct, 
     deleteProduct, 
@@ -410,6 +411,10 @@ export default function AdminDashboard() {
   const handleMenuClick = (tab: TabType) => {
     setActiveTab(tab);
     setMobileSidebarOpen(false);
+    // Auto-refresh fresh orders and log statistics in background on tab navigation
+    if (tab === "dashboard" || tab === "orders" || tab === "logs" || tab === "customers") {
+      refreshSession().catch(() => {});
+    }
   };
 
   return (

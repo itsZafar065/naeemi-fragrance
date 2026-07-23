@@ -127,20 +127,23 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const settingsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load Initial Public Data & Check Session
+  // Load Initial Public Data & Check Session in parallel (concurrency optimization)
   useEffect(() => {
     async function initData() {
       try {
         setLoading(true);
-        // 1. Fetch Products
-        const prodRes = await fetch("/api/products");
+        const [prodRes, settingsRes, couponsRes, sessionRes] = await Promise.all([
+          fetch("/api/products"),
+          fetch("/api/settings"),
+          fetch("/api/coupons"),
+          fetch("/api/auth/session")
+        ]);
+
         if (prodRes.ok) {
           const prodData = await prodRes.json();
           setProducts(prodData);
         }
 
-        // 2. Fetch Settings
-        const settingsRes = await fetch("/api/settings");
         if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
           if (settingsData && Object.keys(settingsData).length > 0) {
@@ -148,21 +151,32 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         }
 
-        // 3. Fetch Coupons
-        const couponsRes = await fetch("/api/coupons");
         if (couponsRes.ok) {
           const couponsData = await couponsRes.json();
           setCoupons(couponsData);
         }
 
-        // 4. Check Auth Session
-        const sessionRes = await fetch("/api/auth/session");
         if (sessionRes.ok) {
           const sessionData = await sessionRes.json();
           if (sessionData.authenticated) {
             setAdminUser(sessionData.user);
-            // 5. Fetch Admin Data (Orders & Logs)
-            await fetchAdminData();
+            
+            // Trigger parallel fetch of authenticated admin dashboard records
+            const [ordersRes, staffRes] = await Promise.all([
+              fetch("/api/orders"),
+              fetch("/api/admins")
+            ]);
+
+            if (ordersRes.ok) {
+              const data = await ordersRes.json();
+              setOrders(data.orders || []);
+              setSystemLogs(data.logs || []);
+            }
+            
+            if (staffRes.ok) {
+              const staffData = await staffRes.json();
+              setStaffUsers(staffData || []);
+            }
           }
         }
       } catch (err) {
@@ -176,14 +190,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const fetchAdminData = async () => {
     try {
-      const ordersRes = await fetch("/api/orders");
+      const [ordersRes, staffRes] = await Promise.all([
+        fetch("/api/orders"),
+        fetch("/api/admins")
+      ]);
+
       if (ordersRes.ok) {
         const data = await ordersRes.json();
         setOrders(data.orders || []);
         setSystemLogs(data.logs || []);
       }
       
-      const staffRes = await fetch("/api/admins");
       if (staffRes.ok) {
         const staffData = await staffRes.json();
         setStaffUsers(staffData || []);
