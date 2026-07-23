@@ -19,6 +19,22 @@ export default function AboutPage() {
           Ruhani-Rehnumai & Spiritual Blessing
         </div>
 
+        {/* Spiritual Master Image Container */}
+        <div className="flex justify-center my-2">
+          <div className="relative w-36 h-36 md:w-40 md:h-40 rounded-full p-1 bg-gradient-to-br from-amber-500 to-amber-600 shadow-md">
+            <div className="w-full h-full rounded-full overflow-hidden bg-stone-100 border border-white relative flex items-center justify-center">
+              <img 
+                src="/mufti-jan.webp" 
+                alt="Mufti Muhammad Jan Naeemi" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aa7c11' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Calligraphy Frame / Title */}
         <div className="space-y-4 max-w-3xl mx-auto">
           <p className="text-xs text-stone-500 font-medium tracking-wide uppercase">
@@ -51,16 +67,26 @@ export default function AboutPage() {
           <div className="relative group w-full max-w-[280px] aspect-[4/5] rounded-[36px] overflow-hidden p-2 bg-gradient-to-br from-amber-500/30 to-amber-600/10 shadow-lg border border-amber-100/50">
             <div className="w-full h-full rounded-[28px] overflow-hidden relative bg-stone-100 flex items-center justify-center border border-white">
               {/* Premium Abstract Gold Texture Background */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-900 opacity-90 transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-stone-900 via-stone-800 to-amber-900 opacity-95" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0%,transparent_70%)]" />
               
+              {/* Owner Photo */}
+              <img 
+                src="/yousuf.webp" 
+                alt="Muhammad Yousuf Naeemi" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 transition-opacity duration-500 group-hover:opacity-65"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+
               {/* Overlay Text Details */}
               <div className="relative z-10 text-center p-6 space-y-3 text-white">
-                <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto text-amber-400">
+                <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/45 flex items-center justify-center mx-auto text-amber-400">
                   <User className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm tracking-wide uppercase font-serif">Zafar Naeemi</h4>
+                  <h4 className="font-extrabold text-sm tracking-wide uppercase font-serif">Muhammad Yousuf Naeemi</h4>
                   <p className="text-[9px] text-amber-400 font-bold uppercase tracking-widest mt-0.5">Owner & Founder</p>
                 </div>
                 <p className="text-[10px] text-stone-300 leading-relaxed">
@@ -87,7 +113,7 @@ export default function AboutPage() {
           </h3>
           <div className="text-xs text-stone-600 space-y-3.5 leading-relaxed">
             <p>
-              Main **Zafar**, Naeemi Fragrance ka owner aur founder, apne aap ko nihayat khush-naseeb samajhta hoon ke mujhe mere **Ustad aur Murshid Mufti Muhammad Jan Naeemi** ke zair-e-saaya taleem o tarbiyat hasil karne ka sharaf mila.
+              Main **Muhammad Yousuf Naeemi**, Naeemi Fragrance ka owner aur founder, apne aap ko nihayat khush-naseeb samajhta hoon ke mujhe mere **Ustad aur Murshid Mufti Muhammad Jan Naeemi** ke zair-e-saaya taleem o tarbiyat hasil karne ka sharaf mila.
             </p>
             <p>
               Is business ki bunyad sirf karobar ke liye nahi, balkay mere ustad ke rohani naam ke sath juday huay aitemad ko aam karne ke liye rakhi gayi thi. Hum har perfume ki blending se lekar uski packing tak is baat ka khususi khayal rakhte hain ke hamare har scent mein sachi lagan aur pakeezah mohabbat ka ahasas shamil ho.
