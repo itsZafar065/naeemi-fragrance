@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 // Simple in-memory maps for production rate limiting and brute force protection (reloaded on HMR)
 const loginAttempts = new Map<string, { count: number; lockUntil: number }>();
 const ipRequests = new Map<string, { count: number; resetTime: number }>();
@@ -82,4 +84,12 @@ export function validateEmail(email: string): boolean {
 export function validatePassword(password: string): boolean {
   // Min 8 characters, at least 1 uppercase letter, 1 lowercase letter, 1 number
   return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
+}
+
+export function generateOtp(): string {
+  return crypto.randomInt(100000, 1000000).toString();
+}
+
+export function hashOtp(otp: string, secret: string): string {
+  return crypto.createHmac("sha256", secret).update(otp.trim()).digest("hex");
 }

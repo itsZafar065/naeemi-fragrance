@@ -3,6 +3,7 @@ import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { requireServerEnv } from "@/lib/env";
+import { isJwtRevoked } from "@/lib/auth-tokens";
 
 const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
@@ -18,6 +19,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (await isJwtRevoked(sessionCookie)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
 
@@ -28,11 +33,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find all orders associated with this customer's email address
+    // Find only orders explicitly tied to this authenticated customer account.
     const orders = await db
       .collection("orders")
       .find(
-        { customerEmail: customer.email },
+        { customerId: customer._id.toString() },
         {
           projection: {
             _id: 0,

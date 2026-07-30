@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
-import { sanitizeInput, rateLimit, rateLimitKey, validateEmail } from "@/lib/security";
+import { generateOtp, hashOtp, sanitizeInput, rateLimit, rateLimitKey, validateEmail } from "@/lib/security";
 import { sendEmailVerificationOtp, sendForgotPasswordOtp } from "@/lib/email";
+import { requireServerEnv } from "@/lib/env";
+
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 // POST handler to generate and dispatch OTP
 export async function POST(request: Request) {
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     // Generate 6-digit numeric OTP code
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
     // Remove any existing active OTP codes of the same type for this email and purge expired ones
@@ -65,7 +68,7 @@ export async function POST(request: Request) {
     // Save new OTP code
     await db.collection("otps").insertOne({
       email: cleanEmail,
-      otp,
+      otpHash: hashOtp(otp, JWT_SECRET),
       type,
       createdAt: new Date(),
       expiresAt,

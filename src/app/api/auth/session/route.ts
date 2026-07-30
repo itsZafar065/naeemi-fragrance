@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { requireServerEnv } from "@/lib/env";
+import { isJwtRevoked } from "@/lib/auth-tokens";
 
 const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
@@ -14,6 +15,10 @@ export async function GET(request: Request) {
       ?.split("=")[1];
 
     if (!sessionCookie) {
+      return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+
+    if (await isJwtRevoked(sessionCookie)) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 

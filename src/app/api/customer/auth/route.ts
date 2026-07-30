@@ -5,6 +5,8 @@ import {
   sanitizeInput, 
   rateLimit, 
   rateLimitKey,
+  generateOtp,
+  hashOtp,
   validateEmail,
   validatePassword
 } from "@/lib/security";
@@ -16,6 +18,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getPusherServer } from "@/lib/pusher";
 import { requireServerEnv } from "@/lib/env";
+import { isJwtRevoked } from "@/lib/auth-tokens";
 
 const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
@@ -29,6 +32,10 @@ export async function GET(request: Request) {
       ?.split("=")[1];
 
     if (!sessionCookie) {
+      return NextResponse.json({ authenticated: false });
+    }
+
+    if (await isJwtRevoked(sessionCookie)) {
       return NextResponse.json({ authenticated: false });
     }
 
@@ -145,7 +152,7 @@ export async function POST(request: Request) {
       }
 
       // Generate 6-digit email verification OTP
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const generatedOtp = generateOtp();
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
 
       // Store OTP and purge expired ones
@@ -153,7 +160,7 @@ export async function POST(request: Request) {
       await db.collection("otps").deleteMany({ email: cleanEmail, type: "email_verification" });
       await db.collection("otps").insertOne({
         email: cleanEmail,
-        otp: generatedOtp,
+        otpHash: hashOtp(generatedOtp, JWT_SECRET),
         type: "email_verification",
         createdAt: new Date(),
         expiresAt,
@@ -177,7 +184,7 @@ export async function POST(request: Request) {
       // Retrieve verification OTP from DB
       const activeOtp = await db.collection("otps").findOne({
         email: cleanEmail,
-        otp: otp.trim(),
+        otpHash: hashOtp(otp, JWT_SECRET),
         type: "email_verification"
       });
 
@@ -260,7 +267,7 @@ export async function POST(request: Request) {
       // Retrieve forgot password OTP
       const activeOtp = await db.collection("otps").findOne({
         email: cleanEmail,
-        otp: otp.trim(),
+        otpHash: hashOtp(otp, JWT_SECRET),
         type: "forgot_password"
       });
 
@@ -306,14 +313,14 @@ export async function POST(request: Request) {
 
       // If unverified login attempt, trigger fresh OTP and block login until verified
       if (customer.verified === false) {
-        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        const generatedOtp = generateOtp();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
         await db.collection("otps").deleteMany({ expiresAt: { $lt: new Date() } });
         await db.collection("otps").deleteMany({ email: cleanEmail, type: "email_verification" });
         await db.collection("otps").insertOne({
           email: cleanEmail,
-          otp: generatedOtp,
+          otpHash: hashOtp(generatedOtp, JWT_SECRET),
           type: "email_verification",
           createdAt: new Date(),
           expiresAt,
@@ -379,6 +386,10 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (await isJwtRevoked(sessionCookie)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
 
     const body = await request.json();
@@ -433,6 +444,10 @@ export async function DELETE(request: Request) {
       ?.split("=")[1];
 
     if (!sessionCookie) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (await isJwtRevoked(sessionCookie)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

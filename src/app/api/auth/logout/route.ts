@@ -3,6 +3,7 @@ import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { requireServerEnv } from "@/lib/env";
+import { revokeJwt } from "@/lib/auth-tokens";
 
 const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
@@ -17,7 +18,8 @@ export async function POST(request: Request) {
     let hadValidSession = false;
     if (sessionCookie) {
       try {
-        jwt.verify(sessionCookie, JWT_SECRET);
+        const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
+        await revokeJwt(sessionCookie, decoded.exp);
         hadValidSession = true;
       } catch (e) {}
     }

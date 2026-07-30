@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { sanitizeInput } from "@/lib/security";
 import jwt from "jsonwebtoken";
 import { requireServerEnv } from "@/lib/env";
+import { isJwtRevoked } from "@/lib/auth-tokens";
 
 const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
@@ -17,6 +18,7 @@ async function verifyAdminToken(request: Request) {
   if (!sessionCookie) return null;
 
   try {
+    if (await isJwtRevoked(sessionCookie)) return null;
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
     const ObjectId = require("mongodb").ObjectId;
