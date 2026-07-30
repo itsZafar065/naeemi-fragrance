@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
-import { sanitizeInput, validateEmail } from "@/lib/security";
+import { rateLimitKey, sanitizeInput, validateEmail } from "@/lib/security";
 import { sendNewsletterWelcome } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
+    const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!rateLimitKey(`newsletter:${clientIp}`, 5, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many newsletter attempts. Please try again later." }, { status: 429 });
+    }
+
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
     const { email } = sanitizedBody;

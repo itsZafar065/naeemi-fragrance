@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
-import { sanitizeInput } from "@/lib/security";
+import { rateLimitKey, sanitizeInput } from "@/lib/security";
 
 // GET reviews for a specific product
 export async function GET(request: Request) {
@@ -29,12 +29,23 @@ export async function GET(request: Request) {
 // POST create a review for a specific product
 export async function POST(request: Request) {
   try {
+    const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!rateLimitKey(`review:${clientIp}`, 3, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many review submissions. Please try again later." }, { status: 429 });
+    }
+
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
     const { productId, name, rating, text } = sanitizedBody;
 
     if (!productId || !name || !rating || !text) {
       return NextResponse.json({ error: "Missing required review fields" }, { status: 400 });
+    }
+
+    const cleanName = name.trim();
+    const cleanText = text.trim();
+    if (cleanName.length < 2 || cleanName.length > 80 || cleanText.length < 10 || cleanText.length > 1000) {
+      return NextResponse.json({ error: "Review name or text length is invalid." }, { status: 400 });
     }
 
     const db = await getDb();
@@ -47,9 +58,9 @@ export async function POST(request: Request) {
 
     const newReview = {
       productId: productId.toString(),
-      name: name.trim(),
+      name: cleanName,
       rating: Math.max(1, Math.min(5, Number(rating))),
-      text: text.trim(),
+      text: cleanText,
       date: new Date().toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
-import { sanitizeInput } from "@/lib/security";
+import { rateLimitKey, sanitizeInput, validateEmail } from "@/lib/security";
 import { sendOrderConfirmation, sendOrderStatusEmail } from "@/lib/email";
 import { getPusherServer } from "@/lib/pusher";
 import { requireServerEnv } from "@/lib/env";
@@ -110,6 +110,11 @@ export async function GET(request: Request) {
 // POST create a new checkout order (Public)
 export async function POST(request: Request) {
   try {
+    const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!rateLimitKey(`order:${clientIp}`, 10, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many checkout attempts. Please try again later." }, { status: 429 });
+    }
+
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
     const { 
@@ -134,6 +139,10 @@ export async function POST(request: Request) {
       : typeof customerEmail === "string"
         ? customerEmail.toLowerCase().trim()
         : "";
+
+    if (normalizedCustomerEmail && !validateEmail(normalizedCustomerEmail)) {
+      return NextResponse.json({ error: "Invalid customer email." }, { status: 400 });
+    }
 
     // Verify stock availability and recalculate subtotal on the server
     let calculatedSubtotal = 0;
@@ -186,11 +195,22 @@ export async function POST(request: Request) {
     // Verify coupon code and fetch discount from database
     let discountPercent = 0;
     if (couponCode) {
+      if (!normalizedCustomerEmail) {
+        return NextResponse.json({ error: "Email is required to use a coupon." }, { status: 400 });
+      }
+
       const dbCoupon = await db.collection("coupons").findOne({ code: couponCode.toUpperCase().trim() });
       if (dbCoupon) {
         discountPercent = Number(dbCoupon.discount);
         if (!Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 90) {
           return NextResponse.json({ error: "Invalid coupon configuration." }, { status: 400 });
+        }
+        const priorRedemption = await db.collection("coupon_redemptions").findOne({
+          code: dbCoupon.code,
+          email: normalizedCustomerEmail,
+        });
+        if (priorRedemption) {
+          return NextResponse.json({ error: "This coupon has already been used for this email." }, { status: 400 });
         }
       } else {
         return NextResponse.json({ error: "Invalid coupon code provided." }, { status: 400 });
@@ -247,6 +267,15 @@ export async function POST(request: Request) {
     }
 
     await db.collection("orders").insertOne(newOrder);
+
+    if (couponCode && normalizedCustomerEmail) {
+      await db.collection("coupon_redemptions").insertOne({
+        code: couponCode.toUpperCase().trim(),
+        email: normalizedCustomerEmail,
+        orderId,
+        redeemedAt: new Date(),
+      });
+    }
 
     // Asynchronously dispatch SMTP confirmation email if configurations are set
     if (newOrder.customerEmail) {

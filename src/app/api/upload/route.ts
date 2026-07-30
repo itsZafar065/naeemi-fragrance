@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverErrorResponse } from "@/lib/api-response";
+import { rateLimitKey } from "@/lib/security";
 import path from "path";
 
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -18,6 +19,11 @@ function hasValidSignature(buffer: Buffer, mimeType: string): boolean {
 
 export async function POST(request: Request) {
   try {
+    const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!rateLimitKey(`upload:${clientIp}`, 10, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many upload attempts. Please try again later." }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 

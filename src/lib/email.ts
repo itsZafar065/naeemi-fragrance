@@ -31,6 +31,15 @@ const transporter = isSmtpConfigured
     })
   : null;
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // Helper to execute sending of emails with HTML content and fallback logging
 async function sendMailHelper(to: string, subject: string, htmlContent: string) {
   if (!isSmtpConfigured || !transporter) {
@@ -89,12 +98,14 @@ const emailBaseTemplate = (title: string, bodyContent: string) => `
 // 1. Send Email Verification OTP
 export async function sendEmailVerificationOtp(email: string, name: string, otp: string) {
   const title = "Verify Your Email Address";
+  const safeName = escapeHtml(name);
+  const safeOtp = escapeHtml(otp);
   const content = `
-    <p>Dear <strong>${name}</strong>,</p>
+    <p>Dear <strong>${safeName}</strong>,</p>
     <p>Thank you for creating an account with Naeemi Fragrance. To secure your profile and verify your registration, please use the 6-digit verification code below:</p>
     
     <div style="background-color: #faf7f2; border: 1px dashed #d4af37; border-radius: 16px; padding: 20px; text-align: center; margin: 30px 0; letter-spacing: 6px; font-size: 28px; font-weight: 900; color: #aa7c11;">
-      ${otp}
+      ${safeOtp}
     </div>
     
     <p style="color: #8a827c; font-size: 11px;">* This verification code is valid for <strong>5 minutes</strong>. Do not share this OTP with anyone.</p>
@@ -106,12 +117,14 @@ export async function sendEmailVerificationOtp(email: string, name: string, otp:
 // 2. Send Forgot Password OTP
 export async function sendForgotPasswordOtp(email: string, name: string, otp: string) {
   const title = "Password Reset Authorization";
+  const safeName = escapeHtml(name);
+  const safeOtp = escapeHtml(otp);
   const content = `
-    <p>Dear <strong>${name}</strong>,</p>
+    <p>Dear <strong>${safeName}</strong>,</p>
     <p>We received a request to reset your Naeemi account password. Please enter the following 6-digit security code to authorize your password update:</p>
     
     <div style="background-color: #faf7f2; border: 1px dashed #d4af37; border-radius: 16px; padding: 20px; text-align: center; margin: 30px 0; letter-spacing: 6px; font-size: 28px; font-weight: 900; color: #aa7c11;">
-      ${otp}
+      ${safeOtp}
     </div>
     
     <p style="color: #8a827c; font-size: 11px;">* This security code is valid for <strong>5 minutes</strong>. If you did not request a password reset, please secure your account immediately or contact support.</p>
@@ -122,8 +135,9 @@ export async function sendForgotPasswordOtp(email: string, name: string, otp: st
 // 3. Send Welcome Email
 export async function sendWelcomeEmail(email: string, name: string) {
   const title = "Welcome to the Naeemi Fragrance Vault";
+  const safeName = escapeHtml(name);
   const content = `
-    <p>Dear <strong>${name}</strong>,</p>
+    <p>Dear <strong>${safeName}</strong>,</p>
     <p>Your email has been successfully verified! Welcome as an official registered member of <strong>Naeemi Fragrance</strong>.</p>
     <p>True to our tagline, <em>"Naeemi Naam Hai Mohabbat Ka"</em>, we strive to bring you ultimate satisfaction through handcrafted luxury Ouds and French floral imports, mixed at maximum longevity concentrations.</p>
     
@@ -147,12 +161,16 @@ export async function sendWelcomeEmail(email: string, name: string) {
 // 4. Send Order Confirmation Email
 export async function sendOrderConfirmation(email: string, order: any) {
   const title = "Order Placed Successfully";
+  const safeOrderId = escapeHtml(order.id);
+  const safeCustomerName = escapeHtml(order.customerName);
+  const safeCustomerAddress = escapeHtml(order.customerAddress);
+  const safeCustomerPhone = escapeHtml(order.customerPhone);
   
   const itemsListHtml = order.items
     .map(
       (item: any) => `
     <tr style="border-bottom: 1px solid #e8dec9;">
-      <td style="padding: 10px 0; font-weight: bold; color: #1c1917;">${item.name} <span style="color: #8a827c; font-weight: 500;">x${item.quantity}</span></td>
+      <td style="padding: 10px 0; font-weight: bold; color: #1c1917;">${escapeHtml(item.name)} <span style="color: #8a827c; font-weight: 500;">x${escapeHtml(item.quantity)}</span></td>
       <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #1c1917;">Rs. ${(item.price * item.quantity).toLocaleString()}</td>
     </tr>
   `
@@ -160,8 +178,8 @@ export async function sendOrderConfirmation(email: string, order: any) {
     .join("");
 
   const content = `
-    <p>Dear <strong>${order.customerName}</strong>,</p>
-    <p>Thank you for your purchase! Your order <strong>${order.id}</strong> has been received and is currently being processed by our curation team.</p>
+    <p>Dear <strong>${safeCustomerName}</strong>,</p>
+    <p>Thank you for your purchase! Your order <strong>${safeOrderId}</strong> has been received and is currently being processed by our curation team.</p>
     
     <h3 style="font-family: serif; color: #aa7c11; font-size: 14px; margin-top: 25px; border-bottom: 1px solid #e8dec9; pb-5;">Invoice Summary:</h3>
     <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
@@ -187,37 +205,41 @@ export async function sendOrderConfirmation(email: string, order: any) {
     <div style="background-color: #faf7f2; border-radius: 16px; padding: 15px; margin: 25px 0; font-size: 12px; border: 1px solid #e8dec9;">
       <h4 style="margin: 0 0 6px 0; color: #aa7c11; font-family: serif;">Delivery Destination:</h4>
       <p style="margin: 0; color: #5a5450; font-weight: 500; line-height: 1.5;">
-        ${order.customerAddress}<br/>
-        Contact: ${order.customerPhone}
+        ${safeCustomerAddress}<br/>
+        Contact: ${safeCustomerPhone}
       </p>
     </div>
 
     <p style="font-size: 11.5px; color: #8a827c;">* Our logistics partner will deliver your package in <strong>2-4 working days</strong>. Our rider will contact you to coordinate delivery.</p>
   `;
-  return sendMailHelper(email, `Naeemi Fragrance - Order Placed (${order.id})`, emailBaseTemplate(title, content));
+  return sendMailHelper(email, `Naeemi Fragrance - Order Placed (${safeOrderId})`, emailBaseTemplate(title, content));
 }
 
 // 5. Send Order Status Notification (Shipped, Completed/Delivered, Cancelled)
 export async function sendOrderStatusEmail(order: any, status: string) {
-  let title = `Order Status: ${status}`;
+  const safeStatus = escapeHtml(status);
+  const safeOrderId = escapeHtml(order.id);
+  const safeCustomerName = escapeHtml(order.customerName);
+  const safeCustomerAddress = escapeHtml(order.customerAddress);
+  let title = `Order Status: ${safeStatus}`;
   let content = "";
-  let subject = `Naeemi Fragrance - Order Update (${order.id})`;
+  let subject = `Naeemi Fragrance - Order Update (${safeOrderId})`;
 
   switch (status.toLowerCase()) {
     case "shipped":
       title = "Your Scent is on the Way!";
-      subject = `Naeemi Fragrance - Order Shipped (${order.id})`;
+      subject = `Naeemi Fragrance - Order Shipped (${safeOrderId})`;
       content = `
-        <p>Dear <strong>${order.customerName}</strong>,</p>
-        <p>Exciting news! Your Naeemi luxury order <strong>${order.id}</strong> has been carefully packed, sealed, and handed over to our courier partner.</p>
+        <p>Dear <strong>${safeCustomerName}</strong>,</p>
+        <p>Exciting news! Your Naeemi luxury order <strong>${safeOrderId}</strong> has been carefully packed, sealed, and handed over to our courier partner.</p>
         <p>It is currently on its way to your destination and will be delivered shortly. Please ensure your contact number is active so the rider can coordinate delivery.</p>
         
         <div style="background-color: #faf7f2; border-radius: 16px; padding: 15px; margin: 25px 0; font-size: 12px; border: 1px solid #e8dec9;">
           <h4 style="margin: 0 0 6px 0; color: #aa7c11; font-family: serif;">Shipping Info:</h4>
           <p style="margin: 0; color: #5a5450; font-weight: 500;">
-            Order ID: <strong>${order.id}</strong><br/>
+            Order ID: <strong>${safeOrderId}</strong><br/>
             Courier Status: <strong>In Transit</strong><br/>
-            Destination: ${order.customerAddress}
+            Destination: ${safeCustomerAddress}
           </p>
         </div>
       `;
@@ -226,10 +248,10 @@ export async function sendOrderStatusEmail(order: any, status: string) {
     case "completed":
     case "delivered":
       title = "Delivery Confirmed - Enjoy Your Scents!";
-      subject = `Naeemi Fragrance - Order Delivered (${order.id})`;
+      subject = `Naeemi Fragrance - Order Delivered (${safeOrderId})`;
       content = `
-        <p>Dear <strong>${order.customerName}</strong>,</p>
-        <p>Our courier partner has confirmed the successful delivery of order <strong>${order.id}</strong>. We hope you absolute love your new fragrances!</p>
+        <p>Dear <strong>${safeCustomerName}</strong>,</p>
+        <p>Our courier partner has confirmed the successful delivery of order <strong>${safeOrderId}</strong>. We hope you absolute love your new fragrances!</p>
         <p>True to our heritage, we mix our scents at Extrait concentrations for ultimate projection. We would be absolutely thrilled to receive your feedback or review on our shop!</p>
         
         <div style="text-align: center; margin-top: 25px;">
@@ -240,18 +262,18 @@ export async function sendOrderStatusEmail(order: any, status: string) {
 
     case "cancelled":
       title = "Order Cancellation Confirmation";
-      subject = `Naeemi Fragrance - Order Cancelled (${order.id})`;
+      subject = `Naeemi Fragrance - Order Cancelled (${safeOrderId})`;
       content = `
-        <p>Dear <strong>${order.customerName}</strong>,</p>
-        <p>This email confirms that order <strong>${order.id}</strong> has been cancelled.</p>
+        <p>Dear <strong>${safeCustomerName}</strong>,</p>
+        <p>This email confirms that order <strong>${safeOrderId}</strong> has been cancelled.</p>
         <p>If this was a mistake or you wish to modify order contents/address details instead, please call or WhatsApp support at <strong>03092184760</strong> immediately. We would be happy to assist you in re-creating your order.</p>
       `;
       break;
 
     default:
       content = `
-        <p>Dear <strong>${order.customerName}</strong>,</p>
-        <p>Your order <strong>${order.id}</strong> status has been updated to: <strong>${status}</strong>.</p>
+        <p>Dear <strong>${safeCustomerName}</strong>,</p>
+        <p>Your order <strong>${safeOrderId}</strong> status has been updated to: <strong>${safeStatus}</strong>.</p>
       `;
       break;
   }
@@ -262,6 +284,10 @@ export async function sendOrderStatusEmail(order: any, status: string) {
 // 6. Send Contact Form Submission (Inquiry to Business Owner)
 export async function sendContactInquiry(name: string, email: string, phone: string, message: string) {
   const title = "New Customer Inquiry Received";
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safePhone = escapeHtml(phone);
+  const safeMessage = escapeHtml(message);
   const content = `
     <p>You have received a new contact submission from your store website:</p>
     
@@ -269,19 +295,19 @@ export async function sendContactInquiry(name: string, email: string, phone: str
       <tbody>
         <tr style="background-color: #faf7f2; border-bottom: 1px solid #e8dec9;">
           <td style="padding: 10px; font-weight: bold; width: 120px; color: #aa7c11;">Customer Name:</td>
-          <td style="padding: 10px; color: #1c1917;">${name}</td>
+          <td style="padding: 10px; color: #1c1917;">${safeName}</td>
         </tr>
         <tr style="border-bottom: 1px solid #e8dec9;">
           <td style="padding: 10px; font-weight: bold; color: #aa7c11;">Email Address:</td>
-          <td style="padding: 10px; color: #1c1917;"><a href="mailto:${email}">${email}</a></td>
+          <td style="padding: 10px; color: #1c1917;"><a href="mailto:${safeEmail}">${safeEmail}</a></td>
         </tr>
         <tr style="background-color: #faf7f2; border-bottom: 1px solid #e8dec9;">
           <td style="padding: 10px; font-weight: bold; color: #aa7c11;">Mobile Phone:</td>
-          <td style="padding: 10px; color: #1c1917;"><a href="tel:${phone}">${phone}</a></td>
+          <td style="padding: 10px; color: #1c1917;"><a href="tel:${safePhone}">${safePhone}</a></td>
         </tr>
         <tr>
           <td style="padding: 10px; font-weight: bold; color: #aa7c11; vertical-align: top;">Message:</td>
-          <td style="padding: 10px; color: #1c1917; line-height: 1.5;">${message}</td>
+          <td style="padding: 10px; color: #1c1917; line-height: 1.5;">${safeMessage}</td>
         </tr>
       </tbody>
     </table>
@@ -289,7 +315,7 @@ export async function sendContactInquiry(name: string, email: string, phone: str
     <p style="font-size: 11px; color: #8a827c;">* You can reply directly to this customer inquiry by clicking their email address above.</p>
   `;
   // Send inquiry email to business owner
-  return sendMailHelper(businessEmail, `Naeemi Fragrance Care Inquiry - From ${name}`, emailBaseTemplate(title, content));
+  return sendMailHelper(businessEmail, `Naeemi Fragrance Care Inquiry - From ${safeName}`, emailBaseTemplate(title, content));
 }
 
 // 7. Send Newsletter Subscription Welcome & Discount Code
