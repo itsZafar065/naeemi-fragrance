@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { 
   sanitizeInput, 
   rateLimit, 
+  rateLimitKey,
   validateEmail,
   validatePassword
 } from "@/lib/security";
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
   try {
     // 1. Rate limiting by IP to protect endpoints
     const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
-    if (!rateLimit(clientIp, 20, 60000)) { // 20 requests per minute
+    if (!rateLimit(clientIp, 10, 60000)) {
       return NextResponse.json({ error: "Too many requests. Please wait 1 minute." }, { status: 429 });
     }
 
@@ -76,6 +78,18 @@ export async function POST(request: Request) {
     const cleanEmail = email.toLowerCase().trim();
     if (!validateEmail(cleanEmail)) {
       return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
+    }
+
+    if ((action === "login" || !action) && !rateLimitKey(`customer-login:${clientIp}`, 5, 60000)) {
+      return NextResponse.json({ error: "Too many login attempts. Please wait 1 minute." }, { status: 429 });
+    }
+
+    if (action === "signup" && !rateLimitKey(`customer-signup:${clientIp}`, 5, 60000)) {
+      return NextResponse.json({ error: "Too many signup attempts. Please wait 1 minute." }, { status: 429 });
+    }
+
+    if (action === "reset_password" && !rateLimitKey(`password-reset:${clientIp}`, 3, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many password reset attempts. Please wait 1 hour." }, { status: 429 });
     }
 
     const db = await getDb();
@@ -348,7 +362,7 @@ export async function POST(request: Request) {
       return response;
     }
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/customer/auth");
   }
 }
 
@@ -405,7 +419,7 @@ export async function PUT(request: Request) {
       }
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/customer/auth");
   }
 }
 
@@ -467,6 +481,6 @@ export async function DELETE(request: Request) {
     response.cookies.delete("naeemi_customer_session");
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/customer/auth");
   }
 }

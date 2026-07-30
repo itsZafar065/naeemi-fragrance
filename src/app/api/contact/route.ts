@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { sanitizeInput, rateLimit, validateEmail } from "@/lib/security";
 import { sendContactInquiry } from "@/lib/email";
 
@@ -43,6 +44,6 @@ export async function POST(request: Request) {
       message: "Thank you. Your inquiry has been sent to our customer care team."
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/contact");
   }
 }

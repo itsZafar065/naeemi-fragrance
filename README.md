@@ -25,7 +25,6 @@ All deployment secrets must live in environment variables:
 - `JWT_SECRET`
 - `PUSHER_SECRET`
 - `SMTP_PASS`
-- seed admin passwords such as `SEED_OWNER_PASSWORD`
 
 Only browser-safe values may use the `NEXT_PUBLIC_` prefix. In this project that is limited to the public app URL and Pusher client connection settings.
 

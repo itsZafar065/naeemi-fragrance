@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { sanitizeInput } from "@/lib/security";
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(reviews);
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/reviews");
   }
 }
 
@@ -70,6 +71,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, review: newReview, avgRating });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/reviews");
   }
 }

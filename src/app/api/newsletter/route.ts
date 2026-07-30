@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { sanitizeInput, validateEmail } from "@/lib/security";
 import { sendNewsletterWelcome } from "@/lib/email";
@@ -39,6 +40,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: "Thank you for subscribing! We have sent a 10% OFF discount coupon code to your email." });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/newsletter");
   }
 }

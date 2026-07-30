@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { 
   sanitizeInput, 
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
   try {
     // 1. Rate Limiting Check by client IP
     const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
-    if (!rateLimit(clientIp, 10, 60000)) { // limit 10 requests per minute
+    if (!rateLimit(clientIp, 5, 60000)) {
       return NextResponse.json({ error: "Too many login attempts. Please wait 1 minute." }, { status: 429 });
     }
 
@@ -106,6 +107,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/auth/login");
   }
 }

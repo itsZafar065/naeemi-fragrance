@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { sanitizeInput, validateEmail, validatePassword } from "@/lib/security";
 import bcrypt from "bcryptjs";
@@ -48,7 +49,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(staff);
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/admins");
   }
 }
 
@@ -122,7 +123,7 @@ export async function POST(request: Request) {
       user: { email: cleanEmail, name: newStaff.name, role } 
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/admins");
   }
 }
 
@@ -169,6 +170,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/admins");
   }
 }

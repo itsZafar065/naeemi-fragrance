@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 
 export async function GET(request: Request) {
@@ -25,6 +26,6 @@ export async function GET(request: Request) {
       description: dbCoupon.description || ""
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/coupons/validate");
   }
 }

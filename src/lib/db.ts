@@ -1,13 +1,18 @@
 import { MongoClient } from "mongodb";
+import { requireServerEnv } from "@/lib/env";
 
-const uri = process.env.MONGODB_URI;
+const uri = requireServerEnv("MONGODB_URI");
 const options = {};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-if (!uri) {
-  throw new Error("Please add your Mongo URI to .env.local");
+if (
+  process.env.NODE_ENV === "production" &&
+  !uri.startsWith("mongodb+srv://") &&
+  !/[?&](tls|ssl)=true\b/i.test(uri)
+) {
+  throw new Error("Production MongoDB connections must use TLS/SSL.");
 }
 
 if (process.env.NODE_ENV === "development") {

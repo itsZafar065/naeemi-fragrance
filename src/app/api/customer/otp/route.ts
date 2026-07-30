@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
-import { sanitizeInput, rateLimit, validateEmail } from "@/lib/security";
+import { sanitizeInput, rateLimit, rateLimitKey, validateEmail } from "@/lib/security";
 import { sendEmailVerificationOtp, sendForgotPasswordOtp } from "@/lib/email";
 
 // POST handler to generate and dispatch OTP
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
   try {
     // Apply IP-based rate limiting
     const clientIp = request.headers.get("x-forwarded-for") || "127.0.0.1";
-    if (!rateLimit(clientIp, 10, 60000)) { // Max 10 requests per minute
+    if (!rateLimit(clientIp, 5, 60000)) {
       return NextResponse.json({ error: "Too many requests. Please wait a minute." }, { status: 429 });
     }
 
@@ -23,6 +24,14 @@ export async function POST(request: Request) {
     const cleanEmail = email.toLowerCase().trim();
     if (!validateEmail(cleanEmail)) {
       return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
+    }
+
+    if (type === "forgot_password" && !rateLimitKey(`forgot-password:${clientIp}`, 3, 60 * 60 * 1000)) {
+      return NextResponse.json({ error: "Too many password reset attempts. Please wait 1 hour." }, { status: 429 });
+    }
+
+    if (type === "email_verification" && !rateLimitKey(`email-verification:${clientIp}`, 5, 60000)) {
+      return NextResponse.json({ error: "Too many verification attempts. Please wait 1 minute." }, { status: 429 });
     }
 
     const db = await getDb();
@@ -74,6 +83,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: "Verification OTP code sent successfully." });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/customer/otp");
   }
 }

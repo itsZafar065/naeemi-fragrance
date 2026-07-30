@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import path from "path";
 
 export async function POST(request: Request) {
@@ -40,6 +41,6 @@ export async function POST(request: Request) {
       url: dataUrl
     });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/upload");
   }
 }

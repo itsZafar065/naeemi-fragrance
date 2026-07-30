@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ orders, logs, customers });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/orders");
   }
 }
 
@@ -182,7 +183,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, orderId });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/orders");
   }
 }
 
@@ -245,6 +246,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/orders");
   }
 }

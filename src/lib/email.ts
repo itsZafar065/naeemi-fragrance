@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { requireServerEnv } from "@/lib/env";
 
 const host = process.env.SMTP_HOST;
 const port = Number(process.env.SMTP_PORT) || 465;
@@ -6,9 +7,17 @@ const user = process.env.SMTP_USER;
 const pass = process.env.SMTP_PASS;
 const from = process.env.SMTP_FROM || `"Naeemi Fragrance" <naeemifragrance@gmail.com>`;
 const businessEmail = process.env.BUSINESS_EMAIL || "naeemifragrance@gmail.com";
+const appUrl =
+  process.env.NODE_ENV === "production"
+    ? requireServerEnv("NEXT_PUBLIC_APP_URL")
+    : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 // Verify SMTP connection settings are present
 const isSmtpConfigured = !!(host && user && pass);
+
+if (process.env.NODE_ENV === "production" && !isSmtpConfigured) {
+  throw new Error("Missing required SMTP environment configuration.");
+}
 
 const transporter = isSmtpConfigured
   ? nodemailer.createTransport({
@@ -42,7 +51,6 @@ Body: (Check console/logs for content)
       subject,
       html: htmlContent,
     });
-    console.log(`Email delivered successfully. Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch {
     console.error("Nodemailer dispatch failed. Check SMTP environment configuration.");
@@ -57,7 +65,7 @@ const emailBaseTemplate = (title: string, bodyContent: string) => `
     <!-- Brand Header -->
     <div style="background-color: #1c1917; padding: 30px; text-align: center; border-bottom: 2px solid #d4af37;">
       <div style="width: 64px; height: 64px; border-radius: 50%; background-color: #faf7f2; display: inline-block; padding: 4px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 12px; overflow: hidden;">
-        <img src="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/logo.svg" style="width: 100%; height: 100%; object-fit: cover;" alt="Logo" />
+        <img src="${appUrl}/logo.svg" style="width: 100%; height: 100%; object-fit: cover;" alt="Logo" />
       </div>
       <h1 style="font-family: serif; color: #ffffff; margin: 0; font-size: 20px; letter-spacing: 0.15em; font-weight: bold; text-transform: uppercase;">NAEEMI FRAGRANCE</h1>
       <p style="color: #d4af37; font-size: 8px; font-weight: bold; letter-spacing: 0.25em; text-transform: uppercase; margin: 6px 0 0 0;">Naeemi Naam Hai Mohabbat Ka</p>
@@ -130,7 +138,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
     
     <p>Browse our catalog today and find your signature note.</p>
     <div style="text-align: center; margin-top: 25px;">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/shop" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Explore Collection</a>
+      <a href="${appUrl}/shop" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Explore Collection</a>
     </div>
   `;
   return sendMailHelper(email, "Welcome to Naeemi Fragrance - Naam Hai Mohabbat Ka", emailBaseTemplate(title, content));
@@ -225,7 +233,7 @@ export async function sendOrderStatusEmail(order: any, status: string) {
         <p>True to our heritage, we mix our scents at Extrait concentrations for ultimate projection. We would be absolutely thrilled to receive your feedback or review on our shop!</p>
         
         <div style="text-align: center; margin-top: 25px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/profile" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Track History & Review</a>
+          <a href="${appUrl}/profile" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Track History & Review</a>
         </div>
       `;
       break;
@@ -300,7 +308,7 @@ export async function sendNewsletterWelcome(email: string) {
     <p>We will keep you updated with private batch launches, secret collections, and seasonal promotions.</p>
     
     <div style="text-align: center; margin-top: 25px;">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/shop" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Shop Collection</a>
+      <a href="${appUrl}/shop" style="background-color: #1c1917; color: #ffffff; padding: 12px 25px; border-radius: 12px; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; border: 1px solid #d4af37;">Shop Collection</a>
     </div>
   `;
   return sendMailHelper(email, "Naeemi Fragrance - Welcome to the Scent Club (10% OFF Coupon)", emailBaseTemplate(title, content));

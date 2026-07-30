@@ -4,11 +4,15 @@ const ipRequests = new Map<string, { count: number; resetTime: number }>();
 
 // 1. Rate Limiting Helper (Standard API limits)
 export function rateLimit(ip: string, limit: number = 60, windowMs: number = 60000): boolean {
+  return rateLimitKey(`ip:${ip}`, limit, windowMs);
+}
+
+export function rateLimitKey(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
-  const record = ipRequests.get(ip);
+  const record = ipRequests.get(key);
 
   if (!record || now > record.resetTime) {
-    ipRequests.set(ip, { count: 1, resetTime: now + windowMs });
+    ipRequests.set(key, { count: 1, resetTime: now + windowMs });
     return true;
   }
 
@@ -41,7 +45,7 @@ export function registerFailedAttempt(email: string) {
 
   record.count += 1;
   if (record.count >= 5) {
-    record.lockUntil = now + 15 * 1000; // 15-second lock on 5 failed attempts (temporary for testing)
+    record.lockUntil = now + 15 * 60 * 1000;
     record.count = 0; // reset counter after locking
   }
   loginAttempts.set(email, record);

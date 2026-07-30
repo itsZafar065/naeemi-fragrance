@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
@@ -35,7 +36,7 @@ export async function GET() {
     const products = await db.collection("products").find({}).toArray();
     return NextResponse.json(products);
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/products");
   }
 }
 
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, product: newProduct });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/products");
   }
 }
 
@@ -188,7 +189,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/products");
   }
 }
 
@@ -241,6 +242,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/products");
   }
 }

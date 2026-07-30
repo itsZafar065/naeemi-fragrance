@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { sanitizeInput } from "@/lib/security";
 import jwt from "jsonwebtoken";
@@ -34,7 +35,7 @@ export async function GET() {
     const settings = await db.collection("settings").findOne({});
     return NextResponse.json(settings || {});
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/settings");
   }
 }
 
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, settings: result });
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/settings");
   }
 }
 

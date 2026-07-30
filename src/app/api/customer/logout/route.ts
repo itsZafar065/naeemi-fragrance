@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverErrorResponse } from "@/lib/api-response";
 
 export async function POST() {
   try {
@@ -17,6 +18,6 @@ export async function POST() {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return serverErrorResponse("/api/customer/logout");
   }
 }
