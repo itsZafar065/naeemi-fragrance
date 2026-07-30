@@ -8,6 +8,7 @@ import { useAdmin, Perfume } from "@/context/AdminContext";
 import { useCart } from "@/context/CartContext";
 import { NoteExplorer } from "@/components/NoteExplorer";
 import { FragranceCard } from "@/components/FragranceCard";
+import { getSiteUrl } from "@/lib/site-url";
 import { 
   ArrowLeft, 
   ShoppingBag, 
@@ -30,6 +31,8 @@ const getFriendlyType = (type: string) => {
   if (type === "Eau de Toilette (EDT)") return "Eau de Toilette";
   return type;
 };
+
+const siteUrl = getSiteUrl();
 
 const getMockReviews = (prodName: string, category: string) => {
   if (prodName === "Shams Un Naeemi") {
@@ -72,6 +75,7 @@ export default function ProductDetailPage() {
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [newReviewText, setNewReviewText] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [reviewError, setReviewError] = useState("");
   const [showReviewForm, setShowReviewForm] = useState(false);
 
   // Sync selected product & load reviews from DB
@@ -154,6 +158,35 @@ export default function ProductDetailPage() {
 
   const hasLowStock = calculatedStock > 0 && calculatedStock <= 5;
   const isOutOfStock = calculatedStock === 0;
+  const productImageUrl = product.imageUrl?.startsWith("/")
+    ? `${siteUrl}${product.imageUrl}`
+    : product.imageUrl;
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${product.name} ${selectedSize}`,
+    image: productImageUrl ? [productImageUrl] : undefined,
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: "Naeemi Fragrance",
+    },
+    sku: product.sku || `NF-0${product.id}`,
+    category: product.category,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: product.rating || 5,
+      reviewCount: Math.max(reviewsList.length, 1),
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/product/${product.id}`,
+      priceCurrency: "PKR",
+      price: calculatedPrice,
+      availability: isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
 
   const handleAddToCart = () => {
     if (quantity > calculatedStock) return;
@@ -210,6 +243,7 @@ export default function ProductDetailPage() {
     };
 
     try {
+      setReviewError("");
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,9 +259,12 @@ export default function ProductDetailPage() {
         setNewReviewText("");
         setShowReviewForm(false);
         setTimeout(() => setReviewSubmitted(false), 3000);
+      } else {
+        const data = await res.json().catch(() => null);
+        setReviewError(data?.error || "Failed to submit review. Please try again.");
       }
     } catch (err) {
-      alert("Failed to submit review. Please try again.");
+      setReviewError("Failed to submit review. Please try again.");
     }
   };
 
@@ -249,6 +286,10 @@ export default function ProductDetailPage() {
 
   return (
     <div className="space-y-12 max-w-6xl mx-auto pb-12 px-2 sm:px-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c") }}
+      />
       {/* Top Breadcrumbs */}
       <div className="flex justify-between items-center px-1">
         <Link
@@ -355,6 +396,7 @@ export default function ProductDetailPage() {
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
+                  aria-pressed={selectedSize === size}
                   className={`px-4 py-2 rounded-xl border text-[11px] font-bold transition-all ${
                     selectedSize === size
                       ? "border-amber-600 bg-amber-500/10 text-amber-900 shadow-sm"
@@ -387,7 +429,7 @@ export default function ProductDetailPage() {
               </span>
             ) : (
               <span className="text-emerald-700 font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100">
-                ✓ In Stock
+                In Stock
               </span>
             )}
           </div>
@@ -558,6 +600,8 @@ export default function ProductDetailPage() {
           {/* Write a Review trigger button - Gold theme styled */}
           <button
             onClick={handleToggleReviewForm}
+            aria-expanded={showReviewForm}
+            aria-controls="review-form-section"
             className="px-5 py-2.5 bg-amber-550/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/20 rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -639,6 +683,12 @@ export default function ProductDetailPage() {
           <div className="w-full flex items-center justify-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-100 p-3.5 rounded-2xl font-bold animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             Thank you! Your experience review has been recorded.
+          </div>
+        )}
+
+        {reviewError && (
+          <div className="w-full text-xs text-rose-800 bg-rose-50 border border-rose-100 p-3.5 rounded-2xl font-bold animate-fadeIn" role="alert">
+            {reviewError}
           </div>
         )}
 

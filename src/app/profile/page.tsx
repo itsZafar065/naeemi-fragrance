@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCustomer } from "@/context/CustomerContext";
 import { getPusherClient } from "@/lib/pusher";
 import { 
@@ -82,6 +83,7 @@ export default function CustomerProfilePage() {
   const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [accountActionMessage, setAccountActionMessage] = useState("");
 
   // Orders state
   const [orders, setOrders] = useState<Order[]>([]);
@@ -207,14 +209,14 @@ export default function CustomerProfilePage() {
         method: "DELETE",
       });
       if (res.ok) {
-        alert("Your account has been permanently deleted. Logging you out.");
+        setAccountActionMessage("Your account has been permanently deleted. Redirecting you to home.");
         window.location.href = "/";
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to delete account");
+        setAccountActionMessage(data.error || "Failed to delete account.");
       }
     } catch (err) {
-      alert("An error occurred. Please try again.");
+      setAccountActionMessage("An error occurred. Please try again.");
     }
   };
 
@@ -498,7 +500,7 @@ export default function CustomerProfilePage() {
                   </div>
                   <div className="grid grid-cols-3 border-b border-stone-200/20 pb-2.5">
                     <span className="text-stone-400 font-semibold">Phone</span>
-                    <span className="col-span-2 font-bold text-stone-750">{customer.phone || "—"}</span>
+                    <span className="col-span-2 font-bold text-stone-750">{customer.phone || "Not provided"}</span>
                   </div>
                   <div className="grid grid-cols-3">
                     <span className="text-stone-400 font-semibold text-left">Address</span>
@@ -508,15 +510,22 @@ export default function CustomerProfilePage() {
               )}
 
               {!isEditing && (
-                <div className="border-t border-stone-200/20 pt-4 flex justify-between items-center text-[10px]">
-                  <span className="text-stone-400 font-semibold">Security Settings</span>
-                  <button
-                    onClick={handleDeleteAccount}
-                    className="font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                  >
-                    Delete Account Permanently
-                  </button>
-                </div>
+                <>
+                  {accountActionMessage && (
+                    <div className="text-[11px] font-semibold text-rose-800 bg-rose-50 border border-rose-200/50 p-3 rounded-xl" role="alert">
+                      {accountActionMessage}
+                    </div>
+                  )}
+                  <div className="border-t border-stone-200/20 pt-4 flex justify-between items-center text-[10px]">
+                    <span className="text-stone-400 font-semibold">Security Settings</span>
+                    <button
+                      onClick={handleDeleteAccount}
+                      className="font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                    >
+                      Delete Account Permanently
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -537,7 +546,7 @@ export default function CustomerProfilePage() {
               <div className="py-20 text-center text-stone-450 text-xs leading-relaxed space-y-3">
                 <p>No orders placed on this account yet.</p>
                 <Link href="/shop" className="text-xs font-bold text-amber-600 hover:text-amber-700 inline-block border border-amber-600/30 px-4 py-2 rounded-xl bg-amber-50/20">
-                  Browse Fragrances & Place Your First Order →
+                  Browse Fragrances & Place Your First Order
                 </Link>
               </div>
             ) : (
@@ -590,7 +599,7 @@ export default function CustomerProfilePage() {
             {/* Mobile Header Brand Area (Only visible on mobile - Premium & Theme-matching) */}
             <div className="block md:hidden text-center space-y-2.5 mb-4 animate-fadeIn">
               <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-md">
-                <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+                <Image src="/logo.svg" width={76} height={76} className="w-full h-full object-cover" alt="Naeemi Fragrance logo" />
               </div>
               <div className="space-y-1 select-none">
                 <h2 className="font-serif text-lg font-extrabold text-stone-850 tracking-widest uppercase leading-none">
@@ -914,7 +923,7 @@ export default function CustomerProfilePage() {
             {/* Brand Logo & Tagline (Top) */}
             <div className="relative z-10 flex items-center gap-3.5">
               <div className="w-13 h-13 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-[0_4px_16px_rgba(212,175,55,0.15)] shrink-0">
-                <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+                <Image src="/logo.svg" width={52} height={52} className="w-full h-full object-cover" alt="Naeemi Fragrance logo" />
               </div>
               <div className="space-y-0.5">
                 <h3 className="font-extrabold tracking-widest text-sm uppercase font-serif text-white">NAEEMI FRAGRANCE</h3>

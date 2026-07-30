@@ -41,6 +41,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "EASYPAISA" | "JAZZCASH" | "BANK">("COD");
   const [paymentSlipUrl, setPaymentSlipUrl] = useState<string | null>(null);
   const [uploadingSlip, setUploadingSlip] = useState(false);
+  const [paymentSlipError, setPaymentSlipError] = useState("");
 
   // 5. Discount / Coupons
   const [couponCode, setCouponCode] = useState("");
@@ -93,6 +94,7 @@ export default function CheckoutPage() {
     if (!file) return;
 
     setUploadingSlip(true);
+    setPaymentSlipError("");
     const formData = new FormData();
     formData.append("file", file);
 
@@ -109,7 +111,7 @@ export default function CheckoutPage() {
       const data = await res.json();
       setPaymentSlipUrl(data.url);
     } catch (err: any) {
-      alert("Slip upload failed. Please try again or select Cash on Delivery.");
+      setPaymentSlipError("Slip upload failed. Please try again or select Cash on Delivery.");
       console.error("Slip upload failed.");
     } finally {
       setUploadingSlip(false);
@@ -120,7 +122,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!name || !phone || !streetAddress || cart.length === 0) return;
     if (paymentMethod !== "COD" && !paymentSlipUrl && !uploadingSlip) {
-      alert("Please upload the transaction transfer screenshot to verify your payment.");
+      setPaymentSlipError("Please upload the transaction transfer screenshot to verify your payment.");
       return;
     }
 
@@ -396,7 +398,9 @@ export default function CheckoutPage() {
                   onClick={() => {
                     setPaymentMethod("COD");
                     setPaymentSlipUrl(null);
+                    setPaymentSlipError("");
                   }}
+                  aria-pressed={paymentMethod === "COD"}
                   className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
                     paymentMethod === "COD"
                       ? "bg-amber-500/5 border-amber-500 shadow-xs"
@@ -416,7 +420,9 @@ export default function CheckoutPage() {
                   onClick={() => {
                     setPaymentMethod("EASYPAISA");
                     setPaymentSlipUrl(null);
+                    setPaymentSlipError("");
                   }}
+                  aria-pressed={paymentMethod === "EASYPAISA"}
                   className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
                     paymentMethod === "EASYPAISA"
                       ? "bg-amber-500/5 border-amber-500 shadow-xs"
@@ -438,7 +444,9 @@ export default function CheckoutPage() {
                   onClick={() => {
                     setPaymentMethod("JAZZCASH");
                     setPaymentSlipUrl(null);
+                    setPaymentSlipError("");
                   }}
+                  aria-pressed={paymentMethod === "JAZZCASH"}
                   className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
                     paymentMethod === "JAZZCASH"
                       ? "bg-amber-500/5 border-amber-500 shadow-xs"
@@ -460,7 +468,9 @@ export default function CheckoutPage() {
                   onClick={() => {
                     setPaymentMethod("BANK");
                     setPaymentSlipUrl(null);
+                    setPaymentSlipError("");
                   }}
+                  aria-pressed={paymentMethod === "BANK"}
                   className={`p-4 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all ${
                     paymentMethod === "BANK"
                       ? "bg-amber-500/5 border-amber-500 shadow-xs"
@@ -489,7 +499,7 @@ export default function CheckoutPage() {
                     {paymentMethod === "EASYPAISA" && (
                       <div className="p-3 bg-white/70 border border-stone-200/50 rounded-xl space-y-1">
                         <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wide block">EasyPaisa Account</span>
-                        <p className="font-black text-sm text-stone-850">📲 {settings?.easyPaisaAccount || "03092184760"}</p>
+                        <p className="font-black text-sm text-stone-850">{settings?.easyPaisaAccount || "03092184760"}</p>
                         <p className="text-[9px] text-stone-500 font-bold">Account Name: Naeemi Fragrances</p>
                       </div>
                     )}
@@ -497,7 +507,7 @@ export default function CheckoutPage() {
                     {paymentMethod === "JAZZCASH" && (
                       <div className="p-3 bg-white/70 border border-stone-200/50 rounded-xl space-y-1">
                         <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wide block">JazzCash Account</span>
-                        <p className="font-black text-sm text-stone-850">📲 0309-2184760</p>
+                        <p className="font-black text-sm text-stone-850">0309-2184760</p>
                         <p className="text-[9px] text-stone-500 font-bold">Account Name: Naeemi Fragrances</p>
                       </div>
                     )}
@@ -529,7 +539,10 @@ export default function CheckoutPage() {
                       <p className="text-[10px] font-bold text-amber-700 animate-pulse">Uploading receipt screenshot...</p>
                     )}
                     {paymentSlipUrl && (
-                      <p className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">✓ Receipt screenshot linked successfully!</p>
+                      <p className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">Receipt screenshot linked successfully.</p>
+                    )}
+                    {paymentSlipError && (
+                      <p className="text-[10px] font-bold text-rose-700" role="alert">{paymentSlipError}</p>
                     )}
                   </div>
                 </div>
@@ -586,7 +599,7 @@ export default function CheckoutPage() {
                     <div className="flex-grow min-w-0 text-xs space-y-0.5">
                       <h4 className="font-extrabold text-stone-850 truncate">{item.product.name}</h4>
                       <p className="text-[10px] text-stone-450 font-bold">
-                        {item.product.volume} • Qty {item.quantity}
+                        {item.product.volume} - Qty {item.quantity}
                       </p>
                     </div>
                     <span className="text-xs font-bold text-stone-800 shrink-0">

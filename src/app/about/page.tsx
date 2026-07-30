@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkles, Award, ShieldCheck, HeartHandshake, ArrowRight, User, BookOpen, Quote } from "lucide-react";
 
 export default function AboutPage() {
@@ -26,14 +27,7 @@ export default function AboutPage() {
           <div className="md:col-span-5 flex justify-center">
             <div className="relative group w-full max-w-[260px] aspect-[4/5] rounded-[48px] overflow-hidden p-2 bg-gradient-to-br from-amber-500/20 to-amber-600/5 shadow-xl border border-amber-100/50">
               <div className="w-full h-full rounded-[40px] overflow-hidden relative bg-white flex items-center justify-center border border-white">
-                <img 
-                  src="/mufti-jan.webp" 
-                  alt="Mufti Muhammad Jan Naeemi" 
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aa7c11' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-                  }}
-                />
+                <Image src="/mufti-jan.webp" alt="Mufti Muhammad Jan Naeemi" fill sizes="(max-width: 768px) 260px, 260px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 
                 {/* Gold frames */}
                 <div className="absolute inset-3 border border-amber-500/20 rounded-[32px] pointer-events-none" />
@@ -50,8 +44,8 @@ export default function AboutPage() {
               </p>
               <div className="py-3 border-y border-amber-500/10">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-stone-900 leading-normal font-sans">
-                  جانِ اہلسنت مفتیِ اعظم سندھ شیخ الحدیث <br />
-                  <span className="gold-gradient-text text-2xl sm:text-3xl md:text-4xl font-serif">مفتی محمد جان نعیمی</span>
+                  Jan-e-Ahle Sunnat, Mufti-e-Azam Sindh, Sheikh-ul-Hadees <br />
+                  <span className="gold-gradient-text text-2xl sm:text-3xl md:text-4xl font-serif">Mufti Muhammad Jan Naeemi</span>
                 </h2>
               </div>
               <p className="text-[11px] sm:text-xs text-stone-500 leading-relaxed">
@@ -63,7 +57,7 @@ export default function AboutPage() {
             <div className="p-4 bg-white/70 border border-amber-100/50 rounded-2xl flex gap-3 text-left items-start shadow-xs">
               <Quote className="w-6 h-6 text-amber-650 shrink-0 opacity-40 rotate-180" />
               <p className="text-[10px] text-stone-500 leading-relaxed italic">
-                "Naeemi Naam Hai Mohabbat Ka — Ye sirf ek tagline nahi, balkay hamare ustad o murshid ki sachi sikhai hui mohabbat ka amli aayena-dar ha jo hum har fragrance ke sath aap tak pohnchate hain."
+                "Naeemi Naam Hai Mohabbat Ka" sirf ek tagline nahi, balkay hamare ustad o murshid ki sikhai hui mohabbat ka amli izhar hai jo hum har fragrance ke sath aap tak pohnchate hain.
               </p>
             </div>
           </div>
@@ -81,14 +75,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0%,transparent_70%)]" />
               
               {/* Owner Photo */}
-              <img 
-                src="/yousuf.webp" 
-                alt="Muhammad Yousuf Naeemi" 
-                className="absolute inset-0 w-full h-full object-cover opacity-40 transition-opacity duration-500 group-hover:opacity-65"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
+              <Image src="/yousuf.webp" alt="Muhammad Yousuf Naeemi" fill sizes="(max-width: 768px) 280px, 280px" className="object-cover opacity-40 transition-opacity duration-500 group-hover:opacity-65" />
 
               {/* Overlay Text Details */}
               <div className="relative z-10 text-center p-6 space-y-3 text-white">
@@ -138,7 +125,7 @@ export default function AboutPage() {
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-700">Scent Heritage</span>
           <h3 className="text-xl md:text-2xl font-bold font-serif text-stone-800">Pure Extracts, Small Batches</h3>
           <p className="text-xs text-stone-500 leading-relaxed">
-            Unlike mass-produced scents that fade quickly, every bottle of Naeemi Fragrance is mixed in small, carefully monitored batches. We allow our premium oils to age organically, ensuring that when the scent reaches your skin, it behaves like a living story — revealing top, heart, and base notes over several hours.
+            Unlike mass-produced scents that fade quickly, every bottle of Naeemi Fragrance is mixed in small, carefully monitored batches. We allow our premium oils to age organically, ensuring that when the scent reaches your skin, it behaves like a living story, revealing top, heart, and base notes over several hours.
           </p>
         </div>
 

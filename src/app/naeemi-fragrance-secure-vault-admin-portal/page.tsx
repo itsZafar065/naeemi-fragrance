@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAdmin, Perfume, Order } from "@/context/AdminContext";
 import { 
   TrendingUp, 
@@ -84,6 +85,12 @@ export default function AdminDashboard() {
   // Local settings editor state (to avoid lag/caret jumping and allow explicit saves)
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [adminNotice, setAdminNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const showAdminNotice = (type: "success" | "error", message: string) => {
+    setAdminNotice({ type, message });
+    window.setTimeout(() => setAdminNotice(null), 4500);
+  };
 
   useEffect(() => {
     if (settings) {
@@ -105,13 +112,13 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         updateSettings(updatedFieldsSubset, false);
-        alert("Settings saved successfully to the database!");
+        showAdminNotice("success", "Settings saved successfully to the database.");
       } else {
-        alert("Failed to save settings. Please try again.");
+        showAdminNotice("error", "Failed to save settings. Please try again.");
       }
     } catch (err) {
       console.error("Settings save error.");
-      alert("Error saving settings.");
+      showAdminNotice("error", "Error saving settings.");
     } finally {
       setSaveLoading(false);
     }
@@ -298,8 +305,9 @@ export default function AdminDashboard() {
       setImagePath("/shams.jpeg");
       setVariantsList([]);
       setShowAddForm(false);
+      showAdminNotice("success", "Product listing added successfully.");
     } else {
-      alert(result.error || "Failed to add product listing");
+      showAdminNotice("error", result.error || "Failed to add product listing.");
     }
   };
 
@@ -354,8 +362,9 @@ export default function AdminDashboard() {
 
     if (result.success) {
       setEditingProduct(null);
+      showAdminNotice("success", "Product specifications updated successfully.");
     } else {
-      alert(result.error || "Failed to update product specifications.");
+      showAdminNotice("error", result.error || "Failed to update product specifications.");
     }
   };
 
@@ -374,8 +383,9 @@ export default function AdminDashboard() {
       setNewCouponCode("");
       setNewCouponDiscount(10);
       setNewCouponDesc("");
+      showAdminNotice("success", "Coupon voucher created successfully.");
     } else {
-      alert(result.error || "Failed to create coupon voucher");
+      showAdminNotice("error", result.error || "Failed to create coupon voucher.");
     }
   };
 
@@ -396,9 +406,9 @@ export default function AdminDashboard() {
       setNewStaffName("");
       setNewStaffRole("Manager");
       setShowStaffForm(false);
-      alert("Staff credentials registered successfully!");
+      showAdminNotice("success", "Staff credentials registered successfully.");
     } else {
-      alert(result.error || "Failed to create staff account");
+      showAdminNotice("error", result.error || "Failed to create staff account.");
     }
   };
 
@@ -442,15 +452,18 @@ export default function AdminDashboard() {
     const result = await updateProduct(id, { stock: Math.max(0, tempStockValue) });
     if (result.success) {
       setEditingStockId(null);
+      showAdminNotice("success", "Perfume inventory updated successfully.");
     } else {
-      alert(result.error || "Failed to restock perfume inventory");
+      showAdminNotice("error", result.error || "Failed to restock perfume inventory.");
     }
   };
 
   const handleOrderStatusUpdate = async (orderId: string, status: Order["status"]) => {
     const result = await updateOrderStatus(orderId, status);
     if (!result.success) {
-      alert(result.error || "Failed to update order status");
+      showAdminNotice("error", result.error || "Failed to update order status.");
+    } else {
+      showAdminNotice("success", "Order status updated successfully.");
     }
   };
 
@@ -458,7 +471,9 @@ export default function AdminDashboard() {
     if (!confirm("Are you sure you want to delete this fragrance listing?")) return;
     const result = await deleteProduct(id);
     if (!result.success) {
-      alert(result.error);
+      showAdminNotice("error", result.error || "Failed to delete product.");
+    } else {
+      showAdminNotice("success", "Product listing deleted successfully.");
     }
   };
 
@@ -563,6 +578,20 @@ export default function AdminDashboard() {
           <LogOut className="w-4 h-4" />
         </button>
       </div>
+
+      {adminNotice && (
+        <div
+          className={`lg:col-span-12 rounded-2xl border px-4 py-3 text-xs font-bold shadow-sm ${
+            adminNotice.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+          role="status"
+          aria-live="polite"
+        >
+          {adminNotice.message}
+        </div>
+      )}
 
       {/* MOBILE COLLAPSIBLE DRAWER SIDEBAR */}
       {mobileSidebarOpen && (
@@ -996,7 +1025,7 @@ export default function AdminDashboard() {
                           {prod.imageUrl && prod.imageUrl.startsWith("linear-gradient") ? (
                             <div className="w-8 h-8 rounded border" style={{ background: prod.imageUrl }} />
                           ) : (
-                            <img src={prod.imageUrl} alt={prod.name} className="w-8 h-8 rounded border object-contain bg-white" />
+                            <Image src={prod.imageUrl} alt={prod.name} width={32} height={32} className="w-8 h-8 rounded border object-contain bg-white" />
                           )}
                         </td>
                         <td className="p-3 font-bold text-stone-855">{prod.name}</td>
@@ -1359,7 +1388,7 @@ export default function AdminDashboard() {
                             <div className="pt-2">
                               <span className="text-[8px] font-extrabold text-stone-400 uppercase tracking-widest block mb-1">EasyPaisa Transaction Receipt</span>
                               <a href={ord.paymentSlipUrl} target="_blank" rel="noreferrer" className="inline-block relative group">
-                                <img src={ord.paymentSlipUrl} alt="Receipt Screenshot" className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:opacity-85 transition-all" />
+                                <Image src={ord.paymentSlipUrl} alt="Receipt Screenshot" width={80} height={80} className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:opacity-85 transition-all" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[8px] text-white font-bold rounded-xl transition-all">
                                   Expand Image
                                 </div>
@@ -1556,7 +1585,11 @@ export default function AdminDashboard() {
                       <td className="p-3 text-right">
                         <button onClick={async () => {
                           const result = await deleteCoupon(cop.code);
-                          if (!result.success) alert(result.error || "Failed to delete coupon");
+                          if (!result.success) {
+                            showAdminNotice("error", result.error || "Failed to delete coupon.");
+                          } else {
+                            showAdminNotice("success", "Coupon deleted successfully.");
+                          }
                         }} className="text-stone-400 hover:text-rose-500 p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1972,7 +2005,11 @@ export default function AdminDashboard() {
                           onClick={async () => {
                             if (confirm(`Are you sure you want to revoke access for ${staff.name}?`)) {
                               const res = await deleteStaff(staff.email);
-                              if (!res.success) alert(res.error || "Failed to delete staff user");
+                              if (!res.success) {
+                                showAdminNotice("error", res.error || "Failed to delete staff user.");
+                              } else {
+                                showAdminNotice("success", "Staff access revoked successfully.");
+                              }
                             }
                           }}
                           className="text-[10px] font-bold text-rose-600 hover:underline"
