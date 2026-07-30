@@ -13,11 +13,11 @@ export async function POST(request: Request) {
       .find(c => c.startsWith("naeemi_session="))
       ?.split("=")[1];
 
-    let userEmail = "unknown";
+    let hadValidSession = false;
     if (sessionCookie) {
       try {
-        const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
-        userEmail = decoded.email;
+        jwt.verify(sessionCookie, JWT_SECRET);
+        hadValidSession = true;
       } catch (e) {}
     }
 
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
     // Clear cookie
     response.cookies.delete("naeemi_session");
 
-    if (userEmail !== "unknown") {
+    if (hadValidSession) {
       await db.collection("logs").insertOne({
         action: "Logout",
-        user: userEmail,
+        user: "[REDACTED]",
         date: new Date().toISOString(),
         details: "Logged out from Admin Hub.",
       });

@@ -27,7 +27,7 @@ async function sendMailHelper(to: string, subject: string, htmlContent: string) 
   if (!isSmtpConfigured || !transporter) {
     console.warn(`
 ====== SMTP NOT CONFIGURED (MOCK EMAIL LOG) ======
-To: ${to}
+To: [REDACTED]
 Subject: ${subject}
 Body: (Check console/logs for content)
 ==================================================
@@ -42,7 +42,7 @@ Body: (Check console/logs for content)
       subject,
       html: htmlContent,
     });
-    console.log(`Email delivered successfully to ${to}. Message ID: ${info.messageId}`);
+    console.log(`Email delivered successfully. Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch {
     console.error("Nodemailer dispatch failed. Check SMTP environment configuration.");
@@ -92,7 +92,7 @@ export async function sendEmailVerificationOtp(email: string, name: string, otp:
     <p style="color: #8a827c; font-size: 11px;">* This verification code is valid for <strong>5 minutes</strong>. Do not share this OTP with anyone.</p>
     <p>We are excited to guide you in finding your luxury scent identity.</p>
   `;
-  return sendMailHelper(email, `Naeemi Fragrance - Verify Email (${otp})`, emailBaseTemplate(title, content));
+  return sendMailHelper(email, "Naeemi Fragrance - Verify Email", emailBaseTemplate(title, content));
 }
 
 // 2. Send Forgot Password OTP
@@ -108,7 +108,7 @@ export async function sendForgotPasswordOtp(email: string, name: string, otp: st
     
     <p style="color: #8a827c; font-size: 11px;">* This security code is valid for <strong>5 minutes</strong>. If you did not request a password reset, please secure your account immediately or contact support.</p>
   `;
-  return sendMailHelper(email, `Naeemi Fragrance - Password Reset Code (${otp})`, emailBaseTemplate(title, content));
+  return sendMailHelper(email, "Naeemi Fragrance - Password Reset Code", emailBaseTemplate(title, content));
 }
 
 // 3. Send Welcome Email

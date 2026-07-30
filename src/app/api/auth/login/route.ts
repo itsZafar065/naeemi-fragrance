@@ -70,9 +70,6 @@ export async function POST(request: Request) {
     const token = jwt.sign(
       {
         userId: user._id.toString(),
-        email: user.email,
-        role: user.role, // 'Owner' | 'Admin' | 'Manager'
-        name: user.name,
       },
       JWT_SECRET,
       { expiresIn: "7d" } // Persistent remember login
@@ -101,7 +98,7 @@ export async function POST(request: Request) {
     // Activity Log
     await db.collection("logs").insertOne({
       action: "Login",
-      user: user.email,
+      user: "[REDACTED]",
       role: user.role,
       date: new Date().toISOString(),
       details: "Successfully logged into Admin Hub.",

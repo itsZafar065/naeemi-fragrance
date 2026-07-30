@@ -19,9 +19,10 @@ async function verifyAdminToken(request: Request) {
   try {
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
-    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    const ObjectId = require("mongodb").ObjectId;
+    const dbUser = await db.collection("users").findOne({ _id: new ObjectId(decoded.userId) });
     if (!dbUser) return null;
-    return { ...decoded, role: dbUser.role, name: dbUser.name };
+    return { userId: decoded.userId, email: dbUser.email, role: dbUser.role, name: dbUser.name };
   } catch (error) {
     return null;
   }
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Create Product",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
       details: `Created new perfume listing: ${name} (${volume}).`,
@@ -170,7 +171,7 @@ export async function PUT(request: Request) {
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Update Product",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
       details: detailsText,
@@ -223,7 +224,7 @@ export async function DELETE(request: Request) {
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Delete Product",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
       details: `Deleted perfume listing: ${product?.name || "ID " + id}.`,

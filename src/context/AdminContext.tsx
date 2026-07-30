@@ -235,18 +235,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const channel = pusher.subscribe("naeemi-channel");
 
-    channel.bind("new-order", (data: { order: Order }) => {
-      setOrders((prev) => {
-        const exists = prev.some((o) => o.id === data.order.id);
-        return exists ? prev : [data.order, ...prev];
-      });
+    channel.bind("new-order", () => {
+      fetchAdminData();
       setSystemLogs((prev) => [
         {
           action: "Order Placed",
-          user: data.order.customerEmail || "Guest",
+          user: "[REDACTED]",
           role: "Customer",
           date: new Date().toISOString(),
-          details: `New order ${data.order.id} placed by ${data.order.customerName} for Rs. ${data.order.totalAmount.toLocaleString()}.`
+          details: "New order placed. Refreshing authorized dashboard data."
         },
         ...prev
       ]);
@@ -278,18 +275,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
-    channel.bind("customer-registered", (data: { customer: any }) => {
-      setRegisteredCustomers((prev) => {
-        const exists = prev.some((c) => c.email === data.customer.email);
-        return exists ? prev : [data.customer, ...prev];
-      });
+    channel.bind("customer-registered", () => {
+      fetchAdminData();
       setSystemLogs((prev) => [
         {
           action: "Customer Registered",
-          user: data.customer.email,
+          user: "[REDACTED]",
           role: "Customer",
           date: new Date().toISOString(),
-          details: `New customer verified profile: ${data.customer.name} (${data.customer.email}).`
+          details: "New customer verified profile. Refreshing authorized dashboard data."
         },
         ...prev
       ]);

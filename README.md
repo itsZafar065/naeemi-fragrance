@@ -33,6 +33,10 @@ Only browser-safe values may use the `NEXT_PUBLIC_` prefix. In this project that
 
 If any secret, password, token, API key, database URL, or credential was ever hardcoded or committed in the past, removing it from the latest code is not enough. The old value may still exist in git history, forks, logs, or deployments. Rotate any previously hardcoded secrets immediately before production deployment.
 
+## Personal Data Flow
+
+See `docs/personal-data-flow-audit.md` for the current map of collected user data, storage locations, third-party sharing, cookie/storage behavior, and deletion handling.
+
 ## Checks
 
 ```bash

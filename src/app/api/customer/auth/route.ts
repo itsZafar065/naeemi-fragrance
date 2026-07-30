@@ -196,13 +196,7 @@ export async function POST(request: Request) {
       const pusher = getPusherServer();
       if (pusher) {
         await pusher.trigger("naeemi-channel", "customer-registered", {
-          customer: {
-            id: customer._id.toString(),
-            email: customer.email,
-            name: customer.name,
-            phone: customer.phone || "",
-            address: customer.address || "",
-          }
+          created: true
         }).catch(() => console.error("Pusher trigger failed."));
       }
 
@@ -210,8 +204,6 @@ export async function POST(request: Request) {
       const token = jwt.sign(
         {
           customerId: customer._id.toString(),
-          email: cleanEmail,
-          name: customer.name,
         },
         JWT_SECRET,
         { expiresIn: "30d" }
@@ -327,8 +319,6 @@ export async function POST(request: Request) {
       const token = jwt.sign(
         {
           customerId: customer._id.toString(),
-          email: cleanEmail,
-          name: customer.name,
         },
         JWT_SECRET,
         { expiresIn: "30d" }
@@ -399,11 +389,16 @@ export async function PUT(request: Request) {
       }
     );
 
+    const dbCustomer = await db.collection("customers").findOne({ _id: new ObjectId(decoded.customerId) });
+    if (!dbCustomer) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     return NextResponse.json({
       success: true,
       customer: {
         id: decoded.customerId,
-        email: decoded.email,
+        email: dbCustomer.email,
         name,
         phone,
         address: address || "",
@@ -414,7 +409,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE permanently delete customer account from database
+// DELETE permanently delete customer account and remove personal data from related records
 export async function DELETE(request: Request) {
   try {
     const cookieHeader = request.headers.get("cookie") || "";
@@ -431,6 +426,16 @@ export async function DELETE(request: Request) {
     const db = await getDb();
     const ObjectId = require("mongodb").ObjectId;
 
+    const customer = await db.collection("customers").findOne({
+      _id: new ObjectId(decoded.customerId)
+    });
+
+    if (!customer) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    const deletedEmail = customer.email;
+
     // Delete customer document from DB
     const deleteResult = await db.collection("customers").deleteOne({
       _id: new ObjectId(decoded.customerId)
@@ -440,8 +445,23 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    // Delete associated OTPs if any
-    await db.collection("otps").deleteMany({ email: decoded.email });
+    // Delete associated OTPs and newsletter records
+    await db.collection("otps").deleteMany({ email: deletedEmail });
+    await db.collection("newsletter_subscribers").deleteMany({ email: deletedEmail });
+
+    // Keep order records for store accounting while removing customer personal data
+    await db.collection("orders").updateMany(
+      { customerEmail: deletedEmail },
+      {
+        $set: {
+          customerName: "[DELETED]",
+          customerEmail: "",
+          customerPhone: "[DELETED]",
+          customerAddress: "[DELETED]",
+          paymentSlipUrl: null,
+        }
+      }
+    );
 
     const response = NextResponse.json({ success: true, message: "Account deleted permanently" });
     response.cookies.delete("naeemi_customer_session");

@@ -19,9 +19,10 @@ async function verifyAdminToken(request: Request) {
   try {
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
-    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    const ObjectId = require("mongodb").ObjectId;
+    const dbUser = await db.collection("users").findOne({ _id: new ObjectId(decoded.userId) });
     if (!dbUser) return null;
-    return { ...decoded, role: dbUser.role, name: dbUser.name };
+    return { userId: decoded.userId, email: dbUser.email, role: dbUser.role, name: dbUser.name };
   } catch (error) {
     return null;
   }
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
     const db = await getDb();
     const staff = await db
       .collection("users")
-      .find({}, { projection: { passwordHash: 0 } })
+      .find({}, { projection: { _id: 0, passwordHash: 0 } })
       .toArray();
 
     return NextResponse.json(staff);
@@ -110,10 +111,10 @@ export async function POST(request: Request) {
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Create Staff",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
-      details: `Created new staff login: ${cleanEmail} (${role}).`,
+      details: `Created new staff login with role ${role}.`,
     });
 
     return NextResponse.json({ 
@@ -160,10 +161,10 @@ export async function DELETE(request: Request) {
     // Logging activity log
     await db.collection("logs").insertOne({
       action: "Revoke Staff",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
-      details: `Revoked access and deleted staff login: ${targetEmail}.`,
+      details: "Revoked access and deleted staff login.",
     });
 
     return NextResponse.json({ success: true });

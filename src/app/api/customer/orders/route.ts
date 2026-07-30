@@ -30,7 +30,23 @@ export async function GET(request: Request) {
     // Find all orders associated with this customer's email address
     const orders = await db
       .collection("orders")
-      .find({ customerEmail: decoded.email })
+      .find(
+        { customerEmail: customer.email },
+        {
+          projection: {
+            _id: 0,
+            id: 1,
+            customerName: 1,
+            customerEmail: 1,
+            customerPhone: 1,
+            customerAddress: 1,
+            items: 1,
+            totalAmount: 1,
+            status: 1,
+            date: 1,
+          }
+        }
+      )
       .sort({ date: -1 })
       .toArray();
 

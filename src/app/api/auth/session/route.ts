@@ -21,7 +21,8 @@ export async function GET(request: Request) {
 
     // Stateful validation check against database users collection
     const db = await getDb();
-    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    const ObjectId = require("mongodb").ObjectId;
+    const dbUser = await db.collection("users").findOne({ _id: new ObjectId(decoded.userId) });
     
     if (!dbUser) {
       const response = NextResponse.json({ authenticated: false }, { status: 401 });

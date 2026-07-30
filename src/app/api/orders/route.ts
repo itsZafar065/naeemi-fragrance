@@ -20,9 +20,10 @@ async function verifyAdminToken(request: Request) {
   try {
     const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
-    const dbUser = await db.collection("users").findOne({ email: decoded.email.toLowerCase().trim() });
+    const ObjectId = require("mongodb").ObjectId;
+    const dbUser = await db.collection("users").findOne({ _id: new ObjectId(decoded.userId) });
     if (!dbUser) return null;
-    return { ...decoded, role: dbUser.role, name: dbUser.name };
+    return { userId: decoded.userId, email: dbUser.email, role: dbUser.role, name: dbUser.name };
   } catch (error) {
     return null;
   }
@@ -45,13 +46,21 @@ export async function GET(request: Request) {
     let logs: any[] = [];
     let customers: any[] = [];
     if (admin.role === "Owner" || admin.role === "Admin") {
-      logs = await db.collection("logs").find({}).sort({ date: -1 }).limit(100).toArray();
+      const rawLogs = await db.collection("logs").find({}).sort({ date: -1 }).limit(100).toArray();
+      logs = rawLogs.map((log) => ({
+        _id: log._id,
+        action: log.action,
+        user: "[REDACTED]",
+        role: log.role,
+        date: log.date,
+        details: log.details || "",
+      }));
     }
     
     // Always load registered customers registry for admin view
     customers = await db
       .collection("customers")
-      .find({}, { projection: { passwordHash: 0 } })
+      .find({}, { projection: { _id: 0, passwordHash: 0 } })
       .toArray();
 
     return NextResponse.json({ orders, logs, customers });
@@ -167,7 +176,7 @@ export async function POST(request: Request) {
     const pusher = getPusherServer();
     if (pusher) {
       await pusher.trigger("naeemi-channel", "new-order", {
-        order: newOrder
+        orderId
       }).catch(() => console.error("Pusher trigger failed."));
     }
 
@@ -211,7 +220,7 @@ export async function PUT(request: Request) {
     // Activity Log
     await db.collection("logs").insertOne({
       action: "Update Order",
-      user: admin.email,
+      user: "[REDACTED]",
       role: admin.role,
       date: new Date().toISOString(),
       details: `Updated order status for ${orderId} to '${status}'.`,
