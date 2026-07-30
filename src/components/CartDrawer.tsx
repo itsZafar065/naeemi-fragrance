@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useCart } from "../context/CartContext";
 import { useAdmin } from "../context/AdminContext";
 import { useRouter } from "next/navigation";
@@ -73,6 +74,7 @@ export const CartDrawer: React.FC = () => {
           <button
             onClick={handleClose}
             className="p-1.5 rounded-full hover:bg-stone-100 text-stone-500 transition-colors"
+            aria-label="Close cart"
           >
             <X className="w-5 h-5" />
           </button>
@@ -183,10 +185,12 @@ export const CartDrawer: React.FC = () => {
                     {item.product.imageUrl && item.product.imageUrl.startsWith("linear-gradient") ? (
                       <div className="absolute inset-0" style={{ background: item.product.imageUrl }} />
                     ) : (
-                      <img
+                      <Image
                         src={item.product.imageUrl}
                         alt={item.product.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     )}
                   </div>
@@ -204,6 +208,7 @@ export const CartDrawer: React.FC = () => {
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                           className="p-1 hover:bg-stone-100 text-stone-500 rounded-l-lg transition-colors"
+                          aria-label={`Decrease quantity of ${item.product.name}`}
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
@@ -213,6 +218,7 @@ export const CartDrawer: React.FC = () => {
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           className="p-1 hover:bg-stone-100 text-stone-500 rounded-r-lg transition-colors"
+                          aria-label={`Increase quantity of ${item.product.name}`}
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
@@ -227,6 +233,7 @@ export const CartDrawer: React.FC = () => {
                   <button
                     onClick={() => removeFromCart(item.product.id)}
                     className="self-start p-1 text-stone-400 hover:text-rose-500 transition-colors"
+                    aria-label={`Remove ${item.product.name} from cart`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

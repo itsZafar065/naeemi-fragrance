@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AdminProvider } from "@/context/AdminContext";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { CartProvider } from "@/context/CartContext";
-
-
-const playfair = Playfair_Display({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
+import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Naeemi Fragrance | Premium Perfume Store",
@@ -29,18 +16,13 @@ export const metadata: Metadata = {
   },
 };
 
-import { LayoutWrapper } from "@/components/LayoutWrapper";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${playfair.variable} ${jakarta.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col pb-24 md:pb-0 bg-[#faf7f2]">
         <AdminProvider>
           <CustomerProvider>

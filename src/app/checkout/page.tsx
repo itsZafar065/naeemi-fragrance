@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAdmin } from "@/context/AdminContext";
@@ -12,10 +13,8 @@ import {
   Ticket, 
   CheckCircle,
   Truck,
-  RotateCcw,
   Wallet,
-  Landmark,
-  ClipboardList
+  Landmark
 } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -74,7 +73,7 @@ export default function CheckoutPage() {
         setCouponError(true);
         setAppliedDiscount(0);
       }
-    } catch (err) {
+    } catch {
       setCouponMessage("Failed to validate coupon code. Please try again.");
       setCouponError(true);
       setAppliedDiscount(0);
@@ -574,10 +573,12 @@ export default function CheckoutPage() {
                       {item.product.imageUrl && item.product.imageUrl.startsWith("linear-gradient") ? (
                         <div className="absolute inset-0" style={{ background: item.product.imageUrl }} />
                       ) : (
-                        <img
+                        <Image
                           src={item.product.imageUrl}
                           alt={item.product.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="56px"
+                          className="object-cover"
                         />
                       )}
                     </div>

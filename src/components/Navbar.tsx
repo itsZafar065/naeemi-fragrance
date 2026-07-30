@@ -2,9 +2,10 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "../context/CartContext";
-import { ShoppingBag, User, Search, Shield, X, Heart } from "lucide-react";
+import { ShoppingBag, User, Search, X } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -48,7 +49,7 @@ export const Navbar: React.FC = () => {
         {/* Brand Logo - Always visible on desktop */}
         <Link href="/" className="flex items-center gap-3 select-none" onClick={handleLogoClick}>
           <div className="w-11 h-11 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
-            <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+            <Image src="/logo.svg" width={40} height={40} className="w-full h-full object-cover" alt="Naeemi Fragrance logo" priority />
           </div>
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-1.5">
@@ -111,7 +112,7 @@ export const Navbar: React.FC = () => {
                 className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
                 autoFocus
               />
-              <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
+              <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600" aria-label="Close search">
                 <X className="w-4 h-4" />
               </button>
             </form>
@@ -121,6 +122,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setShowSearchInput(!showSearchInput)}
             className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors"
             title="Search"
+            aria-label="Search products"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -137,6 +139,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setIsCartOpen(true)}
             className="p-2 rounded-full hover:bg-stone-100/50 text-stone-600 transition-colors relative"
             title="Cart"
+            aria-label={`Open cart with ${cartCount} items`}
           >
             <ShoppingBag className="w-5 h-5" />
             {cartCount > 0 && (
@@ -153,7 +156,7 @@ export const Navbar: React.FC = () => {
         {!showSearchInput ? (
           <Link href="/" className="flex items-center gap-2 select-none" onClick={handleLogoClick}>
             <div className="w-8 h-8 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm">
-              <img src="/logo.svg" className="w-full h-full object-cover" alt="Logo" />
+              <Image src="/logo.svg" width={28} height={28} className="w-full h-full object-cover" alt="Naeemi Fragrance logo" priority />
             </div>
             <span className="font-extrabold text-sm font-serif tracking-widest text-stone-850">
               NAEEMI
@@ -169,7 +172,7 @@ export const Navbar: React.FC = () => {
               className="w-full px-3 py-1 bg-white border border-amber-500/30 rounded-xl text-[11px] focus:outline-none"
               autoFocus
             />
-            <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600">
+            <button type="button" onClick={() => setShowSearchInput(false)} className="text-stone-400 hover:text-stone-600" aria-label="Close search">
               <X className="w-4 h-4" />
             </button>
           </form>
@@ -181,6 +184,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setShowSearchInput(!showSearchInput)}
             className="p-1.5 text-stone-650 hover:text-amber-600"
             title="Search"
+            aria-label="Search products"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -197,6 +201,7 @@ export const Navbar: React.FC = () => {
             onClick={() => setIsCartOpen(true)}
             className="p-1.5 text-stone-650 hover:text-amber-600 relative"
             title="Cart"
+            aria-label={`Open cart with ${cartCount} items`}
           >
             <ShoppingBag className="w-5.5 h-5.5" />
             {cartCount > 0 && (

@@ -1,7 +1,3 @@
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
-
 // Simple in-memory maps for production rate limiting and brute force protection (reloaded on HMR)
 const loginAttempts = new Map<string, { count: number; lockUntil: number }>();
 const ipRequests = new Map<string, { count: number; resetTime: number }>();

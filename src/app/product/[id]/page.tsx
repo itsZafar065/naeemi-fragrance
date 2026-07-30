@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useAdmin, Perfume } from "@/context/AdminContext";
 import { useCart } from "@/context/CartContext";
@@ -272,10 +273,13 @@ export default function ProductDetailPage() {
               {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
                 <div className="absolute inset-0" style={{ background: product.imageUrl }} />
               ) : (
-                <img
+                <Image
                   src={product.imageUrl}
                   alt={product.name}
-                  className="w-full h-full object-cover bg-white/30"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover bg-white/30"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30 pointer-events-none" />
@@ -285,6 +289,7 @@ export default function ProductDetailPage() {
             <button
               onClick={() => toggleWishlist(product.id)}
               className="absolute top-5 right-5 p-2.5 rounded-xl bg-white/80 backdrop-blur-md border border-stone-100 text-stone-600 hover:text-rose-500 transition-all shadow-md"
+              aria-label={isFav ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             >
               <Heart className={`w-4.5 h-4.5 ${isFav ? "fill-rose-500 text-rose-500" : ""}`} />
             </button>
@@ -398,6 +403,7 @@ export default function ProductDetailPage() {
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="px-3.5 py-1.5 hover:bg-stone-50 text-stone-500 rounded-l-xl transition-all font-semibold"
+                      aria-label="Decrease quantity"
                     >
                       -
                     </button>
@@ -407,6 +413,7 @@ export default function ProductDetailPage() {
                     <button
                       onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                       className="px-3.5 py-1.5 hover:bg-stone-50 text-stone-500 rounded-r-xl transition-all font-semibold"
+                      aria-label="Increase quantity"
                     >
                       +
                     </button>
@@ -588,6 +595,7 @@ export default function ProductDetailPage() {
                         type="button"
                         onClick={() => setNewReviewRating(star)}
                         className="focus:outline-none transition-colors"
+                        aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                       >
                         <Star className={`w-5 h-5 ${star <= newReviewRating ? "text-amber-500 fill-amber-500" : "text-stone-300"}`} />
                       </button>

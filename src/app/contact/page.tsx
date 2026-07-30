@@ -37,7 +37,7 @@ export default function ContactPage() {
       } else {
         setError(data.error || "Failed to dispatch inquiry. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please check connection.");
     } finally {
       setSubmitting(false);

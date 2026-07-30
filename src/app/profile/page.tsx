@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCustomer } from "@/context/CustomerContext";
 import { getPusherClient } from "@/lib/pusher";
 import { 
@@ -14,7 +13,6 @@ import {
   Calendar, 
   CheckCircle2, 
   Loader,
-  Sparkles,
   Shield,
   Truck,
   RotateCcw
@@ -40,8 +38,6 @@ interface Order {
 }
 
 export default function CustomerProfilePage() {
-  const router = useRouter();
-
   const { 
     customer, 
     loading, 
@@ -104,18 +100,7 @@ export default function CustomerProfilePage() {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Request system notification permissions on mount
-  useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      if (Notification.permission === "default") {
-        Notification.requestPermission().then((permission) => {
-          console.log("OS notifications permission status:", permission);
-        });
-      }
-    }
-  }, []);
-
-  const triggerSystemNotification = (orderId: string, status: string) => {
+  const triggerSystemNotification = useCallback((orderId: string, status: string) => {
     // Show local custom web app toast overlay
     setToastMessage(`Order #${orderId} status has been updated to '${status}'!`);
     setTimeout(() => setToastMessage(null), 8000);
@@ -142,9 +127,9 @@ export default function CustomerProfilePage() {
         new Notification(title, options);
       }
     }
-  };
+  }, []);
 
-  const fetchOrders = async (isPolling = false) => {
+  const fetchOrders = useCallback(async (isPolling = false) => {
     try {
       if (!isPolling) setOrdersLoading(true);
       const response = await fetch("/api/customer/orders");
@@ -169,7 +154,7 @@ export default function CustomerProfilePage() {
     } finally {
       if (!isPolling) setOrdersLoading(false);
     }
-  };
+  }, [triggerSystemNotification]);
 
   // Sync edit profile fields when customer logs in or edits
   useEffect(() => {
@@ -179,7 +164,7 @@ export default function CustomerProfilePage() {
       setEditAddress(customer.address);
       fetchOrders();
     }
-  }, [customer]);
+  }, [customer, fetchOrders]);
 
   // Pusher real-time updates and polling fallback subscription hook for order status changes
   useEffect(() => {
@@ -211,7 +196,7 @@ export default function CustomerProfilePage() {
       }, 10000);
       return () => clearInterval(interval);
     }
-  }, [customer]);
+  }, [customer, fetchOrders, triggerSystemNotification]);
 
   const handleDeleteAccount = async () => {
     if (!confirm("Warning: Are you sure you want to permanently delete your account? All your personal records will be removed. This action is irreversible.")) {

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAdmin } from "@/context/AdminContext";
 import { FragranceCard } from "@/components/FragranceCard";
 import { 
@@ -184,11 +185,14 @@ export default function Home() {
           <div className="relative flex flex-col items-center justify-center w-full">
             
             {/* LARGE PERFUME BOTTLE: Highlighted scale, floats gently on hover */}
-            <div className="relative z-30 transition-all duration-700 hover:-translate-y-4 cursor-pointer select-none -mb-32">
-              <img
+            <div className="relative z-30 transition-all duration-700 hover:-translate-y-4 cursor-pointer select-none -mb-32 w-full max-w-[360px] h-[380px] md:h-[440px]">
+              <Image
                 src="/heroimg.webp"
                 alt="Naeemi Fragrance Premium Bottle"
-                className="w-auto h-auto max-h-[380px] md:max-h-[440px] object-contain drop-shadow-[0_30px_60px_rgba(180,135,30,0.45)]"
+                fill
+                priority
+                sizes="(max-width: 768px) 80vw, 360px"
+                className="object-contain drop-shadow-[0_30px_60px_rgba(180,135,30,0.45)]"
               />
               
               {/* Gold Specular Light Streak overlay */}
@@ -360,7 +364,19 @@ export default function Home() {
               href={`/product/${product.id}`}
               className="group p-4 bg-white/40 border border-white/60 rounded-2xl hover:bg-white/70 transition-all flex flex-col justify-between"
             >
-              <div className="aspect-square rounded-xl overflow-hidden mb-3" style={{ background: product.imageUrl }} />
+              <div className="relative aspect-square rounded-xl overflow-hidden mb-3 bg-stone-100">
+                {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
+                  <div className="absolute inset-0" style={{ background: product.imageUrl }} />
+                ) : (
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
+              </div>
               <div>
                 <span className="text-[9px] font-bold uppercase text-stone-400 block">{product.type ? product.type.split(" ")[0] : "PARFUM"}</span>
                 <h4 className="font-bold text-xs text-stone-800 group-hover:text-amber-700 truncate">{product.name}</h4>

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Perfume } from "../context/AdminContext";
 import { useCart } from "../context/CartContext";
 import { Heart, ShoppingCart, Sparkles, Star } from "lucide-react";
@@ -47,10 +48,12 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
             style={{ background: product.imageUrl }}
           />
         ) : (
-          <img
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            className="relative z-10 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="relative z-10 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         )}
 
@@ -67,6 +70,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
         <button
           onClick={handleWishlistClick}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/70 backdrop-blur-md border border-white/40 text-stone-600 hover:text-rose-500 hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-sm"
+          aria-label={isFav ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
         >
           <Heart className={`w-4 h-4 transition-colors ${isFav ? "fill-rose-500 text-rose-500" : ""}`} />
         </button>
@@ -123,6 +127,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
               onClick={handleAddToCartClick}
               className="p-2.5 rounded-2xl gold-btn text-white transition-all hover:scale-105 active:scale-95 shadow-md flex items-center justify-center"
               title="Add to Box"
+              aria-label={`Add ${product.name} to cart`}
             >
               <ShoppingCart className="w-4 h-4" />
             </button>

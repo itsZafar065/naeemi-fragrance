@@ -2,21 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAdmin, Perfume, Order, Coupon, StoreSettings, SystemLog } from "@/context/AdminContext";
+import { useAdmin, Perfume, Order } from "@/context/AdminContext";
 import { 
   TrendingUp, 
   ShoppingBag, 
   AlertTriangle, 
-  Clock, 
   Plus, 
   Trash2, 
   Edit3, 
-  CheckCircle,
   Truck,
-  XCircle,
   Package,
-  Layers,
-  ChevronDown,
   Users,
   Percent,
   BarChart3,
@@ -45,7 +40,7 @@ export default function AdminDashboard() {
     settings,
     adminUser,
     systemLogs,
-    loading,
+    loading: _loading,
     registeredCustomers,
     login,
     logout,
@@ -160,7 +155,7 @@ export default function AdminDashboard() {
   const [heartNotes, setHeartNotes] = useState("");
   const [baseNotes, setBaseNotes] = useState("");
   const [stock, setStock] = useState(10);
-  const [imagePath, setImagePath] = useState("/shams.webp");
+  const [imagePath, setImagePath] = useState("/shams.jpeg");
   const [variantsList, setVariantsList] = useState<any[]>([]);
 
   // Variant addition states
@@ -281,7 +276,7 @@ export default function AdminDashboard() {
       heartNotes: heartArray.length ? heartArray : ["Floral Essence"],
       baseNotes: baseArray.length ? baseArray : ["Amber Base"],
       stock,
-      imageUrl: imagePath || "/shams.webp",
+      imageUrl: imagePath || "/shams.jpeg",
       variants: variantsList
     });
 
@@ -300,7 +295,7 @@ export default function AdminDashboard() {
       setHeartNotes("");
       setBaseNotes("");
       setStock(10);
-      setImagePath("/shams.webp");
+      setImagePath("/shams.jpeg");
       setVariantsList([]);
       setShowAddForm(false);
     } else {
@@ -903,9 +898,9 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp) *</label>
+                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.jpeg) *</label>
                   <input
-                    type="text" required placeholder="/shams.webp" value={imagePath}
+                    type="text" required placeholder="/shams.jpeg" value={imagePath}
                     onChange={(e) => setImagePath(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
                   />
@@ -1188,7 +1183,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.webp) *</label>
+                      <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.jpeg) *</label>
                       <input
                         type="text" required value={editImagePath}
                         onChange={(e) => setEditImagePath(e.target.value)}

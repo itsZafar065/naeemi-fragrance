@@ -71,7 +71,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Clean White Musk", "Vanilla"],
     stock: 20,
     rating: 4.7,
-    imageUrl: "/najaf.jpeg",
+    imageUrl: "/mufti-jan.webp",
   },
   {
     name: "Musk e Naeemi",
@@ -85,7 +85,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Madagascar Vanilla", "Amber"],
     stock: 30,
     rating: 4.8,
-    imageUrl: "/musk.jpeg",
+    imageUrl: "/heroimg.webp",
   },
   {
     name: "Gul e Quds",
@@ -99,7 +99,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Golden Amber", "Sandalwood"],
     stock: 9,
     rating: 4.9,
-    imageUrl: "/quds.jpeg",
+    imageUrl: "/shams.jpeg",
   },
   {
     name: "Zouq e Safar",
@@ -113,7 +113,7 @@ const DEFAULT_PRODUCTS = [
     baseNotes: ["Cedarwood", "Vetiver Root", "Musk"],
     stock: 4,
     rating: 4.6,
-    imageUrl: "/safar.jpeg",
+    imageUrl: "/qaswa.jpeg",
   }
 ];
 

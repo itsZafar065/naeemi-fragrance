@@ -3,6 +3,8 @@
 :root {
   --background: #faf7f2;
   --foreground: #1c1917;
+  --font-sans: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
   --gold-accent: #d4af37;
   --gold-light: #f7e7ce;
   --luxury-rose: #fff0f5;

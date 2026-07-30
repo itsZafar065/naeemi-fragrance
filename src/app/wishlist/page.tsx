@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAdmin } from "@/context/AdminContext";
 import { FragranceCard } from "@/components/FragranceCard";
-import { Heart, Compass, Star } from "lucide-react";
+import { Heart, Compass } from "lucide-react";
 
 export default function WishlistPage() {
   const { wishlist } = useCart();
