@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, Mail, MapPin, Heart } from "lucide-react";
 
 export const Footer: React.FC = () => {
@@ -12,7 +13,7 @@ export const Footer: React.FC = () => {
         <div className="md:col-span-4 space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-[#faf7f2] border border-amber-500/30 flex items-center justify-center p-0.5 shadow-sm shrink-0">
-              <img src="/logo.svg" className="w-full h-full object-cover" alt="Brand Logo" />
+              <Image src="/logo.svg" width={44} height={44} className="w-full h-full object-cover" alt="Naeemi Fragrance logo" />
             </div>
             <div className="space-y-1">
               <h3 className="font-extrabold text-lg tracking-wide font-serif text-stone-800 leading-none">
@@ -91,7 +92,7 @@ export const Footer: React.FC = () => {
       {/* Bottom Copyright bar */}
       <div className="border-t border-stone-200/50 bg-white/20 px-6 py-5 text-center text-xs text-stone-500 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-1">
-          <span>© {new Date().getFullYear()} Naeemi Fragrance. Made with</span>
+          <span>&copy; {new Date().getFullYear()} Naeemi Fragrance. Made with</span>
           <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
           <span>in Pakistan.</span>
         </div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "naeemi-fragrance-v3";
+const CACHE_NAME = "naeemi-fragrance-v4";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json"
@@ -32,14 +32,16 @@ self.addEventListener("fetch", (event) => {
   // Only cache GET requests
   if (event.request.method !== "GET") return;
 
-  const url = event.request.url;
+  const url = new URL(event.request.url);
+
+  if (url.origin !== self.location.origin) return;
 
   // Bypass service worker caching for Next.js dev HMR, Hot Reload, and api routes completely
   if (
-    url.includes("/_next/") || 
-    url.includes("/api/") || 
-    url.includes("webpack") ||
-    url.includes("hot-update")
+    url.pathname.startsWith("/_next/") ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname.includes("webpack") ||
+    url.pathname.includes("hot-update")
   ) {
     return;
   }
@@ -53,7 +55,9 @@ self.addEventListener("fetch", (event) => {
         }
         const responseToCache = response.clone();
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
+          if (event.request.destination === "document" || event.request.destination === "image") {
+            cache.put(event.request, responseToCache);
+          }
         });
         return response;
       })

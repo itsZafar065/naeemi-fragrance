@@ -3,6 +3,7 @@
   "short_name": "Naeemi",
   "description": "Naeemi Naam Hai Mohabbat Ka. Luxury Perfumes & Ouds Store.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#faf7f2",
   "theme_color": "#d4af37",
