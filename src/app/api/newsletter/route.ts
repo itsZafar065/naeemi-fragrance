@@ -33,12 +33,12 @@ export async function POST(request: Request) {
     });
 
     // Dispatch welcome email with 10% discount coupon code
-    await sendNewsletterWelcome(cleanEmail).catch((err) => {
-      console.error("Failed to dispatch newsletter welcome email:", err);
+    await sendNewsletterWelcome(cleanEmail).catch(() => {
+      console.error("Failed to dispatch newsletter welcome email.");
     });
 
     return NextResponse.json({ success: true, message: "Thank you for subscribing! We have sent a 10% OFF discount coupon code to your email." });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

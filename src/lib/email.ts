@@ -44,9 +44,9 @@ Body: (Check console/logs for content)
     });
     console.log(`Email delivered successfully to ${to}. Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error("Nodemailer dispatch failed:", error);
-    throw error;
+  } catch {
+    console.error("Nodemailer dispatch failed. Check SMTP environment configuration.");
+    throw new Error("Email dispatch failed.");
   }
 }
 

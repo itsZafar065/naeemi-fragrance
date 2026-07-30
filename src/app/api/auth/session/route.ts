@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("Missing JWT_SECRET environment variable");
-}
-const SECRET = JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 export async function GET(request: Request) {
   try {
@@ -20,7 +17,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    const decoded = jwt.verify(sessionCookie, SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
 
     // Stateful validation check against database users collection
     const db = await getDb();

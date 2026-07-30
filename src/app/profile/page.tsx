@@ -150,7 +150,7 @@ export default function CustomerProfilePage() {
         }
       }
     } catch (err) {
-      console.error("Error loading customer orders:", err);
+      console.error("Error loading customer orders.");
     } finally {
       if (!isPolling) setOrdersLoading(false);
     }

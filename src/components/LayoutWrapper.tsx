@@ -81,7 +81,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               }
             };
           })
-          .catch((err) => console.error("Service Worker registration failed:", err));
+          .catch(() => console.error("Service Worker registration failed."));
 
         return () => {
           navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);

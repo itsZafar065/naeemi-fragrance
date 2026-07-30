@@ -3,8 +3,9 @@ import { getDb } from "@/lib/db";
 import { sanitizeInput, validateEmail, validatePassword } from "@/lib/security";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(staff);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -120,7 +121,7 @@ export async function POST(request: Request) {
       user: { email: cleanEmail, name: newStaff.name, role } 
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -167,6 +168,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

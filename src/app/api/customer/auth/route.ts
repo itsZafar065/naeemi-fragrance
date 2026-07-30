@@ -13,12 +13,9 @@ import {
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getPusherServer } from "@/lib/pusher";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("Missing JWT_SECRET environment variable");
-}
-const SECRET = JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 // GET current customer session
 export async function GET(request: Request) {
@@ -33,7 +30,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false });
     }
 
-    const decoded = jwt.verify(sessionCookie, SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
 
     // Fetch latest user data from DB to ensure it's fresh
     const db = await getDb();
@@ -206,7 +203,7 @@ export async function POST(request: Request) {
             phone: customer.phone || "",
             address: customer.address || "",
           }
-        }).catch((e) => console.error("Pusher trigger failed:", e));
+        }).catch(() => console.error("Pusher trigger failed."));
       }
 
       // Create secure login JWT session
@@ -216,7 +213,7 @@ export async function POST(request: Request) {
           email: cleanEmail,
           name: customer.name,
         },
-        SECRET,
+        JWT_SECRET,
         { expiresIn: "30d" }
       );
 
@@ -333,7 +330,7 @@ export async function POST(request: Request) {
           email: cleanEmail,
           name: customer.name,
         },
-        SECRET,
+        JWT_SECRET,
         { expiresIn: "30d" }
       );
 
@@ -361,7 +358,7 @@ export async function POST(request: Request) {
       return response;
     }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -378,7 +375,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(sessionCookie, SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
 
     const body = await request.json();
     const sanitizedBody = sanitizeInput(body);
@@ -413,7 +410,7 @@ export async function PUT(request: Request) {
       }
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -430,7 +427,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const decoded = jwt.verify(sessionCookie, SECRET) as any;
+    const decoded = jwt.verify(sessionCookie, JWT_SECRET) as any;
     const db = await getDb();
     const ObjectId = require("mongodb").ObjectId;
 
@@ -450,6 +447,6 @@ export async function DELETE(request: Request) {
     response.cookies.delete("naeemi_customer_session");
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

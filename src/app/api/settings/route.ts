@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { sanitizeInput } from "@/lib/security";
 import jwt from "jsonwebtoken";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
@@ -32,7 +33,7 @@ export async function GET() {
     const settings = await db.collection("settings").findOne({});
     return NextResponse.json(settings || {});
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, settings: result });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

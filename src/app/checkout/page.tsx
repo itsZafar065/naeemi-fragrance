@@ -110,7 +110,7 @@ export default function CheckoutPage() {
       setPaymentSlipUrl(data.url);
     } catch (err: any) {
       alert("Slip upload failed. Please try again or select Cash on Delivery.");
-      console.error(err);
+      console.error("Slip upload failed.");
     } finally {
       setUploadingSlip(false);
     }

@@ -40,7 +40,7 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }
       } catch (err) {
-        console.error("Failed to load customer session:", err);
+        console.error("Failed to load customer session.");
       } finally {
         setLoading(false);
       }
@@ -95,7 +95,7 @@ export const CustomerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       await fetch("/api/customer/logout", { method: "POST" });
       setCustomer(null);
     } catch (err) {
-      console.error("Logout failed:", err);
+      console.error("Logout failed.");
     }
   };
 

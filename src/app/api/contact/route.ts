@@ -43,6 +43,6 @@ export async function POST(request: Request) {
       message: "Thank you. Your inquiry has been sent to our customer care team."
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

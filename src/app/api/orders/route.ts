@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
 import { sendOrderConfirmation, sendOrderStatusEmail } from "@/lib/email";
 import { getPusherServer } from "@/lib/pusher";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ orders, logs, customers });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -157,8 +158,8 @@ export async function POST(request: Request) {
 
     // Asynchronously dispatch SMTP confirmation email if configurations are set
     if (newOrder.customerEmail) {
-      sendOrderConfirmation(newOrder.customerEmail, newOrder).catch((err) => {
-        console.error(`Failed to send order confirmation for ${orderId}:`, err);
+      sendOrderConfirmation(newOrder.customerEmail, newOrder).catch(() => {
+        console.error(`Failed to send order confirmation for ${orderId}.`);
       });
     }
 
@@ -167,12 +168,12 @@ export async function POST(request: Request) {
     if (pusher) {
       await pusher.trigger("naeemi-channel", "new-order", {
         order: newOrder
-      }).catch((e) => console.error("Pusher trigger failed:", e));
+      }).catch(() => console.error("Pusher trigger failed."));
     }
 
     return NextResponse.json({ success: true, orderId });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -219,8 +220,8 @@ export async function PUT(request: Request) {
     // Asynchronously dispatch order status update notification to customer
     const updatedOrder = await db.collection("orders").findOne({ id: orderId });
     if (updatedOrder && updatedOrder.customerEmail) {
-      sendOrderStatusEmail(updatedOrder, status).catch((err) => {
-        console.error(`Failed to send order status email for ${orderId}:`, err);
+      sendOrderStatusEmail(updatedOrder, status).catch(() => {
+        console.error(`Failed to send order status email for ${orderId}.`);
       });
     }
 
@@ -230,11 +231,11 @@ export async function PUT(request: Request) {
       await pusher.trigger("naeemi-channel", "order-status-updated", {
         orderId,
         status
-      }).catch((e) => console.error("Pusher trigger failed:", e));
+      }).catch(() => console.error("Pusher trigger failed."));
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -10,12 +10,9 @@ import {
 } from "@/lib/security";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("Missing JWT_SECRET environment variable");
-}
-const SECRET = JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 export async function POST(request: Request) {
   try {
@@ -77,7 +74,7 @@ export async function POST(request: Request) {
         role: user.role, // 'Owner' | 'Admin' | 'Manager'
         name: user.name,
       },
-      SECRET,
+      JWT_SECRET,
       { expiresIn: "7d" } // Persistent remember login
     );
 
@@ -112,6 +109,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Naeemi Fragrance
 
-## Getting Started
+Next.js storefront and PWA for Naeemi Fragrance.
 
-First, run the development server:
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and replace every placeholder with the correct value.
 
-## Learn More
+Never commit real secrets. `.env*` files are intentionally ignored by git.
 
-To learn more about Next.js, take a look at the following resources:
+## Secret Safety
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All deployment secrets must live in environment variables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `PUSHER_SECRET`
+- `SMTP_PASS`
+- seed admin passwords such as `SEED_OWNER_PASSWORD`
 
-## Deploy on Vercel
+Only browser-safe values may use the `NEXT_PUBLIC_` prefix. In this project that is limited to the public app URL and Pusher client connection settings.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Git History Warning
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If any secret, password, token, API key, database URL, or credential was ever hardcoded or committed in the past, removing it from the latest code is not enough. The old value may still exist in git history, forks, logs, or deployments. Rotate any previously hardcoded secrets immediately before production deployment.
+
+## Checks
+
+```bash
+npm run lint
+npm run build
+```

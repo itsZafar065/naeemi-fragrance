@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { requireServerEnv } from "@/lib/env";
 
 const DEFAULT_PRODUCTS = [
   {
@@ -145,30 +146,33 @@ export async function GET(request: Request) {
     // 2. Seed Users if empty
     const usersCount = await db.collection("users").countDocuments();
     if (usersCount === 0) {
-      const ownerPasswordHash = await bcrypt.hash("NaeemiOwner123!", 10);
-      const adminPasswordHash = await bcrypt.hash("NaeemiAdmin123!", 10);
-      const managerPasswordHash = await bcrypt.hash("NaeemiManager123!", 10);
+      const ownerEmail = requireServerEnv("SEED_OWNER_EMAIL").toLowerCase().trim();
+      const ownerPasswordHash = await bcrypt.hash(requireServerEnv("SEED_OWNER_PASSWORD"), 10);
+      const adminEmail = requireServerEnv("SEED_ADMIN_EMAIL").toLowerCase().trim();
+      const adminPasswordHash = await bcrypt.hash(requireServerEnv("SEED_ADMIN_PASSWORD"), 10);
+      const managerEmail = requireServerEnv("SEED_MANAGER_EMAIL").toLowerCase().trim();
+      const managerPasswordHash = await bcrypt.hash(requireServerEnv("SEED_MANAGER_PASSWORD"), 10);
 
       const usersToInsert = [
         {
-          email: "owner@naeemi.com",
+          email: ownerEmail,
           passwordHash: ownerPasswordHash,
           role: "Owner",
-          name: "Zafar Owner",
+          name: process.env.SEED_OWNER_NAME || "Store Owner",
           created_at: new Date().toISOString(),
         },
         {
-          email: "admin@naeemi.com",
+          email: adminEmail,
           passwordHash: adminPasswordHash,
           role: "Admin",
-          name: "Zafar Admin",
+          name: process.env.SEED_ADMIN_NAME || "Store Admin",
           created_at: new Date().toISOString(),
         },
         {
-          email: "manager@naeemi.com",
+          email: managerEmail,
           passwordHash: managerPasswordHash,
           role: "Manager",
-          name: "Zafar Manager",
+          name: process.env.SEED_MANAGER_NAME || "Store Manager",
           created_at: new Date().toISOString(),
         }
       ];
@@ -206,6 +210,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, message: "Database seeded successfully." });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }

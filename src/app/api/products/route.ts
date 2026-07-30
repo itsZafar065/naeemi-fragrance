@@ -3,8 +3,9 @@ import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { sanitizeInput } from "@/lib/security";
 import { getPusherServer } from "@/lib/pusher";
+import { requireServerEnv } from "@/lib/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
+const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 async function verifyAdminToken(request: Request) {
   const cookieHeader = request.headers.get("cookie") || "";
@@ -33,7 +34,7 @@ export async function GET() {
     const products = await db.collection("products").find({}).toArray();
     return NextResponse.json(products);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -114,12 +115,12 @@ export async function POST(request: Request) {
       await pusher.trigger("naeemi-channel", "product-catalog-updated", {
         action: "create",
         product: newProduct
-      }).catch((e) => console.error("Pusher trigger failed:", e));
+      }).catch(() => console.error("Pusher trigger failed."));
     }
 
     return NextResponse.json({ success: true, product: newProduct });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -181,12 +182,12 @@ export async function PUT(request: Request) {
       await pusher.trigger("naeemi-channel", "product-catalog-updated", {
         action: "update",
         product: updatedProduct
-      }).catch((e) => console.error("Pusher trigger failed:", e));
+      }).catch(() => console.error("Pusher trigger failed."));
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -234,11 +235,11 @@ export async function DELETE(request: Request) {
       await pusher.trigger("naeemi-channel", "product-catalog-updated", {
         action: "delete",
         productId: id
-      }).catch((e) => console.error("Pusher trigger failed:", e));
+      }).catch(() => console.error("Pusher trigger failed."));
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

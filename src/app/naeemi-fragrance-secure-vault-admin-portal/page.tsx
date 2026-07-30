@@ -110,7 +110,7 @@ export default function AdminDashboard() {
         alert("Failed to save settings. Please try again.");
       }
     } catch (err) {
-      console.error("Settings save error:", err);
+      console.error("Settings save error.");
       alert("Error saving settings.");
     } finally {
       setSaveLoading(false);

@@ -195,7 +195,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         }
       } catch (err) {
-        console.error("Failed to initialize database connection:", err);
+        console.error("Failed to initialize database connection.");
       } finally {
         setLoading(false);
       }
@@ -222,7 +222,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setStaffUsers(staffData || []);
       }
     } catch (e) {
-      console.error("Failed to fetch admin dashboard records:", e);
+      console.error("Failed to fetch admin dashboard records.");
     }
   };
 
@@ -330,7 +330,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setOrders([]);
       setSystemLogs([]);
     } catch (err) {
-      console.error("Logout failed:", err);
+      console.error("Logout failed.");
     }
   };
 
@@ -550,7 +550,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           body: JSON.stringify(updated),
         });
       } catch (err) {
-        console.error("Failed to save settings modifications to database:", err);
+        console.error("Failed to save settings modifications to database.");
       }
     }, 1000);
   };
