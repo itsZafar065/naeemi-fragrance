@@ -91,12 +91,12 @@ export default function Home() {
     }
   };
 
-  // Filter specific featured products dynamically by name matching
-  const featuredNames = ["Qaswa", "Al-Munir"];
+  // Filter specific featured products dynamically by name matching in exact order
+  const featuredNames = ["Marj", "Qaswa", "Al-Munir"];
   const normalize = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const featuredProducts = products.filter((p) =>
-    featuredNames.some((fn) => normalize(fn) === normalize(p.name))
-  );
+  const featuredProducts = featuredNames
+    .map((name) => products.find((p) => normalize(p.name) === normalize(name)))
+    .filter((p): p is (typeof products)[0] => Boolean(p));
   const bestSellers = products
     .filter((p) => !featuredNames.some((fn) => normalize(fn) === normalize(p.name)))
     .slice(0, 4);
@@ -270,7 +270,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className={`grid gap-6 ${featuredProducts.length <= 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-3xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {featuredProducts.map((product, idx) => (
             <FragranceCard key={product.id || `featured-${idx}`} product={product} />
           ))}
