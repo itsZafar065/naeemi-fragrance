@@ -589,9 +589,9 @@ export default function ProductDetailPage() {
         {/* Fragrance Profile Metrics Card */}
         <div className="glass-panel p-5 rounded-3xl space-y-4 border border-white/50 flex flex-col justify-between h-full">
           <div className="space-y-2">
-            <h4 className="font-bold text-stone-850 text-sm">Fragrance Profile</h4>
+            <h4 className="font-bold text-stone-850 text-sm">Fragrance Performance</h4>
             <p className="text-[10px] text-stone-500 font-medium leading-relaxed font-sans">
-              This signature perfume oil concentration is blended to react dynamically with your skin's warmth, delivering a steady release of notes over time.
+              Crafted with pure concentrated oils for a rich, long-lasting scent that stays fresh all day.
             </p>
           </div>
 
@@ -613,7 +613,7 @@ export default function ProductDetailPage() {
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-stone-755 flex items-center gap-1.5">
-                  <Wind className="w-3.5 h-3.5 text-amber-600" /> Sillage / Projection
+                  <Wind className="w-3.5 h-3.5 text-amber-600" /> Scent Projection
                 </span>
                 <span className="font-semibold text-stone-500">{sillageValue}</span>
               </div>
@@ -625,7 +625,7 @@ export default function ProductDetailPage() {
             {/* Season */}
             <div className="flex items-center justify-between text-xs pt-2 border-t border-stone-200/40">
               <span className="font-bold text-stone-750 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-600" /> Season
+                <Calendar className="w-3.5 h-3.5 text-amber-600" /> Best Season
               </span>
               <span className="font-semibold text-amber-800 bg-amber-50/80 border border-amber-100/50 px-2 py-0.5 rounded-lg">
                 {seasonalPreference}
@@ -648,7 +648,7 @@ export default function ProductDetailPage() {
           <h2 className="text-xl md:text-2xl font-black text-stone-850 tracking-tight font-serif">
             You May Also Like
           </h2>
-          <p className="text-xs text-stone-500 font-medium font-sans">Explore other hand-crafted, premium fragrances from our house.</p>
+          <p className="text-xs text-stone-500 font-medium font-sans">Other customer favorites you might love.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {relatedProducts.map((p) => (
@@ -662,9 +662,9 @@ export default function ProductDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/20 pb-4">
           <div className="space-y-1">
             <h2 className="text-xl md:text-2xl font-black text-stone-855 tracking-tight font-serif">
-              Customer Experience
+              Customer Reviews
             </h2>
-            <p className="text-xs text-stone-500 font-medium font-sans">Verified testimonials and client feedback from our collectors.</p>
+            <p className="text-xs text-stone-500 font-medium font-sans">Read honest feedback and ratings from our customers.</p>
           </div>
           {/* Write a Review trigger button - Gold theme styled */}
           <button
@@ -720,7 +720,7 @@ export default function ProductDetailPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block font-sans">Your Review Description</label>
                 <textarea
-                  placeholder="How is the longevity, projection, and scent drydown?"
+                  placeholder="How does the fragrance smell and how long does it last?"
                   value={newReviewText}
                   onChange={(e) => setNewReviewText(e.target.value)}
                   required

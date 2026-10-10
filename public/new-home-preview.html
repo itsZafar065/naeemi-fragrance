@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naeemi Fragrance | The Royal Artisanal Scent Experience</title>
+  <meta name="description" content="Naeemi Naam Hai Mohabbat Ka. Discover exotic Ouds, pure artisanal attars, and luxury perfumes crafted with royal passion.">
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-cream: #FBF9F5;
+      --bg-alt: #F4EFE6;
+      --surface-card: rgba(255, 255, 255, 0.85);
+      --surface-glass: rgba(255, 255, 255, 0.72);
+      --text-dark: #1A1612;
+      --text-muted: #6B6358;
+      --text-light: #9B9182;
+      --gold-primary: #C59B27;
+      --gold-dark: #9A7513;
+      --gold-light: #E8D38D;
+      --gold-soft: #F9F3DC;
+      --gold-gradient: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%);
+      --gold-foil: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%);
+      --dark-obsidian: #12100E;
+      --border-subtle: rgba(197, 155, 39, 0.22);
+      --border-card: rgba(255, 255, 255, 0.8);
+      --shadow-luxury: 0 20px 45px -15px rgba(60, 45, 20, 0.08), 0 0 1px rgba(197, 155, 39, 0.2);
+      --shadow-elevated: 0 25px 60px -12px rgba(60, 45, 20, 0.16);
+      --font-display: 'Cinzel', serif;
+      --font-serif: 'Cormorant Garamond', serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-cream);
+      color: var(--text-dark);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(at 15% 10%, rgba(232, 211, 141, 0.18) 0px, transparent 40%),
+        radial-gradient(at 85% 25%, rgba(197, 155, 39, 0.12) 0px, transparent 45%),
+        radial-gradient(at 50% 75%, rgba(244, 239, 230, 0.8) 0px, transparent 55%);
+      background-attachment: fixed;
+    }
+
+    /* TYPOGRAPHY UTILS */
+    .font-cinzel { font-family: var(--font-display); }
+    .font-cormorant { font-family: var(--font-serif); }
+    .gold-gradient-text {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    .gold-dark-text {
+      color: var(--gold-dark);
+    }
+
+    /* CONTAINERS & LAYOUT */
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* GLASSMORPHISM */
+    .glass-card {
+      background: var(--surface-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      box-shadow: var(--shadow-luxury);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      box-shadow: var(--shadow-elevated);
+      border-color: rgba(197, 155, 39, 0.45);
+      transform: translateY(-4px);
+    }
+
+    /* LUXURY BUTTONS */
+    .btn-gold {
+      background: var(--gold-foil);
+      color: #FFFFFF;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px rgba(170, 124, 17, 0.28);
+      transition: all 0.35s ease;
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(170, 124, 17, 0.42);
+      filter: brightness(1.06);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-dark);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      padding: 13px 26px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(197, 155, 39, 0.4);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .btn-outline:hover {
+      border-color: var(--gold-primary);
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-2px);
+    }
+
+    /* TICKER BAR */
+    .top-bar {
+      background: var(--dark-obsidian);
+      color: #F7E7CE;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(197, 155, 39, 0.3);
+      position: relative;
+      z-index: 60;
+    }
+    .ticker-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ticker-sparkle {
+      color: var(--gold-primary);
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(251, 249, 245, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(197, 155, 39, 0.15);
+      transition: all 0.3s ease;
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-logo-wrap img {
+      height: 48px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(197, 155, 39, 0.25));
+    }
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-dark);
+      line-height: 1.1;
+    }
+    .brand-tagline-small {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--gold-dark);
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      list-style: none;
+    }
+    .nav-link {
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-dark);
+      text-decoration: none;
+      position: relative;
+      padding: 6px 0;
+      transition: color 0.3s;
+    }
+    .nav-link:hover {
+      color: var(--gold-dark);
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: var(--gold-gradient);
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      color: var(--text-dark);
+    }
+    .icon-btn:hover {
+      background: #FFFFFF;
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+    .badge-count {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--gold-dark);
+      color: #FFF;
+      font-size: 0.65rem;
+      font-weight: 800;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+      position: relative;
+      padding: 70px 0 100px;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(197, 155, 39, 0.12);
+      border: 1px solid rgba(197, 155, 39, 0.3);
+      padding: 7px 18px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3.4rem;
+      font-weight: 700;
+      line-height: 1.12;
+      color: var(--text-dark);
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+    .hero-motto-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.7rem;
+      color: var(--gold-dark);
+      margin-bottom: 18px;
+      display: block;
+      line-height: 1.3;
+      border-left: 3px solid var(--gold-primary);
+      padding-left: 16px;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .hero-cta-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(197, 155, 39, 0.2);
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    /* HERO STAGE / 3D BOTTLE SHOWCASE */
+    .hero-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 520px;
+    }
+    .stage-glow-ambient {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(232, 211, 141, 0.45) 0%, rgba(197, 155, 39, 0.15) 50%, transparent 75%);
+      border-radius: 50%;
+      filter: blur(40px);
+      z-index: 1;
+      animation: pulseGlow 6s infinite alternate ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0% { transform: scale(0.92); opacity: 0.7; }
+      100% { transform: scale(1.1); opacity: 1; }
+    }
+    .stage-ring-outer {
+      position: absolute;
+      width: 440px;
+      height: 440px;
+      border: 1px dashed rgba(197, 155, 39, 0.35);
+      border-radius: 50%;
+      z-index: 2;
+      animation: rotateRing 45s linear infinite;
+    }
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hero-bottle-wrap {
+      position: relative;
+      z-index: 10;
+      max-width: 380px;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .hero-bottle-wrap:hover {
+      transform: translateY(-12px) scale(1.02);
+    }
+    .hero-bottle-img {
+      width: 100%;
+      height: auto;
+      max-height: 440px;
+      object-fit: contain;
+      filter: drop-shadow(0 25px 45px rgba(80, 55, 15, 0.45));
+    }
+    
+    /* FLOATING TAGS ON HERO */
+    .float-pill {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 18px;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px rgba(60, 45, 20, 0.12);
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      animation: floatBadge 4s ease-in-out infinite alternate;
+    }
+    .float-pill-1 {
+      top: 15%;
+      left: -10px;
+      animation-delay: 0s;
+    }
+    .float-pill-2 {
+      bottom: 20%;
+      right: -15px;
+      animation-delay: 2s;
+    }
+    @keyframes floatBadge {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-10px); }
+    }
+    .pill-icon {
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+    }
+
+    /* SECTION HEADERS */
+    .section-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 52px;
+    }
+    .section-subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--gold-dark);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      letter-spacing: 0.02em;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .section-divider {
+      width: 70px;
+      height: 2px;
+      background: var(--gold-gradient);
+      margin: 0 auto 16px;
+      border-radius: 2px;
+    }
+    .section-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ACCORD FILTER BAR */
+    .accord-filters {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .filter-chip {
+      padding: 10px 22px;
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border-color: var(--text-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .filter-chip.active .chip-icon {
+      color: var(--gold-primary);
+    }
+
+    /* PRODUCT CARD GRID */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .product-card {
+      background: #FFFFFF;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(197, 155, 39, 0.2);
+      box-shadow: 0 10px 30px rgba(70, 50, 20, 0.06);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 22px 50px -10px rgba(60, 45, 20, 0.16);
+      border-color: var(--gold-primary);
+    }
+    .card-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(18, 16, 14, 0.88);
+      color: #F7E7CE;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 30px;
+      z-index: 5;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(197, 155, 39, 0.3);
+    }
+    .card-wishlist {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s;
+    }
+    .card-wishlist:hover {
+      background: #FFF;
+      color: #E63946;
+      transform: scale(1.1);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      height: 290px;
+      background: radial-gradient(circle, #F9F7F2 0%, #EDE6DC 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 20px;
+    }
+    .card-img {
+      max-height: 230px;
+      max-width: 85%;
+      object-fit: contain;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      filter: drop-shadow(0 14px 20px rgba(50, 40, 20, 0.25));
+    }
+    .product-card:hover .card-img {
+      transform: scale(1.08) translateY(-4px);
+    }
+
+    .card-content {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .card-family-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .card-notes-preview {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .notes-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .note-mini-pill {
+      background: var(--bg-cream);
+      border: 1px solid rgba(197, 155, 39, 0.25);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* SIZE SELECTOR ON CARD */
+    .card-sizes {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .size-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 8px;
+      background: #FFFFFF;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .size-btn.active {
+      background: var(--gold-soft);
+      border-color: var(--gold-primary);
+      color: var(--gold-dark);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .price-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .price-regular {
+      font-size: 0.76rem;
+      color: var(--text-light);
+      text-decoration: line-through;
+    }
+    .price-current {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .btn-add-cart {
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 30px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .btn-add-cart:hover {
+      background: var(--gold-dark);
+      transform: translateY(-2px);
+    }
+
+    /* MASTERPIECE SPOTLIGHT SECTION */
+    .spotlight-section {
+      padding: 90px 0;
+      position: relative;
+    }
+    .spotlight-card {
+      background: linear-gradient(145deg, #181512 0%, #0D0B0A 100%);
+      border-radius: 32px;
+      border: 1px solid rgba(197, 155, 39, 0.4);
+      padding: 60px 48px;
+      color: #FFFFFF;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 35px 80px -15px rgba(0, 0, 0, 0.5);
+    }
+    .spotlight-bg-flare {
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(197, 155, 39, 0.28) 0%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+    }
+    .spotlight-left {
+      position: relative;
+      z-index: 5;
+    }
+    .spotlight-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(197, 155, 39, 0.15);
+      border: 1px solid var(--gold-primary);
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+    .spotlight-title {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .spotlight-subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.4rem;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+    .spotlight-desc {
+      font-size: 0.95rem;
+      color: #A8A196;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    /* ACCORD BARS */
+    .accord-meters {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .meter-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .meter-label-wrap {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .meter-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      background: var(--gold-gradient);
+      border-radius: 4px;
+    }
+
+    .spotlight-right {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+    }
+    .spotlight-bottle-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(197, 155, 39, 0.35) 0%, transparent 70%);
+      filter: blur(40px);
+    }
+    .spotlight-bottle-img {
+      max-height: 420px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.7));
+      transition: transform 0.5s ease;
+    }
+    .spotlight-bottle-img:hover {
+      transform: scale(1.05) rotate(-2deg);
+    }
+
+    /* STORY SECTION */
+    .story-section {
+      padding: 90px 0;
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .story-visual-card {
+      position: relative;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-luxury);
+      background: #FFFFFF;
+      padding: 36px;
+      text-align: center;
+    }
+    .story-portrait {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      object-fit: cover;
+      border: 4px solid var(--gold-light);
+      box-shadow: 0 10px 30px rgba(197, 155, 39, 0.3);
+    }
+    .craft-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .craft-signature {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--gold-dark);
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .story-content-col {
+      display: flex;
+      flex-direction: column;
+    }
+    .story-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      margin-bottom: 12px;
+    }
+    .story-heading {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .story-p {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 18px;
+    }
+
+    /* VALUE PILLARS */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 36px;
+    }
+    .pillar-box {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px 20px;
+      transition: all 0.3s;
+    }
+    .pillar-box:hover {
+      background: #FFFFFF;
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-luxury);
+    }
+    .pillar-icon {
+      font-size: 1.8rem;
+      color: var(--gold-dark);
+      margin-bottom: 12px;
+    }
+    .pillar-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .pillar-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* REVIEWS SECTION */
+    .reviews-section {
+      padding: 80px 0;
+    }
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .review-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 22px;
+      padding: 32px 28px;
+      box-shadow: var(--shadow-luxury);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .stars-row {
+      display: flex;
+      gap: 4px;
+      color: #E5A910;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    .review-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--text-dark);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .reviewer-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding-top: 16px;
+    }
+    .reviewer-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--gold-soft);
+      border: 1px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--gold-dark);
+      font-size: 0.9rem;
+    }
+    .reviewer-info h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    .reviewer-info span {
+      font-size: 0.74rem;
+      color: var(--gold-dark);
+      font-weight: 600;
+    }
+
+    /* INTERACTIVE NOTES QUIZ WIDGET */
+    .quiz-section {
+      margin: 80px 0;
+      background: radial-gradient(circle at 50% 50%, #2A241E 0%, #151210 100%);
+      border-radius: 32px;
+      padding: 60px 48px;
+      border: 1px solid rgba(197, 155, 39, 0.35);
+      color: #FFFFFF;
+      text-align: center;
+    }
+    .quiz-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .quiz-options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .quiz-option-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .quiz-option-card:hover, .quiz-option-card.selected {
+      background: rgba(197, 155, 39, 0.2);
+      border-color: var(--gold-primary);
+      transform: translateY(-3px);
+    }
+    .quiz-opt-icon {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .quiz-opt-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+    .quiz-opt-desc {
+      font-size: 0.72rem;
+      color: #A39B90;
+    }
+
+    /* FAQ ACCORDION */
+    .faq-section {
+      padding: 70px 0;
+    }
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .faq-item {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.25s;
+    }
+    .faq-question {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      user-select: none;
+    }
+    .faq-icon {
+      color: var(--gold-primary);
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0 24px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding: 0 24px 20px 24px;
+    }
+
+    /* VIP NEWSLETTER */
+    .vip-banner {
+      background: linear-gradient(135deg, #1C1917 0%, #2E2822 100%);
+      border-radius: 28px;
+      padding: 60px 48px;
+      text-align: center;
+      color: #FFFFFF;
+      border: 1px solid rgba(197, 155, 39, 0.35);
+      margin-bottom: 70px;
+      position: relative;
+      overflow: hidden;
+    }
+    .vip-form-wrap {
+      display: flex;
+      max-width: 520px;
+      margin: 28px auto 0;
+      gap: 10px;
+    }
+    .vip-input {
+      flex: 1;
+      padding: 14px 22px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .vip-input:focus {
+      border-color: var(--gold-primary);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--dark-obsidian);
+      color: #B3ABA0;
+      padding: 70px 0 30px;
+      border-top: 1px solid rgba(197, 155, 39, 0.2);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 50px;
+    }
+    .footer-col h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: #FFFFFF;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .footer-links a {
+      color: #B3ABA0;
+      text-decoration: none;
+      font-size: 0.84rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--gold-light);
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+
+    /* FLOATING ACTION NOTIFICATION (Interactive toast demo) */
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1A1612;
+      color: #FFFFFF;
+      border: 1px solid var(--gold-primary);
+      padding: 14px 22px;
+      border-radius: 14px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.82rem;
+      z-index: 100;
+      transform: translateY(120px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-popup.show {
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (max-width: 1024px) {
+      .hero-grid, .spotlight-card, .story-grid {
+        grid-template-columns: 1fr;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .reviews-grid, .pillars-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 2.8rem;
+      }
+      .spotlight-right {
+        order: -1;
+      }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-title { font-size: 2.2rem; }
+      .hero-motto-quote { font-size: 1.3rem; }
+      .ticker-wrap { flex-direction: column; gap: 4px; text-align: center; }
+      .quiz-options-grid { grid-template-columns: 1fr; }
+      .vip-form-wrap { flex-direction: column; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; gap: 20px; }
+      .float-pill { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. LUXURY ANNOUNCEMENT TICKER -->
+  <div class="top-bar">
+    <div class="container ticker-wrap">
+      <div class="ticker-item">
+        <span class="ticker-sparkle">✦</span>
+        <span>100% Alcohol-Free Pure Perfume Oils & Attars</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-sparkle">✦</span>
+        <span>Free Delivery Across Pakistan on Orders Over Rs. 6,000</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-sparkle">✦</span>
+        <span>Cash On Delivery (COD) Available Nationwide</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. STICKY GLASS HEADER -->
+  <header id="mainHeader">
+    <div class="nav-container">
+      <!-- LOGO & BRAND IDENTITY -->
+      <a href="#" class="brand-logo-wrap">
+        <img src="/logo.svg" alt="Naeemi Fragrance Crest" onerror="this.src='/logo.png'">
+        <div class="brand-text-col">
+          <span class="brand-name">NAEEMI</span>
+          <span class="brand-tagline-small">Naam Hai Mohabbat Ka</span>
+        </div>
+      </a>
+
+      <!-- NAVIGATION LINKS -->
+      <ul class="nav-links">
+        <li><a href="#collection" class="nav-link">Best Sellers</a></li>
+        <li><a href="#masterpiece" class="nav-link">Shams Un Naeemi</a></li>
+        <li><a href="#quiz" class="nav-link">Find Your Scent</a></li>
+        <li><a href="#legacy" class="nav-link">Our Story</a></li>
+        <li><a href="#reviews" class="nav-link">Reviews</a></li>
+        <li><a href="#faq" class="nav-link">Help & FAQs</a></li>
+      </ul>
+
+      <!-- RIGHT ACTIONS -->
+      <div class="nav-actions">
+        <!-- CURRENCY PILL -->
+        <div style="background: rgba(197, 155, 39, 0.12); border: 1px solid rgba(197, 155, 39, 0.3); padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--gold-dark);">
+          PKR (Rs)
+        </div>
+
+        <!-- SEARCH BUTTON -->
+        <button class="icon-btn" title="Search Fragrances" onclick="showToast('Search vault opened!')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+
+        <!-- CART BUTTON -->
+        <button class="icon-btn" title="Shopping Bag" onclick="showToast('Your shopping bag has 2 items')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="badge-count" id="cartBadge">2</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. HERO SECTION -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <!-- LEFT COLUMN -->
+      <div>
+        <div class="hero-badge">
+          <span>✨</span>
+          <span>Original Perfumes & Pure Attars</span>
+        </div>
+
+        <h1 class="hero-title">
+          Scents That Leave <br>
+          <span class="gold-gradient-text">A Lasting Impression</span>
+        </h1>
+
+        <span class="hero-motto-quote">
+          "Naeemi Naam Hai Mohabbat Ka"
+        </span>
+
+        <p class="hero-desc">
+          Crafted with high-quality imported oils, rich Oud, and sweet floral notes. Enjoy concentrated perfumes that stay fresh and easily last 12+ hours on your clothes.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="#collection" class="btn-gold">
+            <span>Shop All Perfumes</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+          <a href="#quiz" class="btn-outline">
+            <span>Find Your Scent</span>
+          </a>
+        </div>
+
+        <!-- STATS -->
+        <div class="hero-stats">
+          <div>
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Alcohol-Free & Halal</div>
+          </div>
+          <div>
+            <div class="stat-number">12+ Hrs</div>
+            <div class="stat-label">Long Lasting</div>
+          </div>
+          <div>
+            <div class="stat-number">25,000+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: 3D FLOATING SHOWCASE -->
+      <div class="hero-stage">
+        <div class="stage-glow-ambient"></div>
+        <div class="stage-ring-outer"></div>
+
+        <!-- FLOATING TAG 1 -->
+        <div class="float-pill float-pill-1">
+          <span class="pill-icon">👑</span>
+          <div>
+            <div>Top Recommended</div>
+            <small style="color: var(--gold-dark);">Shams Un Naeemi</small>
+          </div>
+        </div>
+
+        <!-- HERO BOTTLE -->
+        <div class="hero-bottle-wrap">
+          <img src="/heroimg.webp" alt="Naeemi Signature Luxury Fragrance Bottle" class="hero-bottle-img">
+        </div>
+
+        <!-- FLOATING TAG 2 -->
+        <div class="float-pill float-pill-2">
+          <span class="pill-icon">💎</span>
+          <div>
+            <div>Tested Quality</div>
+            <small style="color: #2E7D32;">High Oil Concentration</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. SIGNATURE CURATED COLLECTION -->
+  <section id="collection" style="padding: 70px 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Our Fragrances</span>
+        <h2 class="section-title">Featured Perfumes</h2>
+        <div class="section-divider"></div>
+        <p class="section-desc">Explore our most loved perfumes and attars, crafted for lasting freshness and everyday confidence.</p>
+      </div>
+
+      <!-- ACCORD FILTER CHIPS -->
+      <div class="accord-filters">
+        <button class="filter-chip active" onclick="filterProducts('all', this)">
+          <span class="chip-icon">✦</span> All Perfumes
+        </button>
+        <button class="filter-chip" onclick="filterProducts('oud', this)">
+          <span class="chip-icon">🪵</span> Royal Oud
+        </button>
+        <button class="filter-chip" onclick="filterProducts('floral', this)">
+          <span class="chip-icon">🌸</span> Blossom & Rose
+        </button>
+        <button class="filter-chip" onclick="filterProducts('amber', this)">
+          <span class="chip-icon">✨</span> Warm Amber
+        </button>
+        <button class="filter-chip" onclick="filterProducts('fresh', this)">
+          <span class="chip-icon">🍋</span> Crisp Fresh
+        </button>
+      </div>
+
+      <!-- PRODUCTS GRID -->
+      <div class="products-grid" id="productGrid">
+
+        <!-- PRODUCT 1: Shams Un Naeemi -->
+        <div class="product-card" data-category="oud amber">
+          <div class="card-badge">Bestseller</div>
+          <button class="card-wishlist" onclick="toggleWishlist(this)" title="Save to Wishlist">♥</button>
+          
+          <div class="card-img-wrap">
+            <img src="/shams.jpeg" alt="Shams Un Naeemi" class="card-img" onerror="this.src='/heroimg.webp'">
+          </div>
+
+          <div class="card-content">
+            <span class="card-family-tag">Rich Oriental &bull; Extrait</span>
+            <h3 class="card-title">Shams Un Naeemi</h3>
+            <p class="card-notes-preview">A majestic opening of saffron and smoked honey resting upon royal golden amber.</p>
+
+            <div class="notes-pill-row">
+              <span class="note-mini-pill">Saffron</span>
+              <span class="note-mini-pill">Taif Rose</span>
+              <span class="note-mini-pill">Amber Oud</span>
+            </div>
+
+            <!-- Volume selection -->
+            <div class="card-sizes">
+              <button class="size-btn" onclick="selectSize(this, 2800, 3200)">6 ml</button>
+              <button class="size-btn active" onclick="selectSize(this, 4500, 5200)">12 ml</button>
+              <button class="size-btn" onclick="selectSize(this, 7800, 9000)">50 ml</button>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-wrap">
+                <span class="price-regular">Rs. 5,200</span>
+                <span class="price-current">Rs. 4,500</span>
+              </div>
+              <button class="btn-add-cart" onclick="addToCart('Shams Un Naeemi', 4500)">
+                <span>Add To Bag</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUCT 2: Oud Albaloshi -->
+        <div class="product-card" data-category="oud">
+          <div class="card-badge">Signature</div>
+          <button class="card-wishlist" onclick="toggleWishlist(this)" title="Save to Wishlist">♥</button>
+          
+          <div class="card-img-wrap">
+            <img src="/albaloshi.jpeg" alt="Oud Albaloshi" class="card-img" onerror="this.src='/heroimg.webp'">
+          </div>
+
+          <div class="card-content">
+            <span class="card-family-tag">Imperial Woody &bull; Pure Dehn</span>
+            <h3 class="card-title">Oud Albaloshi</h3>
+            <p class="card-notes-preview">Deep balsamic woods with mysterious incense swirls and earthy tobacco warmth.</p>
+
+            <div class="notes-pill-row">
+              <span class="note-mini-pill">Aged Agarwood</span>
+              <span class="note-mini-pill">Frankincense</span>
+              <span class="note-mini-pill">Smoked Leather</span>
+            </div>
+
+            <div class="card-sizes">
+              <button class="size-btn" onclick="selectSize(this, 3200, 3800)">6 ml</button>
+              <button class="size-btn active" onclick="selectSize(this, 5400, 6200)">12 ml</button>
+              <button class="size-btn" onclick="selectSize(this, 8900, 9900)">50 ml</button>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-wrap">
+                <span class="price-regular">Rs. 6,200</span>
+                <span class="price-current">Rs. 5,400</span>
+              </div>
+              <button class="btn-add-cart" onclick="addToCart('Oud Albaloshi', 5400)">
+                <span>Add To Bag</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUCT 3: Qaswa -->
+        <div class="product-card" data-category="floral fresh">
+          <div class="card-badge">Masterpiece</div>
+          <button class="card-wishlist" onclick="toggleWishlist(this)" title="Save to Wishlist">♥</button>
+          
+          <div class="card-img-wrap">
+            <img src="/Qaswa.jpeg" alt="Qaswa" class="card-img" onerror="this.src='/heroimg.webp'">
+          </div>
+
+          <div class="card-content">
+            <span class="card-family-tag">Velvet Floral &bull; Extrait</span>
+            <h3 class="card-title">Qaswa</h3>
+            <p class="card-notes-preview">Pure white musk kissed by dewy Damask roses and luminous bergamot zest.</p>
+
+            <div class="notes-pill-row">
+              <span class="note-mini-pill">White Musk</span>
+              <span class="note-mini-pill">Damask Rose</span>
+              <span class="note-mini-pill">Bergamot</span>
+            </div>
+
+            <div class="card-sizes">
+              <button class="size-btn" onclick="selectSize(this, 2400, 2900)">6 ml</button>
+              <button class="size-btn active" onclick="selectSize(this, 3900, 4600)">12 ml</button>
+              <button class="size-btn" onclick="selectSize(this, 6900, 8000)">50 ml</button>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-wrap">
+                <span class="price-regular">Rs. 4,600</span>
+                <span class="price-current">Rs. 3,900</span>
+              </div>
+              <button class="btn-add-cart" onclick="addToCart('Qaswa', 3900)">
+                <span>Add To Bag</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUCT 4: Pure Oud Un Naeemi -->
+        <div class="product-card" data-category="oud amber">
+          <div class="card-badge">Reserve</div>
+          <button class="card-wishlist" onclick="toggleWishlist(this)" title="Save to Wishlist">♥</button>
+          
+          <div class="card-img-wrap">
+            <img src="/oud.jpeg" alt="Oud Un Naeemi" class="card-img" onerror="this.src='/heroimg.webp'">
+          </div>
+
+          <div class="card-content">
+            <span class="card-family-tag">Pure Heritage Oud</span>
+            <h3 class="card-title">Oud Un Naeemi</h3>
+            <p class="card-notes-preview">Rare artisanal distillation evoking ancient Arabian caravans and sacred warmth.</p>
+
+            <div class="notes-pill-row">
+              <span class="note-mini-pill">Cambodian Oud</span>
+              <span class="note-mini-pill">Sweet Benzoin</span>
+              <span class="note-mini-pill">Vanilla Bark</span>
+            </div>
+
+            <div class="card-sizes">
+              <button class="size-btn" onclick="selectSize(this, 3500, 4000)">6 ml</button>
+              <button class="size-btn active" onclick="selectSize(this, 5900, 6800)">12 ml</button>
+              <button class="size-btn" onclick="selectSize(this, 9500, 11000)">50 ml</button>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-wrap">
+                <span class="price-regular">Rs. 6,800</span>
+                <span class="price-current">Rs. 5,900</span>
+              </div>
+              <button class="btn-add-cart" onclick="addToCart('Oud Un Naeemi', 5900)">
+                <span>Add To Bag</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. MASTERPIECE SPOTLIGHT: SHAMS UN NAEEMI -->
+  <section id="masterpiece" class="spotlight-section">
+    <div class="container">
+      <div class="spotlight-card">
+        <div class="spotlight-bg-flare"></div>
+
+        <!-- LEFT INFO -->
+        <div class="spotlight-left">
+          <div class="spotlight-badge">
+            <span>👑</span>
+            <span>Customer Favorite</span>
+          </div>
+
+          <h2 class="spotlight-title">Shams Un Naeemi</h2>
+          <div class="spotlight-subtitle">Our Signature Amber & Rose Scent</div>
+          
+          <p class="spotlight-desc">
+            Shams Un Naeemi is our most popular fragrance. A rich, warm blend of saffron, rose, and amber that leaves a lasting scent people will notice and compliment wherever you go.
+          </p>
+
+          <!-- ACCORD METERS -->
+          <div class="accord-meters">
+            <div class="meter-row">
+              <div class="meter-label-wrap">
+                <span>Lasting Performance</span>
+                <span style="color: var(--gold-light);">12+ Hours</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill" style="width: 95%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-label-wrap">
+                <span>Scent Projection</span>
+                <span style="color: var(--gold-light);">Strong & Smooth</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill" style="width: 92%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-label-wrap">
+                <span>Oil Concentration</span>
+                <span style="color: var(--gold-light);">30% Pure Oil</span>
+              </div>
+              <div class="meter-track">
+                <div class="meter-fill" style="width: 88%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <button class="btn-gold" onclick="addToCart('Shams Un Naeemi', 4500)">
+              <span>Order Now &bull; Rs. 4,500</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT BOTTLE SPOTLIGHT -->
+        <div class="spotlight-right">
+          <div class="spotlight-bottle-glow"></div>
+          <img src="/shams.jpeg" alt="Shams Un Naeemi Royal Edition" class="spotlight-bottle-img" onerror="this.src='/heroimg.webp'">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. INTERACTIVE NOTE PROFILER (QUIZ WIDGET) -->
+  <section id="quiz" class="container">
+    <div class="quiz-section">
+      <div class="quiz-wrap">
+        <span style="font-family: var(--font-serif); font-style: italic; color: var(--gold-light); font-size: 1.2rem;">Find Your Scent</span>
+        <h2 style="font-family: var(--font-display); font-size: 2.3rem; margin: 8px 0 16px;">What Type Of Scent Do You Prefer?</h2>
+        <p style="color: #BDB5AA; font-size: 0.95rem;">Choose what you like best and we will suggest the right fragrance for you.</p>
+
+        <div class="quiz-options-grid">
+          <div class="quiz-option-card selected" onclick="pickQuiz(this, 'Shams Un Naeemi', 'Warm spicy amber with supreme majesty and high compliments.')">
+            <div class="quiz-opt-icon">👑</div>
+            <div class="quiz-opt-title">Warm & Rich</div>
+            <div class="quiz-opt-desc">Strong projection for parties, weddings and evening wear</div>
+          </div>
+
+          <div class="quiz-option-card" onclick="pickQuiz(this, 'Qaswa', 'A clean aura of white musk and serene floral sweetness.')">
+            <div class="quiz-opt-icon">🕊️</div>
+            <div class="quiz-opt-title">Clean & Fresh</div>
+            <div class="quiz-opt-desc">Soft, comfortable white musk for everyday office and daily use</div>
+          </div>
+
+          <div class="quiz-option-card" onclick="pickQuiz(this, 'Oud Albaloshi', 'Aged agarwood, incense, and warm woody notes.')">
+            <div class="quiz-opt-icon">🪵</div>
+            <div class="quiz-opt-title">Traditional Oud</div>
+            <div class="quiz-opt-desc">Deep woody aroma for true lovers of authentic eastern oud</div>
+          </div>
+        </div>
+
+        <!-- RESULT CARD -->
+        <div id="quizResult" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--gold-primary); border-radius: 18px; padding: 20px; display: inline-flex; align-items: center; gap: 20px; max-width: 580px; text-align: left;">
+          <span style="font-size: 2rem;">✨</span>
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-light);">Your Recommended Match</div>
+            <div id="quizMatchTitle" style="font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: #FFFFFF;">Shams Un Naeemi</div>
+            <div id="quizMatchDesc" style="font-size: 0.8rem; color: #CCC2B5;">Warm spicy amber with supreme majesty and high compliments.</div>
+          </div>
+          <button class="btn-gold" style="padding: 10px 18px; font-size: 0.74rem;" onclick="addToCart('Shams Un Naeemi', 4500)">Select</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. THE HERITAGE & CRAFTSMANSHIP -->
+  <section id="legacy" class="story-section">
+    <div class="container story-grid">
+      <!-- VISUAL TRIBUTE -->
+      <div class="story-visual-card">
+        <img src="/mufti-jan.webp" alt="Ustad Yousuf - Master Perfumer" class="story-portrait" onerror="this.src='/logo.svg'">
+        <blockquote class="craft-quote">
+          "Khushboo sirf mehak nahi, balke rooh ka sukoon aur mohabbat ka paigham hai."
+        </blockquote>
+        <div class="craft-signature">Ustad Yousuf &bull; Naeemi Founder</div>
+        <div style="font-size: 0.78rem; color: var(--text-light); margin-top: 6px;">Handcrafted With Love</div>
+      </div>
+
+      <!-- EDITORIAL STORY -->
+      <div class="story-content-col">
+        <span class="story-tag">Our Story</span>
+        <h2 class="story-heading">Naeemi Naam Hai Mohabbat Ka</h2>
+        <p class="story-p">
+          At Naeemi Fragrance, we believe everyone deserves high-quality, long-lasting perfumes without overpriced price tags. In an era of diluted chemical scents, we stay true to pure perfume oils and tested longevity.
+        </p>
+        <p class="story-p">
+          Each batch is formulated under direct personal care using quality woods, resins, and floral notes imported from reliable distillers. Every bottle carries the love and trust of our brand motto.
+        </p>
+
+        <!-- VALUE PILLARS -->
+        <div class="pillars-grid">
+          <div class="pillar-box">
+            <div class="pillar-icon">⚜️</div>
+            <div class="pillar-title">100% Alcohol-Free</div>
+            <div class="pillar-desc">Completely Halal, skin-friendly, and suitable for daily prayers (Namaz).</div>
+          </div>
+
+          <div class="pillar-box">
+            <div class="pillar-icon">⏳</div>
+            <div class="pillar-title">12+ Hours Lasting</div>
+            <div class="pillar-desc">High oil concentration that stays on clothes through the entire day.</div>
+          </div>
+
+          <div class="pillar-box">
+            <div class="pillar-icon">🎁</div>
+            <div class="pillar-title">Premium Packaging</div>
+            <div class="pillar-desc">Neatly packed in luxury presentation boxes, ideal for gifting.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. CONNOISSEUR TESTIMONIALS -->
+  <section id="reviews" class="reviews-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Real Feedback</span>
+        <h2 class="section-title">What Our Customers Say</h2>
+        <div class="section-divider"></div>
+        <p class="section-desc">Real reviews from fragrance lovers across Pakistan who wear and trust Naeemi Fragrance every day.</p>
+      </div>
+
+      <div class="reviews-grid">
+        <!-- TESTIMONIAL 1 -->
+        <div class="review-card">
+          <div class="stars-row">★★★★★</div>
+          <p class="review-quote">
+            "Shams Un Naeemi is fantastic. The scent is very smooth and easily lasts 12+ hours on my kurtas. Got many compliments at a family wedding."
+          </p>
+          <div class="reviewer-meta">
+            <div class="reviewer-avatar">MH</div>
+            <div class="reviewer-info">
+              <h4>Mohammad Harris</h4>
+              <span>Verified Customer, Lahore</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TESTIMONIAL 2 -->
+        <div class="review-card">
+          <div class="stars-row">★★★★★</div>
+          <p class="review-quote">
+            "Qaswa feels like a clean, soft powdery dream. Perfect for daily wear. The motto 'Naeemi Naam Hai Mohabbat Ka' is genuinely reflected in their care."
+          </p>
+          <div class="reviewer-meta">
+            <div class="reviewer-avatar">ZB</div>
+            <div class="reviewer-info">
+              <h4>Zainab Bibi</h4>
+              <span>Verified Customer, Islamabad</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TESTIMONIAL 3 -->
+        <div class="review-card">
+          <div class="stars-row">★★★★★</div>
+          <p class="review-quote">
+            "Oud Albaloshi holds its ground against perfumes costing triple its price. Excellent concentration, strong projection, and very premium packaging."
+          </p>
+          <div class="reviewer-meta">
+            <div class="reviewer-avatar">DF</div>
+            <div class="reviewer-info">
+              <h4>Dr. Farhan</h4>
+              <span>Verified Customer, Karachi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FREQUENTLY ASKED QUESTIONS (FAQ) -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Common Questions</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item open" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>Are Naeemi Fragrances 100% Halal and alcohol-free?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes, absolutely. Our attars and concentrated perfume oils are 100% free from denatured alcohol, making them purely Halal and completely safe for prayers (Namaz).
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>How long do these fragrances realistically last?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Because of high perfume oil concentrations (28% to 35%), our scents stay vibrant on skin for 10–12 hours and on fabrics for over 24 hours.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>Do you offer Cash on Delivery (COD) across Pakistan?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes! We ship all across Pakistan via courier with Cash On Delivery (COD) as well as online bank transfer / EasyPaisa. Delivery takes 2–3 working days.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>What if I want to try a smaller size first?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            All our signature fragrances are offered in convenient 6ml bottles so you can try the scent before ordering our larger 12ml or 50ml editions.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. VIP MEMBERS CLUB BANNER -->
+  <section class="container">
+    <div class="vip-banner">
+      <span style="font-family: var(--font-serif); font-style: italic; color: var(--gold-light); font-size: 1.3rem;">Special Discount Offer</span>
+      <h2 style="font-family: var(--font-display); font-size: 2.4rem; margin: 10px 0 16px;">Get 10% Off Your First Order</h2>
+      <p style="color: #B5ADA1; max-width: 550px; margin: 0 auto; font-size: 0.95rem;">
+        Subscribe to our newsletter to receive your 10% discount coupon, new product updates, and special sales.
+      </p>
+
+      <form class="vip-form-wrap" onsubmit="event.preventDefault(); showToast('Welcome! Discount code NAEEMI10 sent.');">
+        <input type="email" placeholder="Enter your email address..." class="vip-input" required>
+        <button type="submit" class="btn-gold" style="white-space: nowrap;">
+          <span>Get 10% Voucher</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 11. MEGA FOOTER -->
+  <footer>
+    <div class="container footer-grid">
+      <!-- COL 1: BRAND BIO -->
+      <div class="footer-col">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <img src="/logo.svg" alt="Naeemi Logo" style="height: 38px;" onerror="this.src='/logo.png'">
+          <span style="font-family: var(--font-display); font-weight: 700; color: #FFF; font-size: 1.2rem;">NAEEMI FRAGRANCE</span>
+        </div>
+        <p style="font-family: var(--font-serif); font-style: italic; color: var(--gold-light); font-size: 1.1rem; margin-bottom: 12px;">
+          "Naeemi Naam Hai Mohabbat Ka"
+        </p>
+        <p style="font-size: 0.84rem; line-height: 1.7; max-width: 320px;">
+          Handcrafted artisanal perfumery blending centuries of Eastern heritage with contemporary olfactory sophistication.
+        </p>
+      </div>
+
+      <!-- COL 2: COLLECTIONS -->
+      <div class="footer-col">
+        <h4>COLLECTIONS</h4>
+        <ul class="footer-links">
+          <li><a href="#collection">Shams Un Naeemi</a></li>
+          <li><a href="#collection">Oud Albaloshi</a></li>
+          <li><a href="#collection">Qaswa Velvet Rose</a></li>
+          <li><a href="#collection">Pure Dehn Al Oud</a></li>
+          <li><a href="#collection">Artisanal Discovery Sets</a></li>
+        </ul>
+      </div>
+
+      <!-- COL 3: CLIENT CARE -->
+      <div class="footer-col">
+        <h4>CLIENT SERVICE</h4>
+        <ul class="footer-links">
+          <li><a href="/shipping-policy">Shipping & Delivery</a></li>
+          <li><a href="/returns-exchange">Returns & Exchanges</a></li>
+          <li><a href="#faq">Authenticity Guarantee</a></li>
+          <li><a href="/contact">Bespoke Orders</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- COL 4: CONTACT & REACH -->
+      <div class="footer-col">
+        <h4>DIRECT INQUIRIES</h4>
+        <ul class="footer-links">
+          <li style="color: #FFF; font-weight: 600;">📞 0309-2184760</li>
+          <li>✉️ care@naeemi-fragrance.com</li>
+          <li>📍 Gulberg III, Lahore, Pakistan</li>
+          <li style="margin-top: 12px; color: var(--gold-light); font-weight: 600;">Open Mon - Sat: 11 AM - 10 PM</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <div>&copy; 2026 Naeemi Fragrance. All Royal Rights Reserved.</div>
+      <div style="display: flex; gap: 20px;">
+        <a href="#" style="color: #B3ABA0; text-decoration: none;">Instagram</a>
+        <a href="#" style="color: #B3ABA0; text-decoration: none;">WhatsApp</a>
+        <a href="#" style="color: #B3ABA0; text-decoration: none;">Facebook</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- INTERACTIVE TOAST POPUP -->
+  <div id="toastPopup" class="toast-popup">
+    <span style="color: var(--gold-primary); font-size: 1.2rem;">✨</span>
+    <span id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <!-- CLIENT INTERACTIONS JAVASCRIPT -->
+  <script>
+    // Header shadow on scroll
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('mainHeader');
+      if (window.scrollY > 40) {
+        header.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
+        header.style.background = 'rgba(251, 249, 245, 0.98)';
+      } else {
+        header.style.boxShadow = 'none';
+        header.style.background = 'rgba(251, 249, 245, 0.92)';
+      }
+    });
+
+    // Accord Filter Chips
+    function filterProducts(category, button) {
+      document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach(card => {
+        if (category === 'all') {
+          card.style.display = 'flex';
+        } else {
+          const cardCat = card.getAttribute('data-category') || '';
+          if (cardCat.includes(category)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Size Switcher on Card
+    function selectSize(btn, newPrice, oldPrice) {
+      const card = btn.closest('.product-card');
+      card.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const currentPriceEl = card.querySelector('.price-current');
+      const regularPriceEl = card.querySelector('.price-regular');
+
+      currentPriceEl.textContent = `Rs. ${newPrice.toLocaleString()}`;
+      regularPriceEl.textContent = `Rs. ${oldPrice.toLocaleString()}`;
+    }
+
+    // Add to Bag Simulation
+    let cartCount = 2;
+    function addToCart(productName, price) {
+      cartCount++;
+      document.getElementById('cartBadge').textContent = cartCount;
+      showToast(`Added "${productName}" (Rs. ${price.toLocaleString()}) to your luxury bag!`);
+    }
+
+    // Toggle Wishlist
+    function toggleWishlist(btn) {
+      if (btn.style.color === 'rgb(230, 57, 70)') {
+        btn.style.color = '';
+        showToast('Removed from your saved fragrances');
+      } else {
+        btn.style.color = '#E63946';
+        showToast('Saved to your private fragrance wishlist ❤️');
+      }
+    }
+
+    // Quiz Matcher Pick
+    function pickQuiz(card, matchTitle, matchDesc) {
+      document.querySelectorAll('.quiz-option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+
+      document.getElementById('quizMatchTitle').textContent = matchTitle;
+      document.getElementById('quizMatchDesc').textContent = matchDesc;
+      showToast(`Matched with: ${matchTitle}!`);
+    }
+
+    // FAQ Accordion
+    function toggleFaq(item) {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+      if (!isOpen) {
+        item.classList.add('open');
+      }
+    }
+
+    // Toast Notification helper
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toastPopup');
+      const msgEl = document.getElementById('toastMsg');
+      msgEl.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+  </script>
+
+</body>
+</html>

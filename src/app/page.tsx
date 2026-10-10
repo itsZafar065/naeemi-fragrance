@@ -97,29 +97,29 @@ export default function Home() {
   const bestSellers = products.filter((p) => !featuredNames.includes(p.name)).slice(0, 4);
 
   const categories = [
-    { name: "Oud", icon: "✨", desc: "Royal & Majestic Oud blends" },
-    { name: "Floral", icon: "🌸", desc: "Sweet & Fresh blossom essences" },
-    { name: "Woody", icon: "🪵", desc: "Warm & Earthy timber elements" },
-    { name: "Fresh", icon: "🍋", desc: "Invigorating, zesty fresh scents" },
+    { name: "Oud", icon: "✨", desc: "Deep, rich & traditional Oud scents" },
+    { name: "Floral", icon: "🌸", desc: "Sweet, soft & pleasant flower notes" },
+    { name: "Woody", icon: "🪵", desc: "Warm, smooth cedar & amber blends" },
+    { name: "Fresh", icon: "🍋", desc: "Clean, light & all-day refreshing" },
   ];
 
   const testimonials = [
     {
       name: "Mohammad Harris",
-      role: "Fragrance Connoisseur",
-      comment: "Shams Un Naeemi is an absolute masterpiece. The projection is majestic and the amber notes are extremely smooth. Easily lasts 10+ hours on my linen shirt.",
+      role: "Verified Customer",
+      comment: "Shams Un Naeemi is fantastic. The scent is very smooth and easily lasts 10+ hours on my clothes. Got many compliments at a family event.",
       rating: 5
     },
     {
       name: "Zainab Bibi",
-      role: "Verified Buyer",
-      comment: "Musk e Naeemi feels like a clean, soft powdery dream. It is perfect for daily wear. The brand tagline 'Naeemi Naam Hai Mohabbat Ka' is fully reflected in their care.",
+      role: "Verified Customer",
+      comment: "Qaswa is such a clean, soft and pleasant fragrance. Perfect for everyday wear. The packaging was also very neat and safe.",
       rating: 5
     },
     {
       name: "Dr. Farhan",
-      role: "Oud Collector",
-      comment: "Oud Un Naeemi holds its ground against perfumes costing triple its price. Excellent concentration, superb sillage, and beautiful presentation.",
+      role: "Verified Customer",
+      comment: "Oud Un Naeemi is comparable to high-end perfumes costing three times more. Very rich, long lasting, and great presentation.",
       rating: 5
     }
   ];
@@ -137,12 +137,12 @@ export default function Home() {
         <div className="space-y-6 max-w-xl text-left w-full md:w-1/2 z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-800 text-xs font-semibold tracking-wider uppercase">
             <Sparkles className="w-3.5 h-3.5 fill-amber-600/30 text-amber-600 animate-pulse" />
-            Luxury Fragrance Vault
+            Original Perfumes & Pure Attars
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black tracking-tight font-serif text-stone-850 leading-tight">
-            Elevate Your <br />
-            <span className="gold-gradient-text">Presence</span>
+            Scents That Leave <br />
+            <span className="gold-gradient-text">A Lasting Impression</span>
           </h1>
 
           <div className="space-y-3">
@@ -150,13 +150,13 @@ export default function Home() {
               "Naeemi Naam Hai Mohabbat Ka"
             </p>
             <p className="text-xs md:text-sm text-stone-500 leading-relaxed font-medium">
-              A curated collection of rich, long-lasting fragrances designed to evoke memories and inspire emotions. Discover our signature blends of royal Oud, fresh florals, and warm wood notes.
+              Premium, long-lasting perfumes and pure attars made with high-quality oils. From rich Oud to fresh and sweet floral notes, find the perfect scent for every day and special occasions.
             </p>
           </div>
 
           <div className="pt-2 flex flex-wrap gap-4">
             <Link href="/shop" className="px-6 py-3.5 rounded-2xl gold-btn font-bold text-xs flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all">
-              Explore Collection
+              Shop All Perfumes
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
@@ -223,11 +223,11 @@ export default function Home() {
         </div>     
       </section>
 
-      {/* SECTION 2: ACCORD EXPLORER */}
+      {/* SECTION 2: SCENT CATEGORIES */}
       <section className="space-y-4">
         <div className="text-center max-w-md mx-auto space-y-1">
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Browse Scent Accords</h2>
-          <p className="text-xs text-stone-500">Select families matching your unique skin chemistry</p>
+          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Shop By Category</h2>
+          <p className="text-xs text-stone-500">Choose the fragrance style you like best</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -255,12 +255,12 @@ export default function Home() {
           <div className="space-y-1">
             <h2 className="text-lg md:text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
               <Flame className="w-5 h-5 text-amber-600 fill-amber-500/20 animate-pulse" />
-              Naeemi Curated Selection
+              Featured Perfumes
             </h2>
-            <p className="text-[10px] md:text-xs text-stone-500 font-medium">Discover our most loved and signature fragrance bottles</p>
+            <p className="text-[10px] md:text-xs text-stone-500 font-medium">Our most popular and highly recommended fragrances</p>
           </div>
           <Link href="/shop" className="text-xs font-extrabold text-amber-800 hover:text-amber-700 flex items-center gap-1 transition-colors shrink-0 self-start sm:self-auto">
-            Explore Entire Collection
+            View All Products
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -276,10 +276,10 @@ export default function Home() {
       <section className="p-8 rounded-[32px] glass-panel bg-stone-50/20 space-y-8 border border-white/40">
         <div className="text-center max-w-lg mx-auto space-y-2">
           <h2 className="text-2xl md:text-3xl font-extrabold text-stone-800 font-serif">
-            Why Choose Naeemi?
+            Why Choose Naeemi Fragrance?
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed">
-            Every bottle is mixed with pure raw imports to deliver maximum sillage and projection longevity.
+            We use high-quality imported fragrance oils so your perfume smells amazing and stays long.
           </p>
         </div>
 
@@ -288,9 +288,9 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-100">
               <Award className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-stone-800 text-sm">Long Lasting projection</h3>
+            <h3 className="font-bold text-stone-800 text-sm">12+ Hours Long Lasting</h3>
             <p className="text-xs text-stone-500 max-w-xs leading-relaxed">
-              We extract concentrates at Extrait strength, lasting up to 12 hours on skin and fabric.
+              High oil concentration means our scents easily last throughout the entire day on your clothes.
             </p>
           </div>
 
@@ -298,9 +298,9 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center border border-rose-100">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-stone-800 text-sm">Pure Essential Imports</h3>
+            <h3 className="font-bold text-stone-800 text-sm">100% Pure Quality</h3>
             <p className="text-xs text-stone-500 max-w-xs leading-relaxed">
-              Sourced directly from Europe and the East, our notes maintain organic complexity and depth.
+              No cheap chemicals or harsh alcohol smell — only smooth, rich, and skin-friendly fragrance oils.
             </p>
           </div>
 
@@ -308,9 +308,9 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
               <HeartHandshake className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-stone-800 text-sm">Naam Hai Mohabbat Ka</h3>
+            <h3 className="font-bold text-stone-800 text-sm">Packed With Care</h3>
             <p className="text-xs text-stone-500 max-w-xs leading-relaxed">
-              True to our slogan, every fragrance is hand-packed and inspected with ultimate care and dedication.
+              As our slogan says, "Naam Hai Mohabbat Ka" — every single order is personally checked and safely packed.
             </p>
           </div>
         </div>
@@ -319,32 +319,32 @@ export default function Home() {
       {/* SECTION 5: BRAND STORY */}
       <section id="story" className="relative overflow-hidden rounded-[32px] glass-panel border border-white/50 p-8 md:p-12 flex flex-col lg:flex-row gap-8 items-center">
         <div className="flex-1 space-y-4">
-          <span className="text-[10px] font-bold tracking-widest text-amber-700 uppercase">The Legacy</span>
+          <span className="text-[10px] font-bold tracking-widest text-amber-700 uppercase">About Our Brand</span>
           <h2 className="text-3xl font-extrabold text-stone-800 font-serif">"Naeemi Naam Hai Mohabbat Ka"</h2>
           <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-            Founded with a passion for high-sillage perfumery, Naeemi Fragrance brings you the warmth of traditional Arabic Ouds and the refreshing charm of floral French extracts. 
+            Naeemi Fragrance was started with a simple vision: to bring authentic Arabic Ouds and elegant French perfumes to people at honest and affordable prices.
           </p>
           <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-            Our name is synonymous with care. We formulate every scent in small premium batches, allowing natural ingredients to mature into complex layers that express love, confidence, and peace.
+            We prepare our perfumes in small batches to ensure strict quality. Each bottle gives you an authentic, long-lasting scent that brings confidence, compliments, and joy.
           </p>
         </div>
         <div className="flex-1 w-full max-w-sm rounded-2xl bg-gradient-to-br from-amber-100/50 to-rose-100/50 border border-white p-6 space-y-4">
-          <span className="text-[10px] font-bold text-amber-900/60 uppercase block">Crafting Accord Secrets</span>
+          <span className="text-[10px] font-bold text-amber-900/60 uppercase block">Our Quality Standards</span>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-700">Import Sillage Strengths</span>
-              <span className="font-extrabold text-amber-800">94%</span>
+              <span className="font-semibold text-stone-700">Customer Satisfaction</span>
+              <span className="font-extrabold text-amber-800">98%</span>
             </div>
             <div className="w-full bg-white h-1.5 rounded-full">
-              <div className="bg-amber-500 h-full w-[94%] rounded-full" />
+              <div className="bg-amber-500 h-full w-[98%] rounded-full" />
             </div>
 
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-700">Pure Essential Concentrations</span>
-              <span className="font-extrabold text-amber-800">22% - 28%</span>
+              <span className="font-semibold text-stone-700">Fragrance Oil Concentration</span>
+              <span className="font-extrabold text-amber-800">25% - 30%</span>
             </div>
             <div className="w-full bg-white h-1.5 rounded-full">
-              <div className="bg-amber-500 h-full w-[85%] rounded-full" />
+              <div className="bg-amber-500 h-full w-[88%] rounded-full" />
             </div>
           </div>
         </div>
@@ -353,8 +353,8 @@ export default function Home() {
       {/* SECTION 6: BEST SELLERS */}
       <section className="space-y-4">
         <div className="text-center max-w-md mx-auto space-y-1">
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Best Sellers List</h2>
-          <p className="text-xs text-stone-500">The most popular signature picks of the season</p>
+          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Best Sellers</h2>
+          <p className="text-xs text-stone-500">Our customer favorites that people reorder the most</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -396,8 +396,8 @@ export default function Home() {
       {/* SECTION 7: REVIEWS */}
       <section className="space-y-6">
         <div className="text-center max-w-md mx-auto space-y-1">
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Client Testimonials</h2>
-          <p className="text-xs text-stone-500">Read what perfume connoisseurs write about us</p>
+          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Customer Reviews</h2>
+          <p className="text-xs text-stone-500">See what our customers have to say about Naeemi Fragrance</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -431,14 +431,14 @@ export default function Home() {
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/10 rounded-full blur-2xl" />
 
         <div className="max-w-xl mx-auto space-y-4 relative">
-          <h2 className="text-3xl font-extrabold text-stone-800 font-serif">Discover Your Scent Identity</h2>
+          <h2 className="text-3xl font-extrabold text-stone-800 font-serif">Get Special Offers & Updates</h2>
           <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-            Sign up for our exclusive collection alerts, private promotions, and new batch launch notifications. Let us find the fragrance of love for you.
+            Subscribe to our newsletter to receive discount codes, new product updates, and special seasonal sales.
           </p>
 
           {newsletterSubscribed ? (
             <div className="mx-auto max-w-sm py-2 px-4 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 animate-fadeIn">
-              <Check className="w-4 h-4" /> Subscription Successful! Check your email for your 10% OFF discount coupon.
+              <Check className="w-4 h-4" /> Thank you! You are now subscribed to our latest offers.
             </div>
           ) : (
             <form onSubmit={handleNewsletterSubmit} className="mx-auto max-w-md space-y-2">
@@ -451,7 +451,7 @@ export default function Home() {
                 <input
                   type="email"
                   required
-                  placeholder="Enter email address"
+                  placeholder="Enter your email address"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="flex-grow px-4 py-2.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none w-full"
@@ -474,8 +474,8 @@ export default function Home() {
         {/* Contact info list */}
         <div className="md:col-span-5 space-y-4">
           <div className="space-y-1">
-            <h3 className="font-extrabold text-stone-800 text-lg">Connect With Us</h3>
-            <p className="text-xs text-stone-500">Reach out for custom bridal batches or private orders</p>
+            <h3 className="font-extrabold text-stone-800 text-lg">Contact Us</h3>
+            <p className="text-xs text-stone-500">Have questions or need help placing an order? We are here to help.</p>
           </div>
 
           <div className="space-y-3.5 text-xs text-stone-600 font-medium">
@@ -507,8 +507,8 @@ export default function Home() {
           {contactSubmitted ? (
             <div className="p-6 text-center bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-3xl space-y-2 animate-fadeIn">
               <Check className="w-8 h-8 mx-auto stroke-[2.5] text-emerald-600" />
-              <h4 className="font-bold text-sm">Inquiry Dispatched</h4>
-              <p className="text-xs text-emerald-750 font-medium">Thank you. The Naeemi care team will contact you shortly.</p>
+              <h4 className="font-bold text-sm">Message Sent!</h4>
+              <p className="text-xs text-emerald-750 font-medium">Thank you. Our team will contact you shortly.</p>
             </div>
           ) : (
             <form
@@ -552,7 +552,7 @@ export default function Home() {
               <textarea
                 required
                 rows={3}
-                placeholder="How can we assist you with Naeemi Fragrances?"
+                placeholder="Your message or inquiry..."
                 value={contactMessage}
                 onChange={(e) => setContactMessage(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/10 shadow-sm transition-all resize-none min-h-[70px] leading-relaxed"
@@ -568,7 +568,7 @@ export default function Home() {
                 ) : (
                   <Send className="w-3.5 h-3.5" />
                 )}
-                Send Inquiry
+                Send Message
               </button>
             </form>
           )}

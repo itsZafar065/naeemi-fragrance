@@ -16,7 +16,7 @@ export const NoteExplorer: React.FC<NoteExplorerProps> = ({ topNotes, heartNotes
     {
       id: "top" as const,
       title: "Top Notes (Opening)",
-      description: "Initial Impression: Light, fresh scents experienced immediately upon spraying.",
+      description: "Opening Scent: The fresh, pleasant aroma you smell right after applying.",
       notes: topNotes,
       icon: Sparkles,
       color: "bg-amber-50 text-amber-700 border-amber-200/50",
@@ -25,7 +25,7 @@ export const NoteExplorer: React.FC<NoteExplorerProps> = ({ topNotes, heartNotes
     {
       id: "heart" as const,
       title: "Heart Notes (Core)",
-      description: "Heart Core: The main character of the perfume, unfolding after 15 minutes.",
+      description: "Main Scent: The core fragrance that develops smoothly after a few minutes.",
       notes: heartNotes,
       icon: Heart,
       color: "bg-rose-50 text-rose-700 border-rose-200/50",
@@ -34,7 +34,7 @@ export const NoteExplorer: React.FC<NoteExplorerProps> = ({ topNotes, heartNotes
     {
       id: "base" as const,
       title: "Base Notes (Dry Down)",
-      description: "Dry Down: Deep, grounding notes that stay on skin and fabric for hours.",
+      description: "Lasting Scent: The deep, rich notes that stay on your clothes all day.",
       notes: baseNotes,
       icon: Trees,
       color: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
