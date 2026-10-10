@@ -161,8 +161,8 @@ export async function POST(request: Request) {
       // Calculate server expected price depending on variant size comparison
       let expectedUnitPrice = prod.price;
       let expectedStock = prod.stock;
-      const baseVolume = prod.volume || "100ml";
-      const orderedVolume = item.volume || "100ml";
+      const baseVolume = prod.volume || (Array.isArray(prod.variants) && prod.variants[0]?.volume) || "50ml";
+      const orderedVolume = item.volume || baseVolume;
       const selectedVariant = Array.isArray(prod.variants)
         ? prod.variants.find((variant: any) => variant.volume === orderedVolume)
         : null;
@@ -170,10 +170,6 @@ export async function POST(request: Request) {
       if (selectedVariant) {
         expectedUnitPrice = Number(selectedVariant.price);
         expectedStock = Number(selectedVariant.stock);
-      } else if (baseVolume === "100ml" && orderedVolume === "50ml") {
-        expectedUnitPrice = Math.round(prod.price * 0.7);
-      } else if (baseVolume === "50ml" && orderedVolume === "100ml") {
-        expectedUnitPrice = Math.round(prod.price * 1.45);
       }
 
       if (!Number.isFinite(expectedUnitPrice) || expectedUnitPrice <= 0) {
@@ -245,8 +241,9 @@ export async function POST(request: Request) {
 
     // Deduct stocks
     for (const item of items) {
-      const orderedVolume = item.volume || "100ml";
       const product = await db.collection("products").findOne({ id: item.perfumeId.toString() });
+      const baseVolume = product?.volume || (Array.isArray(product?.variants) && product.variants[0]?.volume) || "50ml";
+      const orderedVolume = item.volume || baseVolume;
       const hasVariant = Array.isArray(product?.variants) && product.variants.some((variant: any) => variant.volume === orderedVolume);
       const updateResult = hasVariant
         ? await db.collection("products").updateOne(

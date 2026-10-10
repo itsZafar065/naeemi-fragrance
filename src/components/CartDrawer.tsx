@@ -190,6 +190,7 @@ export const CartDrawer: React.FC = () => {
                         alt={item.product.name}
                         fill
                         sizes="64px"
+                        unoptimized={Boolean(item.product.imageUrl?.startsWith("data:"))}
                         className="object-cover"
                       />
                     )}

@@ -66,7 +66,7 @@ export default function ProductDetailPage() {
   const { addToCart, toggleWishlist, isInWishlist, setIsCartOpen } = useCart();
 
   const [product, setProduct] = useState<Perfume | null>(null);
-  const [selectedSize, setSelectedSize] = useState("100ml");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
 
   // Review states
@@ -84,7 +84,11 @@ export default function ProductDetailPage() {
       const found = products.find((p) => p.id === id);
       if (found) {
         setProduct(found);
-        setSelectedSize(found.volume || "100ml");
+        const matchingVariant = found.variants?.find((v) => v.volume === found.volume);
+        const initialSize = matchingVariant 
+          ? matchingVariant.volume 
+          : (found.variants && found.variants.length > 0 ? found.variants[0].volume : (found.volume || "50ml"));
+        setSelectedSize(initialSize);
         
         // Fetch reviews from DB
         fetch(`/api/reviews?productId=${found.id}`)
@@ -109,7 +113,9 @@ export default function ProductDetailPage() {
   // Client-side SEO update
   useEffect(() => {
     if (product) {
-      document.title = `${product.name} (${selectedSize}) - Naeemi Fragrance`;
+      document.title = selectedSize
+        ? `${product.name} (${selectedSize}) - Naeemi Fragrance`
+        : `${product.name} - Naeemi Fragrance`;
       
       let metaDesc = document.querySelector('meta[name="description"]');
       if (!metaDesc) {
@@ -117,7 +123,10 @@ export default function ProductDetailPage() {
         metaDesc.setAttribute('name', 'description');
         document.head.appendChild(metaDesc);
       }
-      metaDesc.setAttribute('content', `${product.description} Scent category: ${product.category}. Available in 50ml and 100ml at Naeemi Fragrance.`);
+      const availableSizes = product.variants && product.variants.length > 0
+        ? product.variants.map((v) => v.volume).join(", ")
+        : (product.volume || "50ml");
+      metaDesc.setAttribute('content', `${product.description} Scent category: ${product.category}. Available in ${availableSizes} at Naeemi Fragrance.`);
     }
   }, [product, selectedSize]);
 
@@ -147,20 +156,16 @@ export default function ProductDetailPage() {
     calculatedPrice = activeVariant.price;
     calculatedRegularPrice = activeVariant.regularPrice || null;
     calculatedStock = activeVariant.stock;
-  } else {
-    // Fallback static calculations for backwards compatibility
-    if (product.volume === "100ml" && selectedSize === "50ml") {
-      calculatedPrice = Math.round(product.price * 0.7);
-    } else if (product.volume === "50ml" && selectedSize === "100ml") {
-      calculatedPrice = Math.round(product.price * 1.45);
-    }
   }
+
+  // Active image: variant's bottle image if available, fallback to product main image
+  const currentDisplayImage = activeVariant?.imageUrl || product.imageUrl;
 
   const hasLowStock = calculatedStock > 0 && calculatedStock <= 5;
   const isOutOfStock = calculatedStock === 0;
-  const productImageUrl = product.imageUrl?.startsWith("/")
-    ? `${siteUrl}${product.imageUrl}`
-    : product.imageUrl;
+  const productImageUrl = currentDisplayImage?.startsWith("/")
+    ? `${siteUrl}${currentDisplayImage}`
+    : currentDisplayImage;
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -196,7 +201,8 @@ export default function ProductDetailPage() {
       name: `${product.name} (${selectedSize})`,
       price: calculatedPrice,
       volume: selectedSize,
-      stock: calculatedStock
+      stock: calculatedStock,
+      imageUrl: currentDisplayImage,
     };
     addToCart(variantItem, quantity);
   };
@@ -209,7 +215,8 @@ export default function ProductDetailPage() {
       name: `${product.name} (${selectedSize})`,
       price: calculatedPrice,
       volume: selectedSize,
-      stock: calculatedStock
+      stock: calculatedStock,
+      imageUrl: currentDisplayImage,
     };
     addToCart(variantItem, quantity);
     setIsCartOpen(false);
@@ -307,20 +314,22 @@ export default function ProductDetailPage() {
       {/* 1. Main product view grid: Split Image and checkout details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-start">
         
-        {/* LEFT COLUMN: Clean Product Image only */}
-        <div className="w-full">
+        {/* LEFT COLUMN: Clean Product Image with Size Switcher Gallery */}
+        <div className="w-full space-y-3">
           <div className="relative aspect-[4/5] rounded-[24px] sm:rounded-[32px] overflow-hidden border border-white/60 shadow-xl flex items-center justify-center bg-white/40 backdrop-blur-md max-h-[380px] sm:max-h-none">
             <div className="absolute inset-2 rounded-[20px] sm:rounded-[24px] overflow-hidden">
-              {product.imageUrl && product.imageUrl.startsWith("linear-gradient") ? (
-                <div className="absolute inset-0" style={{ background: product.imageUrl }} />
+              {currentDisplayImage && currentDisplayImage.startsWith("linear-gradient") ? (
+                <div className="absolute inset-0" style={{ background: currentDisplayImage }} />
               ) : (
                 <Image
-                  src={product.imageUrl}
-                  alt={product.name}
+                  key={currentDisplayImage}
+                  src={currentDisplayImage}
+                  alt={`${product.name} ${selectedSize}`}
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover bg-white/30"
+                  unoptimized={Boolean(currentDisplayImage?.startsWith("data:"))}
+                  className="object-cover bg-white/30 transition-all duration-300"
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/30 pointer-events-none" />
@@ -343,6 +352,57 @@ export default function ProductDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Size Variant Image Thumbnails Gallery */}
+          {product.variants && product.variants.length > 1 && (
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest block font-sans">
+                Bottle Size Previews
+              </span>
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+                {product.variants.map((v) => {
+                  const isSelected = selectedSize === v.volume;
+                  const vImg = v.imageUrl || product.imageUrl;
+                  return (
+                    <button
+                      key={v.volume}
+                      type="button"
+                      onClick={() => setSelectedSize(v.volume)}
+                      className={`relative flex items-center gap-2 p-1.5 rounded-2xl border transition-all text-left shrink-0 cursor-pointer ${
+                        isSelected
+                          ? "border-amber-600 bg-amber-500/10 shadow-sm ring-2 ring-amber-500/30"
+                          : "border-stone-200/80 bg-white/70 hover:border-amber-400 hover:bg-white"
+                      }`}
+                      title={`Select ${v.volume} bottle`}
+                    >
+                      <div className="w-10 h-10 rounded-xl overflow-hidden relative bg-stone-100 shrink-0 border border-stone-200/50">
+                        {vImg && vImg.startsWith("linear-gradient") ? (
+                          <div className="w-full h-full" style={{ background: vImg }} />
+                        ) : (
+                          <Image
+                            src={vImg}
+                            alt={`${product.name} ${v.volume}`}
+                            fill
+                            sizes="40px"
+                            unoptimized={Boolean(vImg?.startsWith("data:"))}
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="pr-1.5">
+                        <span className={`text-[11px] font-extrabold block leading-tight ${isSelected ? "text-amber-950" : "text-stone-700"}`}>
+                          {v.volume}
+                        </span>
+                        <span className="text-[10px] text-stone-500 font-semibold block leading-tight">
+                          Rs. {Number(v.price).toLocaleString()}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: Actions, description, size variants, trust badges */}
@@ -388,24 +448,33 @@ export default function ProductDetailPage() {
           {/* Size Variant Selector */}
           <div className="space-y-1.5 pt-1">
             <span className="text-[10px] font-extrabold text-stone-400 uppercase block tracking-widest font-sans">Select Bottle Size</span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {(product.variants && product.variants.length > 0
                 ? product.variants.map((v) => v.volume)
-                : ["50ml", "100ml"]
-              ).map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  aria-pressed={selectedSize === size}
-                  className={`px-4 py-2 rounded-xl border text-[11px] font-bold transition-all ${
-                    selectedSize === size
-                      ? "border-amber-600 bg-amber-500/10 text-amber-900 shadow-sm"
-                      : "border-stone-200 bg-white text-stone-600 hover:border-stone-300"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+                : [product.volume || "50ml"]
+              ).map((size) => {
+                const variantForSize = product.variants?.find((v) => v.volume === size);
+                const isSelected = selectedSize === size;
+                return (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    aria-pressed={isSelected}
+                    className={`px-4 py-2 rounded-xl border text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      isSelected
+                        ? "border-amber-600 bg-amber-500/10 text-amber-900 shadow-sm ring-1 ring-amber-500/40"
+                        : "border-stone-200 bg-white text-stone-600 hover:border-amber-300 hover:text-stone-800"
+                    }`}
+                  >
+                    <span>{size}</span>
+                    {variantForSize && (
+                      <span className={`text-[10px] font-normal opacity-80 ${isSelected ? "text-amber-800" : "text-stone-400"}`}>
+                        Rs. {Number(variantForSize.price).toLocaleString()}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

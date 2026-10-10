@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { requireServerEnv } from "@/lib/env";
@@ -8,11 +9,20 @@ const JWT_SECRET = requireServerEnv("JWT_SECRET");
 
 export async function GET(request: Request) {
   try {
-    const cookieHeader = request.headers.get("cookie") || "";
-    const sessionCookie = cookieHeader
-      .split("; ")
-      .find((c) => c.startsWith("naeemi_session="))
-      ?.split("=")[1];
+    let sessionCookie: string | undefined;
+
+    try {
+      const cookieStore = await cookies();
+      sessionCookie = cookieStore.get("naeemi_session")?.value;
+    } catch {
+      // Fallback if cookies() helper fails
+    }
+
+    if (!sessionCookie) {
+      const cookieHeader = request.headers.get("cookie") || "";
+      const match = cookieHeader.match(/(?:^|;\s*)naeemi_session=([^;]+)/);
+      sessionCookie = match ? match[1] : undefined;
+    }
 
     if (!sessionCookie) {
       return NextResponse.json({ authenticated: false }, { status: 401 });
@@ -43,11 +53,14 @@ export async function GET(request: Request) {
         name: dbUser.name,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    const isJwtError = error?.name === "JsonWebTokenError" || error?.name === "TokenExpiredError";
     const response = NextResponse.json({ authenticated: false }, { status: 401 });
-    try {
-      response.cookies.delete("naeemi_session");
-    } catch (e) {}
+    if (isJwtError) {
+      try {
+        response.cookies.delete("naeemi_session");
+      } catch (e) {}
+    }
     return response;
   }
 }

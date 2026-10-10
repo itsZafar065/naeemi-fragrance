@@ -3,6 +3,15 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { getPusherClient } from "@/lib/pusher";
 
+export interface PerfumeVariant {
+  volume: string;
+  price: number;
+  regularPrice?: number;
+  stock: number;
+  sku?: string;
+  imageUrl?: string;
+}
+
 export interface Perfume {
   id: string;
   name: string;
@@ -21,13 +30,7 @@ export interface Perfume {
   stock: number;
   rating: number;
   imageUrl: string;
-  variants?: Array<{
-    volume: string;
-    price: number;
-    regularPrice?: number;
-    stock: number;
-    sku?: string;
-  }>;
+  variants?: PerfumeVariant[];
 }
 
 export interface OrderItem {
@@ -143,6 +146,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Load Initial Public Data & Check Session in parallel (concurrency optimization)
   useEffect(() => {
+    // Populate cached admin user from localStorage on client mount if available
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("naeemi_admin_user");
+        if (stored) {
+          setAdminUser(JSON.parse(stored));
+        }
+      } catch {}
+    }
+
     async function initData() {
       try {
         setLoading(true);
@@ -174,6 +187,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const sessionData = await sessionRes.json();
           if (sessionData.authenticated) {
             setAdminUser(sessionData.user);
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem("naeemi_admin_user", JSON.stringify(sessionData.user));
+              } catch {}
+            }
             
             // Trigger parallel fetch of authenticated admin dashboard records
             const [ordersRes, staffRes] = await Promise.all([
@@ -192,6 +210,20 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               const staffData = await staffRes.json();
               setStaffUsers(staffData || []);
             }
+          } else {
+            setAdminUser(null);
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.removeItem("naeemi_admin_user");
+              } catch {}
+            }
+          }
+        } else if (sessionRes.status === 401) {
+          setAdminUser(null);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.removeItem("naeemi_admin_user");
+            } catch {}
           }
         }
       } catch (err) {
@@ -310,6 +342,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const data = await res.json();
       setAdminUser(data.user);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("naeemi_admin_user", JSON.stringify(data.user));
+        } catch {}
+      }
       await fetchAdminData();
       return { success: true };
     } catch (err: any) {
@@ -320,25 +357,43 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const logout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      setAdminUser(null);
-      setOrders([]);
-      setSystemLogs([]);
     } catch (err) {
       console.error("Logout failed.");
+    } finally {
+      setAdminUser(null);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("naeemi_admin_user");
+        } catch {}
+      }
+      setOrders([]);
+      setSystemLogs([]);
     }
   };
 
   const refreshSession = async () => {
-    const res = await fetch("/api/auth/session");
-    if (res.ok) {
-      const data = await res.json();
-      if (data.authenticated) {
-        setAdminUser(data.user);
-        await fetchAdminData();
-      } else {
-        setAdminUser(null);
+    try {
+      const res = await fetch("/api/auth/session");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated) {
+          setAdminUser(data.user);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("naeemi_admin_user", JSON.stringify(data.user));
+            } catch {}
+          }
+          await fetchAdminData();
+        } else {
+          setAdminUser(null);
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.removeItem("naeemi_admin_user");
+            } catch {}
+          }
+        }
       }
-    }
+    } catch {}
   };
 
   const addProduct = async (product: Omit<Perfume, "id" | "rating">) => {

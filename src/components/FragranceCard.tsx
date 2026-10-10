@@ -53,6 +53,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized={Boolean(product.imageUrl?.startsWith("data:"))}
             className="relative z-10 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         )}
@@ -108,7 +109,11 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ product }) => {
 
         <div className="flex items-center justify-between pt-1">
           <div className="flex flex-col">
-            <span className="text-[10px] text-stone-400 font-medium">{product.volume}</span>
+            <span className="text-[10px] text-stone-400 font-medium">
+              {product.variants && product.variants.length > 0
+                ? product.variants.map((v) => v.volume).join(" · ")
+                : (product.volume || "50ml")}
+            </span>
             <div className="flex items-baseline gap-1.5 flex-wrap">
               <span className="font-extrabold text-stone-800 text-base">
                 Rs. {product.price.toLocaleString()}

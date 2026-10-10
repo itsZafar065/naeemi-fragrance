@@ -134,7 +134,7 @@ export default function CheckoutPage() {
       name: item.product.name,
       quantity: item.quantity,
       price: item.product.price,
-      volume: item.product.volume || "100ml",
+      volume: item.product.volume || item.product.variants?.[0]?.volume || "50ml",
     }));
 
     setCheckoutLoading(true);
@@ -591,6 +591,7 @@ export default function CheckoutPage() {
                           alt={item.product.name}
                           fill
                           sizes="56px"
+                          unoptimized={Boolean(item.product.imageUrl?.startsWith("data:"))}
                           className="object-cover"
                         />
                       )}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ImageUploader from "@/components/ImageUploader";
 import { useAdmin, Perfume, Order } from "@/context/AdminContext";
 import { 
   TrendingUp, 
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
     settings,
     adminUser,
     systemLogs,
-    loading: _loading,
+    loading,
     registeredCustomers,
     login,
     logout,
@@ -78,9 +79,91 @@ export default function AdminDashboard() {
     | "admins"
     | "logs";
 
+  type SettingsSubtabType = "website" | "payment" | "shipping" | "notifications" | "seo" | "storeinfo";
+
+  const VALID_TABS: TabType[] = [
+    "dashboard",
+    "products",
+    "orders",
+    "customers",
+    "inventory",
+    "coupons",
+    "analytics",
+    "settings",
+    "admins",
+    "logs",
+  ];
+
+  const VALID_SETTINGS_SUBTABS: SettingsSubtabType[] = [
+    "website",
+    "payment",
+    "shipping",
+    "notifications",
+    "seo",
+    "storeinfo",
+  ];
+
+  const parseTabFromLocation = (): { tab: TabType; subtab: SettingsSubtabType } => {
+    if (typeof window === "undefined") {
+      return { tab: "dashboard", subtab: "website" };
+    }
+
+    const path = window.location.pathname;
+    const adminPrefix = "/naeemi-fragrance-secure-vault-admin-portal";
+    let foundTab: TabType = "dashboard";
+    let foundSubtab: SettingsSubtabType = "website";
+
+    if (path.startsWith(adminPrefix)) {
+      const rest = path.slice(adminPrefix.length).replace(/^\/+|\/+$/g, "");
+      if (rest) {
+        const segments = rest.split("/");
+        const candidate = segments[0]?.toLowerCase() as TabType;
+        if (VALID_TABS.includes(candidate)) {
+          foundTab = candidate;
+        }
+        if (candidate === "settings" && segments[1]) {
+          const subCandidate = segments[1]?.toLowerCase() as SettingsSubtabType;
+          if (VALID_SETTINGS_SUBTABS.includes(subCandidate)) {
+            foundSubtab = subCandidate;
+          }
+        }
+      }
+    }
+
+    // Also support query params fallback (?tab=products&subtab=payment)
+    const searchParams = new URLSearchParams(window.location.search);
+    const qTab = searchParams.get("tab")?.toLowerCase() as TabType;
+    if (qTab && VALID_TABS.includes(qTab)) {
+      foundTab = qTab;
+    }
+    const qSubtab = searchParams.get("subtab")?.toLowerCase() as SettingsSubtabType;
+    if (qSubtab && VALID_SETTINGS_SUBTABS.includes(qSubtab)) {
+      foundSubtab = qSubtab;
+    }
+
+    return { tab: foundTab, subtab: foundSubtab };
+  };
+
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
-  const [activeSettingsSubtab, setActiveSettingsSubtab] = useState<"website" | "payment" | "shipping" | "notifications" | "seo" | "storeinfo">("website");
+  const [activeSettingsSubtab, setActiveSettingsSubtab] = useState<SettingsSubtabType>("website");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const parsed = parseTabFromLocation();
+    setActiveTab(parsed.tab);
+    setActiveSettingsSubtab(parsed.subtab);
+
+    const handlePopState = () => {
+      const p = parseTabFromLocation();
+      setActiveTab(p.tab);
+      setActiveSettingsSubtab(p.subtab);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   // Local settings editor state (to avoid lag/caret jumping and allow explicit saves)
   const [localSettings, setLocalSettings] = useState<any>(null);
@@ -155,7 +238,7 @@ export default function AdminDashboard() {
   const [price, setPrice] = useState(0);
   const [regularPrice, setRegularPrice] = useState<number | "">("");
   const [salePrice, setSalePrice] = useState<number | "">("");
-  const [volume, setVolume] = useState("100ml");
+  const [volume, setVolume] = useState("50ml");
   const [type, setType] = useState("Eau de Parfum (EDP)");
   const [category, setCategory] = useState("Oud");
   const [topNotes, setTopNotes] = useState("");
@@ -171,6 +254,7 @@ export default function AdminDashboard() {
   const [varRegularPrice, setVarRegularPrice] = useState<number | "">("");
   const [varStock, setVarStock] = useState<number>(10);
   const [varSku, setVarSku] = useState("");
+  const [varImageUrl, setVarImageUrl] = useState("");
   
   // Stock edit states
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
@@ -185,7 +269,7 @@ export default function AdminDashboard() {
   const [editPrice, setEditPrice] = useState(0);
   const [editRegularPrice, setEditRegularPrice] = useState<number | "">("");
   const [editSalePrice, setEditSalePrice] = useState<number | "">("");
-  const [editVolume, setEditVolume] = useState("100ml");
+  const [editVolume, setEditVolume] = useState("50ml");
   const [editType, setEditType] = useState("Eau de Parfum (EDP)");
   const [editCategory, setEditCategory] = useState("Oud");
   const [editTopNotes, setEditTopNotes] = useState("");
@@ -201,6 +285,7 @@ export default function AdminDashboard() {
   const [editVarRegularPrice, setEditVarRegularPrice] = useState<number | "">("");
   const [editVarStock, setEditVarStock] = useState<number>(10);
   const [editVarSku, setEditVarSku] = useState("");
+  const [editVarImageUrl, setEditVarImageUrl] = useState("");
 
   const [newCouponCode, setNewCouponCode] = useState("");
   const [newCouponDiscount, setNewCouponDiscount] = useState(10);
@@ -276,7 +361,7 @@ export default function AdminDashboard() {
       price: finalPrice,
       regularPrice: regularPrice ? Number(regularPrice) : undefined,
       salePrice: salePrice ? Number(salePrice) : undefined,
-      volume,
+      volume: volume || (variantsList.length > 0 ? variantsList[variantsList.length - 1].volume : "50ml"),
       type,
       category,
       topNotes: topArray.length ? topArray : ["Fresh Accord"],
@@ -295,7 +380,7 @@ export default function AdminDashboard() {
       setPrice(0);
       setRegularPrice("");
       setSalePrice("");
-      setVolume("100ml");
+      setVolume("50ml");
       setType("Eau de Parfum (EDP)");
       setCategory("Oud");
       setTopNotes("");
@@ -320,7 +405,7 @@ export default function AdminDashboard() {
     setEditPrice(prod.price);
     setEditRegularPrice(prod.regularPrice || "");
     setEditSalePrice(prod.salePrice || "");
-    setEditVolume(prod.volume || "100ml");
+    setEditVolume(prod.volume || "50ml");
     setEditType(prod.type || "Eau de Parfum (EDP)");
     setEditCategory(prod.category || "Oud");
     setEditTopNotes(prod.topNotes?.join(", ") || "");
@@ -490,7 +575,19 @@ export default function AdminDashboard() {
     }
   };
 
-  // Auth gate check
+  // Auth gate check - SSR and initial hydration always render the loading screen to avoid hydration mismatch
+  if (!mounted || (loading && !adminUser)) {
+    return (
+      <div className="max-w-md mx-auto py-20 px-6 glass-panel rounded-[36px] border border-white/60 shadow-xl mt-12 flex flex-col items-center justify-center space-y-4 animate-fadeIn">
+        <div className="w-10 h-10 border-3 border-amber-500/20 border-t-amber-600 rounded-full animate-spin" />
+        <div className="text-center space-y-1">
+          <p className="text-xs font-black text-stone-800 uppercase tracking-widest">Verifying Portal Access</p>
+          <p className="text-[11px] text-stone-400">Authenticating admin session token...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!adminUser) {
     return (
       <div className="max-w-md mx-auto py-16 px-6 glass-panel rounded-[36px] border border-white/60 shadow-xl mt-12 space-y-6 animate-fadeIn">
@@ -557,9 +654,42 @@ export default function AdminDashboard() {
   const handleMenuClick = (tab: TabType) => {
     setActiveTab(tab);
     setMobileSidebarOpen(false);
+
+    const targetUrl = tab === "dashboard"
+      ? "/naeemi-fragrance-secure-vault-admin-portal"
+      : tab === "settings" && activeSettingsSubtab && activeSettingsSubtab !== "website"
+        ? `/naeemi-fragrance-secure-vault-admin-portal/settings/${activeSettingsSubtab}`
+        : `/naeemi-fragrance-secure-vault-admin-portal/${tab}`;
+
+    if (typeof window !== "undefined") {
+      const currentFull = window.location.pathname;
+      if (currentFull !== targetUrl) {
+        window.history.pushState({ tab }, "", targetUrl);
+      }
+    }
+
     // Auto-refresh fresh orders and log statistics in background on tab navigation
     if (tab === "dashboard" || tab === "orders" || tab === "logs" || tab === "customers") {
       refreshSession().catch(() => {});
+    }
+  };
+
+  const handleSettingsSubtabClick = (subtab: SettingsSubtabType) => {
+    setActiveSettingsSubtab(subtab);
+    const targetUrl = subtab === "website"
+      ? "/naeemi-fragrance-secure-vault-admin-portal/settings"
+      : `/naeemi-fragrance-secure-vault-admin-portal/settings/${subtab}`;
+
+    if (typeof window !== "undefined" && window.location.pathname !== targetUrl) {
+      window.history.pushState({ tab: "settings", subtab }, "", targetUrl);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setMobileSidebarOpen(false);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", "/naeemi-fragrance-secure-vault-admin-portal");
     }
   };
 
@@ -574,7 +704,7 @@ export default function AdminDashboard() {
             Hub: {activeTab.toUpperCase()}
           </span>
         </div>
-        <button onClick={logout} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-500" title="Logout">
+        <button onClick={handleLogout} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-500" title="Logout">
           <LogOut className="w-4 h-4" />
         </button>
       </div>
@@ -608,7 +738,7 @@ export default function AdminDashboard() {
               </nav>
             </div>
             <button
-              onClick={() => { logout(); setMobileSidebarOpen(false); }}
+              onClick={handleLogout}
               className="py-2.5 w-full bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
             >
               <LogOut className="w-4 h-4" /> Logout Session
@@ -640,7 +770,7 @@ export default function AdminDashboard() {
         {/* Logout bottom */}
         <div className="border-t border-stone-200/40 pt-4">
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full py-2 px-3 hover:bg-rose-50 hover:text-rose-700 text-stone-500 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5"
           >
             <LogOut className="w-4 h-4" />
@@ -746,7 +876,7 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-center border-b pb-2">
                   <h3 className="font-bold text-stone-800 text-sm">Recent Store Orders</h3>
                   <button
-                    onClick={() => setActiveTab("orders")}
+                    onClick={() => handleMenuClick("orders")}
                     className="text-[10px] font-bold text-amber-700 hover:text-amber-600 transition-colors"
                   >
                     View All Orders
@@ -763,7 +893,7 @@ export default function AdminDashboard() {
                         className="p-3.5 bg-white/40 border border-stone-200/40 rounded-2xl flex justify-between items-center text-xs hover:bg-white/60 transition-all cursor-pointer group"
                         onClick={() => {
                           setOrderSearchQuery(order.id);
-                          setActiveTab("orders");
+                          handleMenuClick("orders");
                         }}
                       >
                         <div className="space-y-1">
@@ -792,7 +922,7 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-center border-b pb-2">
                   <h3 className="font-bold text-stone-800 text-sm">Security Audit Activity</h3>
                   <button
-                    onClick={() => setActiveTab("logs")}
+                    onClick={() => handleMenuClick("logs")}
                     className="text-[10px] font-bold text-amber-700 hover:text-amber-600 transition-colors"
                   >
                     Audits Feed
@@ -873,7 +1003,15 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-stone-600 block">Primary Volume *</label>
+                    <input
+                      type="text" required placeholder="e.g. 50ml" value={volume}
+                      onChange={(e) => setVolume(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs"
+                    />
+                  </div>
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-stone-600 block">Fallback Price (Rs.) *</label>
                     <input
@@ -926,18 +1064,18 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.jpeg) *</label>
-                  <input
-                    type="text" required placeholder="/shams.jpeg" value={imagePath}
-                    onChange={(e) => setImagePath(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
-                  />
-                </div>
+                <ImageUploader
+                  label="Product Main Image"
+                  value={imagePath}
+                  onChange={(url) => setImagePath(url)}
+                />
 
                 {/* Variants Manager Container */}
                 <div className="border border-stone-200 rounded-2xl p-4 bg-stone-50/50 space-y-3">
-                  <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants (e.g. 5ml, 12ml, 50ml, 100ml)</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants (e.g. 5ml, 30ml, 50ml)</label>
+                    <span className="text-[10px] text-stone-400 font-medium">Add bottles with separate images & prices</span>
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-end">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-stone-500 block uppercase">Volume (Size)</label>
@@ -963,25 +1101,64 @@ export default function AdminDashboard() {
                           price: Number(varPrice),
                           regularPrice: varRegularPrice ? Number(varRegularPrice) : undefined,
                           stock: Number(varStock),
-                          sku: varSku || `${sku || name}-${varVolume}`
+                          sku: varSku || `${sku || name}-${varVolume}`,
+                          imageUrl: varImageUrl || undefined
                         }]);
                         setVarVolume("");
                         setVarPrice("");
                         setVarRegularPrice("");
                         setVarStock(10);
                         setVarSku("");
+                        setVarImageUrl("");
                       }} className="w-full py-2.5 gold-btn text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
                         Add Variant
                       </button>
                     </div>
                   </div>
+
+                  {/* Compact Variant Image Uploader */}
+                  <div className="pt-1">
+                    <ImageUploader
+                      compact
+                      label="Variant Bottle Photo (Optional — uses main product photo if empty)"
+                      value={varImageUrl}
+                      onChange={(url) => setVarImageUrl(url)}
+                    />
+                  </div>
+
                   {variantsList.length > 0 && (
                     <div className="pt-2 divide-y divide-stone-200 text-xs">
                       {variantsList.map((v, idx) => (
-                        <div key={idx} className="py-2 flex justify-between items-center">
-                          <span className="font-semibold text-stone-700">{v.volume} - Rs. {v.price} {v.regularPrice ? <span className="line-through text-stone-400 ml-1">Rs. {v.regularPrice}</span> : null} (Stock: {v.stock})</span>
-                          <button type="button" onClick={() => setVariantsList(variantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer">
-                            Remove Variant
+                        <div key={idx} className="py-2.5 flex justify-between items-center gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 relative shrink-0 flex items-center justify-center">
+                              {v.imageUrl ? (
+                                <Image src={v.imageUrl} alt={v.volume} fill className="object-cover" />
+                              ) : (
+                                <span className="text-[9px] text-stone-400 font-bold uppercase text-center px-1">Main Img</span>
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-bold text-stone-800 text-xs block truncate">
+                                {v.volume} &bull; Rs. {Number(v.price).toLocaleString()}
+                                {v.regularPrice ? <span className="line-through text-stone-400 ml-1.5 font-normal">Rs. {Number(v.regularPrice).toLocaleString()}</span> : null}
+                              </span>
+                              <span className="text-[10px] text-stone-500 flex items-center gap-1.5 flex-wrap">
+                                Stock: {v.stock} units
+                                {v.imageUrl ? (
+                                  <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold text-[9px] border border-emerald-200">
+                                    Variant Photo Added
+                                  </span>
+                                ) : (
+                                  <span className="text-stone-400 text-[9px]">
+                                    (Uses Main Product Image)
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                          <button type="button" onClick={() => setVariantsList(variantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer shrink-0">
+                            Remove
                           </button>
                         </div>
                       ))}
@@ -1025,7 +1202,7 @@ export default function AdminDashboard() {
                           {prod.imageUrl && prod.imageUrl.startsWith("linear-gradient") ? (
                             <div className="w-8 h-8 rounded border" style={{ background: prod.imageUrl }} />
                           ) : (
-                            <Image src={prod.imageUrl} alt={prod.name} width={32} height={32} className="w-8 h-8 rounded border object-contain bg-white" />
+                            <Image src={prod.imageUrl} alt={prod.name} width={32} height={32} unoptimized={Boolean(prod.imageUrl?.startsWith("data:"))} className="w-8 h-8 rounded border object-contain bg-white" />
                           )}
                         </td>
                         <td className="p-3 font-bold text-stone-855">{prod.name}</td>
@@ -1211,18 +1388,18 @@ export default function AdminDashboard() {
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-stone-600 block">Image Path/Filename (e.g. /shams.jpeg) *</label>
-                      <input
-                        type="text" required value={editImagePath}
-                        onChange={(e) => setEditImagePath(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-xs focus:outline-none"
-                      />
-                    </div>
+                    <ImageUploader
+                      label="Product Main Image"
+                      value={editImagePath}
+                      onChange={(url) => setEditImagePath(url)}
+                    />
 
                     {/* Variants Manager Container */}
                     <div className="border border-stone-200 rounded-2xl p-4 bg-stone-50/50 space-y-3">
-                      <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants</label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-stone-700 block">Perfume Volume & Size Variants</label>
+                        <span className="text-[10px] text-stone-400 font-medium">Add bottles with separate images & prices</span>
+                      </div>
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 items-end">
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold text-stone-500 block uppercase">Volume</label>
@@ -1248,25 +1425,64 @@ export default function AdminDashboard() {
                               price: Number(editVarPrice),
                               regularPrice: editVarRegularPrice ? Number(editVarRegularPrice) : undefined,
                               stock: Number(editVarStock),
-                              sku: editVarSku || `${editSku || editName}-${editVarVolume}`
+                              sku: editVarSku || `${editSku || editName}-${editVarVolume}`,
+                              imageUrl: editVarImageUrl || undefined
                             }]);
                             setEditVarVolume("");
                             setEditVarPrice("");
                             setEditVarRegularPrice("");
                             setEditVarStock(10);
                             setEditVarSku("");
+                            setEditVarImageUrl("");
                           }} className="w-full py-2.5 gold-btn text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
                             Add Variant
                           </button>
                         </div>
                       </div>
+
+                      {/* Compact Variant Image Uploader for edit form */}
+                      <div className="pt-1">
+                        <ImageUploader
+                          compact
+                          label="Variant Bottle Photo (Optional — uses main product photo if empty)"
+                          value={editVarImageUrl}
+                          onChange={(url) => setEditVarImageUrl(url)}
+                        />
+                      </div>
+
                       {editVariantsList.length > 0 && (
                         <div className="pt-2 divide-y divide-stone-200 text-xs">
                           {editVariantsList.map((v, idx) => (
-                            <div key={idx} className="py-2 flex justify-between items-center">
-                              <span className="font-semibold text-stone-700">{v.volume} - Rs. {v.price} {v.regularPrice ? <span className="line-through text-stone-400 ml-1">Rs. {v.regularPrice}</span> : null} (Stock: {v.stock})</span>
-                              <button type="button" onClick={() => setEditVariantsList(editVariantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer">
-                                Remove Variant
+                            <div key={idx} className="py-2.5 flex justify-between items-center gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 relative shrink-0 flex items-center justify-center">
+                                  {v.imageUrl ? (
+                                    <Image src={v.imageUrl} alt={v.volume} fill className="object-cover" />
+                                  ) : (
+                                    <span className="text-[9px] text-stone-400 font-bold uppercase text-center px-1">Main Img</span>
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-bold text-stone-800 text-xs block truncate">
+                                    {v.volume} &bull; Rs. {Number(v.price).toLocaleString()}
+                                    {v.regularPrice ? <span className="line-through text-stone-400 ml-1.5 font-normal">Rs. {Number(v.regularPrice).toLocaleString()}</span> : null}
+                                  </span>
+                                  <span className="text-[10px] text-stone-500 flex items-center gap-1.5 flex-wrap">
+                                    Stock: {v.stock} units
+                                    {v.imageUrl ? (
+                                      <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold text-[9px] border border-emerald-200">
+                                        Variant Photo Added
+                                      </span>
+                                    ) : (
+                                      <span className="text-stone-400 text-[9px]">
+                                        (Uses Main Product Image)
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                              <button type="button" onClick={() => setEditVariantsList(editVariantsList.filter((_, i) => i !== idx))} className="text-rose-600 hover:text-rose-700 font-bold text-[10px] cursor-pointer shrink-0">
+                                Remove
                               </button>
                             </div>
                           ))}
@@ -1649,8 +1865,8 @@ export default function AdminDashboard() {
             {/* Inner Subtabs Navigation Bar */}
             <div className="flex flex-wrap border-b text-[11px] font-bold gap-3 pb-1.5">
               <button
-                onClick={() => setActiveSettingsSubtab("website")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("website")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "website" ? "border-amber-500 text-amber-800 font-extrabold" : "border-transparent text-stone-400"
                 }`}
               >
@@ -1658,8 +1874,8 @@ export default function AdminDashboard() {
                 Website Info
               </button>
               <button
-                onClick={() => setActiveSettingsSubtab("payment")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("payment")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "payment" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
@@ -1667,8 +1883,8 @@ export default function AdminDashboard() {
                 Payment Options
               </button>
               <button
-                onClick={() => setActiveSettingsSubtab("shipping")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("shipping")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "shipping" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
@@ -1676,8 +1892,8 @@ export default function AdminDashboard() {
                 Courier Fees
               </button>
               <button
-                onClick={() => setActiveSettingsSubtab("notifications")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("notifications")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "notifications" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
@@ -1685,8 +1901,8 @@ export default function AdminDashboard() {
                 Email Alerts
               </button>
               <button
-                onClick={() => setActiveSettingsSubtab("seo")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("seo")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "seo" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
@@ -1694,8 +1910,8 @@ export default function AdminDashboard() {
                 SEO Metadata
               </button>
               <button
-                onClick={() => setActiveSettingsSubtab("storeinfo")}
-                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 ${
+                onClick={() => handleSettingsSubtabClick("storeinfo")}
+                className={`pb-2 px-2 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeSettingsSubtab === "storeinfo" ? "border-amber-500 text-amber-800" : "border-transparent text-stone-400"
                 }`}
               >
